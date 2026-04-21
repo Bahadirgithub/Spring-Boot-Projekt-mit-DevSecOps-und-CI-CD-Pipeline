@@ -99,7 +99,7 @@ class HellocarApplicationTests {
     void testFindCarsAndTheirUsers() {
         List<Object[]> list = this.carRepository.findAllCarsAndTheirUsers();
         for (Object[] item: list) {
-            System.out.println("Brand: " + item[0] );
+            System.out.println("Brand:  " + item[0] );
             System.out.println("Model: " + item[1] );
             System.out.println("Price: " + item[2] );
             System.out.println("First Name: " + item[3] );
