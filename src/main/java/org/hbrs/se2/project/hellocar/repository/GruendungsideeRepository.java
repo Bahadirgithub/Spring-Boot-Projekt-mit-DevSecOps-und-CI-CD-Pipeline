@@ -10,4 +10,6 @@ public interface GruendungsideeRepository extends JpaRepository<Gruendungsidee, 
     List<Gruendungsidee> findByGruenderUserId(int gruenderUserId);
 
     List<Gruendungsidee> findByPosition(String position);
+
+    boolean existsByGruenderUserId(int gruenderUserId);  // ← das hinzufügen
 }
