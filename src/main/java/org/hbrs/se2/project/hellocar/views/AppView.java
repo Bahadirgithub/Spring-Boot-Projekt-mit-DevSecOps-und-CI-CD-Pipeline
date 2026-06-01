@@ -21,7 +21,7 @@ import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.PWA;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
-import org.hbrs.se2.project.hellocar.dtos.UserDTO;
+import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import org.hbrs.se2.project.hellocar.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +41,11 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
     private H1 viewTitle;
     private H1 helloUser;
 
-    private AuthorizationControl authorizationControl;
+    private final AuthorizationControl authorizationControl;
 
-    public AppView() {
+    public AppView(AuthorizationControl authorizationControl) {
+        this.authorizationControl = authorizationControl;
+
         if (getCurrentUser() == null) {
             System.out.println("LOG: In Constructor of App View - No User given!");
         } else {
@@ -64,12 +66,13 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
     }
 
     private boolean checkIfUserIsLoggedIn() {
-        // Falls der Benutzer nicht eingeloggt ist, dann wird er auf die Startseite gelenkt
-        UserDTO userDTO = this.getCurrentUser();
-        if (userDTO == null) {
+        BenutzerDTO benutzerDTO = this.getCurrentUser();
+
+        if (benutzerDTO == null) {
             UI.getCurrent().navigate(Globals.Pages.LOGIN_VIEW);
             return false;
         }
+
         return true;
     }
 
@@ -165,25 +168,18 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
     }
 
     private Component[] createMenuItems() {
-       // Abholung der Referenz auf den Authorisierungs-Service
-       authorizationControl = new AuthorizationControl();
+        // Jeder eingeloggte User sollte die Hauptseite sehen können.
+        Tab[] tabs = new Tab[]{ createTab("Show Cars", ShowCarsView.class) };
+        // Neue Logik ohne Rollen:
+        // Nur Gründer dürfen EnterCar sehen.
+        if (this.authorizationControl.canAccessEnterCar(this.getCurrentUser())) {
+            System.out.println("User ist Gründer und darf Enter Car sehen.");
+            tabs = Utils.append(tabs, createTab("Enter Car", EnterCarView.class));
+        }
 
-       // Jeder User sollte Autos sehen können, von daher wird dieser schon mal erzeugt und
-       // und dem Tabs-Array hinzugefügt. In der Methode createTab wird ein (Key, Value)-Pair übergeben:
-        // Key: der sichtbare String des Menu-Items
-        // Value: Die UI-Component, die nach dem Klick auf das Menuitem angezeigt wird.
-       Tab[] tabs = new Tab[]{ createTab( "Show Cars", ShowCarsView.class) };
+        // ToDo für die Teams: Weitere Tabs aus ihrem Projekt hier einfügen!
 
-       // Falls er Admin-Rechte hat, sollte der User auch Autos hinzufügen können
-       // (Alternative: Verwendung der Methode 'isUserisAllowedToAccessThisFeature')
-       if ( this.authorizationControl.isUserInRole( this.getCurrentUser() , Globals.Roles.ADMIN ) ) {
-           System.out.println("User is Admin!");
-           tabs = Utils.append( tabs , createTab("Enter Car", EnterCarView.class)  );
-       }
-
-       // ToDo für die Teams: Weitere Tabs aus ihrem Projekt hier einfügen!
-
-       return tabs;
+        return tabs;
     }
 
     private static Tab createTab(String text, Class<? extends Component> navigationTarget) {
@@ -222,11 +218,11 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
     }
 
     private String getCurrentNameOfUser() {
-        return getCurrentUser().getFirstName();
+        return getCurrentUser().getVorname();
     }
 
-    private UserDTO getCurrentUser() {
-        return (UserDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
+    private BenutzerDTO getCurrentUser() {
+        return (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
     }
 
 

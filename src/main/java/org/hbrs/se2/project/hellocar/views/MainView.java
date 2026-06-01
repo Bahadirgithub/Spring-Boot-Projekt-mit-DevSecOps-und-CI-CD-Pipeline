@@ -9,7 +9,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import org.hbrs.se2.project.hellocar.control.LoginControl;
 import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
-import org.hbrs.se2.project.hellocar.dtos.UserDTO;
+import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -58,8 +58,8 @@ public class MainView extends VerticalLayout {
     }
 
     private void grabAndSetUserIntoSession() {
-        UserDTO userDTO = loginControl.getCurrentUser();
-        UI.getCurrent().getSession().setAttribute( Globals.CURRENT_USER, userDTO );
+        BenutzerDTO benutzerDTO = loginControl.getCurrentUser();
+        UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, benutzerDTO);
     }
 
 
