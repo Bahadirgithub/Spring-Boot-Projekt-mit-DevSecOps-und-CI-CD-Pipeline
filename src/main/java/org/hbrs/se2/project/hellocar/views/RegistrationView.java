@@ -21,17 +21,29 @@ import java.security.AllPermission;
 public class RegistrationView extends VerticalLayout {
 
     public RegistrationView() {
-        // Seitentitel anzeigen
+        // Seitentitel
         add(new H2("Register"));
+
+        //Eingabe Felder
         TextField firstNameField = new TextField("Vorname");
+        TextField lastNameField = new TextField("Nachname");
+        EmailField emailField = new EmailField("E-Mail Addresse");
+        TextField usernameField = new TextField("Benutzername");
 
+        // Passwortfelder – (Eingabe wird versteckt)
+        PasswordField passwordField = new PasswordField("Passwort");
+        PasswordField repeatPasswordField = new PasswordField("Passwort wiederholen");
 
+        // Dropdown zur Auswahl ob Student oder Gründer
+        Select<String> typeSelect = new Select<>();
+        typeSelect.setLabel("Kontotyp");
+        typeSelect.setItems("Student", "Gründer");
+        typeSelect.setPlaceholder("Bitte wählen");
 
-
-        add(firstNameField);
+        // Alle Komponenten zur View hinzufügen
+        add(firstNameField, lastNameField,emailField, usernameField, passwordField, repeatPasswordField, typeSelect);
+        // Alles zentriert ausrichten
         setAlignItems(Alignment.CENTER);
-
-
 
     }
 }
