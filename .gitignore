@@ -30,5 +30,9 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### Vaadin ###
+frontend/generated/
+frontend/target/
+
 ### VS Code ###
 .vscode/
