@@ -13,6 +13,11 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.component.html.Hr;
+import org.hbrs.se2.project.hellocar.control.RegistrationControl;
+import com.vaadin.flow.component.notification.Notification;
+import java.time.LocalDate;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.notification.Notification;
 
 /**
  * View zur Registrierung neuer Benutzer (Student oder Gründer).
@@ -20,7 +25,8 @@ import com.vaadin.flow.component.html.Hr;
 @Route("registration")
 public class RegistrationView extends VerticalLayout {
 
-    public RegistrationView() {
+    // RegistrationControl wird von Spring injiziert
+    public RegistrationView(RegistrationControl registrationControl) {
         // Seitentitel
         add(new H2("Register"));
 
@@ -65,10 +71,55 @@ public class RegistrationView extends VerticalLayout {
             unternehmensNameField.setVisible("Gründer".equals(typ));
         });
 
-        // Registrieren-Button – Logik folgt später
-        Button registerButton = new Button("Registrieren");
-        // ToDo: Registrierungslogik folgt
 
+        // Registrieren-Button – verbindungs Logik und Pflichtfeld prüfung
+        Button registerButton = new Button("Registrieren");
+        registerButton.addClickListener(e -> {
+
+            // Pflichtfelder prüfen bevor Registrierung gestartet wird
+            if (firstNameField.isEmpty() || lastNameField.isEmpty() || birthdayField.isEmpty()
+                    || emailField.isEmpty() || usernameField.isEmpty()
+                    || passwordField.isEmpty() || typeSelect.isEmpty()) {
+                Notification.show("Bitte alle Pflichtfelder ausfüllen.");
+                return;
+            }
+
+            // prüft welcher typ gewählt wurde Student/Gründer
+            String typ = typeSelect.getValue();
+
+            boolean erfolg = false;
+
+            if ("Student".equals(typ)) {
+                erfolg = registrationControl.registriereStudent(
+                        firstNameField.getValue(),
+                        lastNameField.getValue(),
+                        birthdayField.getValue(),
+                        usernameField.getValue(),
+                        emailField.getValue(),
+                        passwordField.getValue(),
+                        universitaetField.getValue(),
+                        Integer.parseInt(semesterField.getValue())
+                );
+            } else if ("Gründer".equals(typ)) {
+                erfolg = registrationControl.registriereGruender(
+                        firstNameField.getValue(),
+                        lastNameField.getValue(),
+                        birthdayField.getValue(),
+                        usernameField.getValue(),
+                        emailField.getValue(),
+                        passwordField.getValue(),
+                        unternehmensNameField.getValue()
+                );
+            }
+
+            if (erfolg) {
+                // Erfolgreich registriert – weiterleiten zur Login-Seite
+                UI.getCurrent().navigate("");
+            } else {
+                // Registrierung fehlgeschlagen – Hinweis anzeigen
+                Notification.show("Registrierung fehlgeschlagen. Benutzername bereits vergeben.");
+            }
+        });
 
         // Alle Komponenten zur View hinzufügen
         add(firstNameField, lastNameField, birthdayField, emailField, usernameField,
