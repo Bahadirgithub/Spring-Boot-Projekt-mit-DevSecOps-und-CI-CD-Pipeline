@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 /**
  * Bitte noch nicht mergen!
  * Es werden Änderungen und Verbesserungen hier noch geschehen.
+ * :)
  */
 @Component
 public class VerwaltungControl {
@@ -26,10 +27,7 @@ public class VerwaltungControl {
     }
 
     private <T> boolean isNull(T a){
-        if(a == null){
-            return true;
-        }
-        return false;
+        return a == null;
     }
 
     public void loeschen(BenutzerDTO x){
@@ -46,29 +44,34 @@ public class VerwaltungControl {
         return true;
     }
 
-    private void vornameAendern(String x){
-        if(!isNull(x))return;
+    public boolean vornameAendern(String x){
+        if(!isNull(x))return false;
         benutzer.setVorname(x);
+        return true;
     }
 
-    private void nachnameAendern(String x){
-        if(!isNull(x))return;
+    public boolean nachnameAendern(String x){
+        if(!isNull(x))return false;
         benutzer.setNachname(x);
+        return true;
     }
 
-    private void emailAendern(String x){
-        if(!isNull(x))return;
+    public boolean emailAendern(String x){
+        if(!isNull(x))return false;
         benutzer.setEmail(x);
+        return true;
     }
 
-    private void passwortAendern(String x){
-        if(!isNull(x))return;
-        //hier muss eigentlich noch ne email gesendet werden als confirmation.
+    public boolean passwortAendern(String x){
+        if(!isNull(x))return false;
+        //hier muss eigentlich noch ne E-Mail gesendet werden als confirmation.
         benutzer.setPasswort(x);
+        return true;
     }
 
-    private void telefonnummerAendern(String x){
-        if(!isNull(x))return;
+    public boolean telefonnummerAendern(String x){
+        if(!isNull(x))return false;
         benutzer.setTelefonnummer(x);
+        return true;
     }
 }
