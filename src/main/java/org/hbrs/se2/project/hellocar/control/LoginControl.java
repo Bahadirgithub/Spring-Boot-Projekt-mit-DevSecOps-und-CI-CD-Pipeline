@@ -1,83 +1,68 @@
 package org.hbrs.se2.project.hellocar.control;
 
 import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
-import org.hbrs.se2.project.hellocar.dao.UserDAO;
-import org.hbrs.se2.project.hellocar.dtos.UserDTO;
-import org.hbrs.se2.project.hellocar.repository.UserRepository;
-import org.hbrs.se2.project.hellocar.services.db.exceptions.DatabaseLayerException;
-import org.hbrs.se2.project.hellocar.util.Globals;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
+import org.hbrs.se2.project.hellocar.dtos.impl.BenutzerDTOImpl;
+import org.hbrs.se2.project.hellocar.entities.Benutzer;
+import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 
 @Component
 public class LoginControl {
 
-    @Autowired
-    private UserRepository repository;
+    private final BenutzerRepository benutzerRepository;
 
-    private UserDTO userDTO = null;
+    private BenutzerDTO benutzerDTO = null;
 
-    public boolean authentificate(String username, String password ) throws DatabaseUserException {
-        // Standard: User wird mit Spring JPA ausgelesen (Was sind die Vorteile?)
-        // UserDTO tmpUser = this.getUserWithJPA( username , password );
+    public LoginControl(BenutzerRepository benutzerRepository) {
+        this.benutzerRepository = benutzerRepository;
+    }
 
-        // Alternative: Auslesen des Users mit JDBC (Was sind die Vorteile bzw. Nachteile?)
-        UserDTO tmpUser = this.getUserWithJDBC( username , password );
+    public boolean authentificate(String username, String password) throws DatabaseUserException {
+        BenutzerDTO tmpBenutzer = this.getBenutzerWithJPA(username, password);
 
-        if ( tmpUser == null ) {
-            // ggf. hier ein Loggin einfügen
+        if (tmpBenutzer == null) {
             return false;
         }
-        this.userDTO = tmpUser;
+
+        this.benutzerDTO = tmpBenutzer;
         return true;
     }
 
-    public UserDTO getCurrentUser(){
-        return this.userDTO;
-
+    public BenutzerDTO getCurrentUser() {
+        return this.benutzerDTO;
     }
 
-    private UserDTO getUserWithJDBC( String username , String password ) throws DatabaseUserException {
-        UserDTO userTmp = null;
-        UserDAO dao = new UserDAO();
+    private BenutzerDTO getBenutzerWithJPA(String username, String password) throws DatabaseUserException {
         try {
-            userDTO = dao.findUserByUseridAndPassword( username , password );
+            Optional<Benutzer> benutzer =
+                    benutzerRepository.findByUsernameAndPasswort(username, password);
+
+            if (benutzer.isEmpty()) {
+                return null;
+            }
+
+            return convertToDTO(benutzer.get());
+
+        } catch (DataAccessResourceFailureException e) {
+            throw new DatabaseUserException("Fehler bei der Verbindung zur Datenbank mit JPA.");
         }
-        catch ( DatabaseLayerException e) {
-
-            // Analyse und Umwandlung der technischen Errors in 'lesbaren' Darstellungen
-            // Durchreichung und Behandlung der Fehler (Chain Of Responsibility Pattern (SE-1))
-            String reason = e.getReason();
-
-            if (reason.equals(Globals.Errors.NOUSERFOUND)) {
-                return userTmp;
-                // throw new DatabaseUserException("No User could be found! Please check your credentials!");
-            }
-            else if ( reason.equals((Globals.Errors.SQLERROR))) {
-                throw new DatabaseUserException("There were problems with the SQL code. Please contact the developer!");
-            }
-            else if ( reason.equals((Globals.Errors.DATABASE ) )) {
-                throw new DatabaseUserException("A failure occured while trying to connect to database with JDBC. " +
-                        "Please contact the admin");
-            }
-            else {
-                throw new DatabaseUserException("A failure occured while");
-            }
-
-        }
-        return userDTO;
     }
 
-    private UserDTO getUserWithJPA( String username , String password ) throws DatabaseUserException {
-        UserDTO userTmp;
-        try {
-            userTmp = repository.findUserByUseridAndPassword(username, password);
-        } catch ( org.springframework.dao.DataAccessResourceFailureException e ) {
-            // Analyse und Umwandlung der technischen Errors in 'lesbaren' Darstellungen (ToDo!)
-           throw new DatabaseUserException("A failure occured while trying to connect to database with JPA");
-        }
-        return userTmp;
-    }
+    private BenutzerDTO convertToDTO(Benutzer benutzer) {
+        BenutzerDTOImpl dto = new BenutzerDTOImpl();
 
+        dto.setUserId(benutzer.getUserId());
+        dto.setVorname(benutzer.getVorname());
+        dto.setNachname(benutzer.getNachname());
+        dto.setGeburtstag(benutzer.getGeburtstag());
+        dto.setUsername(benutzer.getUsername());
+        dto.setEmail(benutzer.getEmail());
+        dto.setTelefonnummer(benutzer.getTelefonnummer());
+
+        return dto;
+    }
 }
