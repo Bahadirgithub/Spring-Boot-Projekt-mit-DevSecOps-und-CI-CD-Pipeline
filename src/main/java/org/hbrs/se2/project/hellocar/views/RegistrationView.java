@@ -33,6 +33,8 @@ public class RegistrationView extends VerticalLayout {
         TextField firstNameField = new TextField("Vorname");
         TextField lastNameField = new TextField("Nachname");
         DatePicker birthdayField = new DatePicker("Geburtsdatum");
+        birthdayField.setMax(java.time.LocalDate.now());
+
         EmailField emailField = new EmailField("E-Mail Adresse");
         TextField usernameField = new TextField("Benutzername");
 
