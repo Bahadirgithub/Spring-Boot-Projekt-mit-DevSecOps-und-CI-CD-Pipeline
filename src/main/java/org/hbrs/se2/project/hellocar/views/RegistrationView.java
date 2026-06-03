@@ -42,6 +42,8 @@ public class RegistrationView extends VerticalLayout {
         PasswordField passwordField = new PasswordField("Passwort");
         PasswordField repeatPasswordField = new PasswordField("Passwort wiederholen");
 
+
+
         // Dropdown zur Auswahl ob Student oder Gründer
         Select<String> typeSelect = new Select<>();
         typeSelect.setLabel("Kontotyp");
@@ -70,6 +72,11 @@ public class RegistrationView extends VerticalLayout {
         Button registerButton = new Button("Speichern");
         registerButton.addClickListener(e -> {
 
+            // 2. NEU: Prüfung auf Passwort-Übereinstimmung
+            if (!passwordField.getValue().equals(repeatPasswordField.getValue())) {
+                Notification.show("Die Passwörter stimmen nicht überein!");
+                return; // Bricht die Registrierung ab
+            }
             // Pflichtfelder prüfen bevor Registrierung gestartet wird
             if (firstNameField.isEmpty() || lastNameField.isEmpty() || birthdayField.isEmpty()
                     || emailField.isEmpty() || usernameField.isEmpty()
