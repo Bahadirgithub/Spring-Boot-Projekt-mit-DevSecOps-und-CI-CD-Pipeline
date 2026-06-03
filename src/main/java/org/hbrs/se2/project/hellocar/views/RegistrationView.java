@@ -4,7 +4,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -66,7 +65,7 @@ public class RegistrationView extends VerticalLayout {
         });
 
         // Registrieren-Button mit Logik
-        Button registerButton = new Button("Registrieren");
+        Button registerButton = new Button("Speichern");
         registerButton.addClickListener(e -> {
 
             // Pflichtfelder prüfen bevor Registrierung gestartet wird
@@ -116,12 +115,12 @@ public class RegistrationView extends VerticalLayout {
 
         // Alle Komponenten zur View hinzufügen
         add(firstNameField, lastNameField, birthdayField, emailField, usernameField,
-                new Hr(),
+
                 passwordField, repeatPasswordField,
-                new Hr(),
+
                 typeSelect,
                 universitaetField, semesterField, unternehmensNameField,
-                new Hr(),
+
                 registerButton);
 
         // Alles zentriert ausrichten
