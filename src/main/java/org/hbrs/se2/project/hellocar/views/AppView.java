@@ -109,7 +109,7 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
 
         // Logout-Button am rechts-oberen Rand.
         MenuBar bar = new MenuBar();
-        MenuItem item = bar.addItem("Logout" , e -> logoutUser());
+        MenuItem item = bar.addItem("Ausloggen" , e -> logoutUser());
         topRightPanel.add(bar);
 
         layout.add( topRightPanel );
@@ -143,7 +143,7 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
         logoLayout.setId("logo");
         logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         logoLayout.add(new Image("images/logo.png", "HelloCar logo"));
-        logoLayout.add(new H1("HelloCar"));
+        logoLayout.add(new H1("St@rtMeUp"));
 
         // Hinzufügen des Menus inklusive der Tabs
         layout.add(logoLayout, menu);
@@ -169,12 +169,12 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
 
     private Component[] createMenuItems() {
         // Jeder eingeloggte User sollte die Hauptseite sehen können.
-        Tab[] tabs = new Tab[]{ createTab("Show Cars", ShowCarsView.class) };
+        Tab[] tabs = new Tab[]{ createTab("Gründungsideen anschauen", ShowCarsView.class) };
         // Neue Logik ohne Rollen:
         // Nur Gründer dürfen EnterCar sehen.
         if (this.authorizationControl.canAccessEnterCar(this.getCurrentUser())) {
-            System.out.println("User ist Gründer und darf Enter Car sehen.");
-            tabs = Utils.append(tabs, createTab("Enter Car", EnterCarView.class));
+            System.out.println("User ist Gründer und darf Gründungsidee erstellen.");
+            tabs = Utils.append(tabs, createTab("Gründungsidee erstellen", EnterCarView.class));
         }
 
         // ToDo für die Teams: Weitere Tabs aus ihrem Projekt hier einfügen!
@@ -203,7 +203,7 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
         viewTitle.setText(getCurrentPageTitle());
 
         // Setzen des Vornamens von dem aktuell eingeloggten Benutzer
-        helloUser.setText("Hello my dear old friend!! Wie geht's dir, "  + this.getCurrentNameOfUser() );
+        helloUser.setText("Willkommen zurück! Wie geht's dir, "  + this.getCurrentNameOfUser() );
 
     }
 

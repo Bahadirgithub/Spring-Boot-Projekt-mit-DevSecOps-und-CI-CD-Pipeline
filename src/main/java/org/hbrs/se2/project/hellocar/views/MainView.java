@@ -31,7 +31,7 @@ public class MainView extends VerticalLayout {
         setAlignItems(Alignment.CENTER);
 
         LoginForm loginForm = new LoginForm();
-        RouterLink registerLink = new RouterLink("Register new account", RegistrationView.class);
+        RouterLink registerLink = new RouterLink("Registrieren", RegistrationView.class);
 
         // Komponenten werden beim Start der View zum Layout hinzugefügt
         add(loginForm, registerLink);

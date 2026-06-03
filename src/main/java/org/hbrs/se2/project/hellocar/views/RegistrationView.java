@@ -27,7 +27,7 @@ public class RegistrationView extends VerticalLayout {
 
         // Standard-Abstände reduzieren
         setSpacing(false);
-        getStyle().set("gap", "4px");
+        getStyle().set("gap", "2px");
 
         // Eingabefelder
         TextField firstNameField = new TextField("Vorname");
@@ -114,7 +114,7 @@ public class RegistrationView extends VerticalLayout {
             }
 
             if (erfolg) {
-                // Erfolgreich registriert – weiterleiten zur Login-Seite
+                // Erfolgreich registriert – weiterleiten zur show-car-view
                 UI.getCurrent().navigate("");
             } else {
                 // Registrierung fehlgeschlagen
