@@ -4,7 +4,6 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.login.LoginForm;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -58,7 +57,7 @@ public class MainView extends VerticalLayout {
         add(component);
         RouterLink registerLink = new RouterLink("Register new account", RegistrationView.class);
         add(registerLink);
-        this.setAlignItems( FlexComponent.Alignment.CENTER );
+        this.setAlignItems( Alignment.CENTER );
     }
 
     private void grabAndSetUserIntoSession() {
