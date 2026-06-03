@@ -1,5 +1,6 @@
 package org.hbrs.se2.project.hellocar.test;
 
+import org.hbrs.se2.project.hellocar.dao.UserDAO;
 import org.hbrs.se2.project.hellocar.dtos.CarDTO;
 import org.hbrs.se2.project.hellocar.dtos.RolleDTO;
 import org.hbrs.se2.project.hellocar.dtos.UserDTO;
@@ -8,6 +9,7 @@ import org.hbrs.se2.project.hellocar.entities.User;
 import org.hbrs.se2.project.hellocar.repository.CarRepository;
 import org.hbrs.se2.project.hellocar.repository.RolleRepository;
 import org.hbrs.se2.project.hellocar.repository.UserRepository;
+import org.hbrs.se2.project.hellocar.services.db.exceptions.DatabaseLayerException;
 import org.hbrs.se2.project.hellocar.util.Utils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,6 +118,20 @@ class HellocarApplicationTests {
             System.out.println("Phone: " + item.getPhone() );
         }
         // Todo: Definition von passenden Assertions (z.B. Anzahl der Autos)
+    }
+
+    @Test
+    void testFindUserWithJDBC() {
+        UserDAO userDAO = new UserDAO();
+        try {
+            UserDTO userDTO = userDAO.findUserByUseridAndPassword("sascha" , "abc");
+            System.out.println(userDTO.toString());
+
+            assertEquals("Sascha", userDTO.getFirstName());
+        } catch (DatabaseLayerException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }
