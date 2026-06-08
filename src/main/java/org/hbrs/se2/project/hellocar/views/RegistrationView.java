@@ -38,6 +38,8 @@ public class RegistrationView extends VerticalLayout {
         EmailField emailField = new EmailField("E-Mail Adresse");
         TextField usernameField = new TextField("Benutzername");
 
+        usernameField.setMinLength(1);
+
         // Passwortfelder – Eingabe wird versteckt angezeigt
         PasswordField passwordField = new PasswordField("Passwort");
         PasswordField repeatPasswordField = new PasswordField("Passwort wiederholen");
