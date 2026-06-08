@@ -36,7 +36,7 @@ import java.util.List;
 @CssImport("./styles/views/showcars/show-cars-view.css")
 public class ShowCarsView extends Div  {
 
-    private List<CarDTO> personList;
+    private final List<CarDTO> personList;
 
     public ShowCarsView( ManageCarControl carControl ) {
             addClassName("show-cars-view");
@@ -104,4 +104,4 @@ public class ShowCarsView extends Div  {
     }
 
 
-};
+}

@@ -75,11 +75,8 @@ public class UserDTO {
 		} else if (!password.equals(other.password))
 			return false;
 		if (userID == null) {
-			if (other.userID != null)
-				return false;
-		} else if (!userID.equals(other.userID))
-			return false;
-		return true;
-	}
+            return other.userID == null;
+		} else return userID.equals(other.userID);
+    }
 
 }
