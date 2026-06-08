@@ -15,7 +15,8 @@ import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
 
 /**
- * Wird für das updaten der Daten und löschen von Benutzern verwendet.
+ * Die View ist jetzt irrelevant, wegen dem neuen MockUp.
+ * Ich muss das wieder neu machen, aber für das erste will ich das schon mal commiten.
  */
 @Route(value = "verwaltung")
 public class VerwaltungView extends VerticalLayout {
