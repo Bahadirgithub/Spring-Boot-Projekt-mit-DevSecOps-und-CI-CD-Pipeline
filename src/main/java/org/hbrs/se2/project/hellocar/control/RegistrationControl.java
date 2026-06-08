@@ -49,7 +49,9 @@ public class RegistrationControl {
             return false;
         }
 
-        if(passwort.length() <= 8){
+        if(username.isBlank()){return false;}
+
+        if(pwd(passwort)){
             return false;
         }
 
@@ -58,7 +60,6 @@ public class RegistrationControl {
             return false; // Validierung fehlgeschlagen
         }
 
-        if(username.isEmpty()){return false;}
 
         // Benutzer anlegen über Hilfsmethode danach speichern
         Benutzer benutzer = erstelleBenutzer(vorname, nachname, geburtstag, username, email, passwort);
@@ -76,6 +77,13 @@ public class RegistrationControl {
         return true;
     }
 
+    public boolean pwd(String passwort){
+
+        if(passwort.length()< 8){return true;}
+
+        return false;
+    }
+
 
     /**
      * Registriert einen neuen Benutzer als Gründer.
@@ -91,7 +99,9 @@ public class RegistrationControl {
             return false;
         }
 
-        if(passwort.length() <= 8){
+        if(username.isBlank()){return false;}
+
+        if(pwd(passwort)){
             return false;
         }
 
