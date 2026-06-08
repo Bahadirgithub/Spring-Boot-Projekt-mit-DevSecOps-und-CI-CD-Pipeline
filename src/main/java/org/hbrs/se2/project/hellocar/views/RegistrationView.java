@@ -104,6 +104,25 @@ public class RegistrationView extends VerticalLayout {
                 );
             }
 
+            // =================================================================================
+            // HINWEIS FÜR DAS ENTWICKLERTEAM:
+            //
+            // WARUM DIE FEHLERMELDUNG HIER IRREFÜHREND IST:
+            //
+            // Die Methode 'registriereStudent' gibt aktuell nur 'true' (hat geklappt) oder 'false' (hat nicht geklappt) zurück.
+            // Wir wissen aber nicht, WARUM es nicht geklappt hat.
+            //
+            // Das Problem: Der untere 'else'-Block wird für JEDEN Fehler ausgeführt. Egal ob das Passwort zu kurz ist,
+            // die E-Mail falsch ist oder der Benutzername schon existiert – wir zeigen IMMER die gleiche,
+            // fest einprogrammierte Nachricht an: "Benutzername bereits vergeben".
+            //
+            // Das verwirrt beim Testen, weil man denkt, es liegt immer am Benutzernamen, obwohl der Fehler
+            // vielleicht ein zu kurzes Passwort war.
+            //
+            // TODO: Die 'registriereStudent'-Methode in der 'RegistrationControl' so umbauen, dass sie uns den
+            //       genauen Grund für den Fehler zurückgibt (z.B. mit einem Ergebnis-Objekt oder einer Exception).
+            //       Danach können wir hier im 'else'-Block die richtige Fehlermeldung anzeigen.
+            // =================================================================================
             if (erfolg) {
                 // Erfolgreich registriert – weiterleiten zur Login-Seite
                 UI.getCurrent().navigate("");
