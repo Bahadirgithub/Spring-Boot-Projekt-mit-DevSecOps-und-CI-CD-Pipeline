@@ -41,6 +41,9 @@ public class RegistrationView extends VerticalLayout {
         // Passwortfelder – Eingabe wird versteckt angezeigt
         PasswordField passwordField = new PasswordField("Passwort");
         PasswordField repeatPasswordField = new PasswordField("Passwort wiederholen");
+        passwordField.setMinLength(9);
+        repeatPasswordField.setMinLength(9);
+
 
 
 
@@ -76,6 +79,11 @@ public class RegistrationView extends VerticalLayout {
             if (!passwordField.getValue().equals(repeatPasswordField.getValue())) {
                 Notification.show("Die Passwörter stimmen nicht überein!");
                 return; // Bricht die Registrierung ab
+            }
+
+            if(repeatPasswordField.getValue().length() <= 7){
+                Notification.show("Das Passwort ist zu kurz.");
+                return;
             }
             // Pflichtfelder prüfen bevor Registrierung gestartet wird
             if (firstNameField.isEmpty() || lastNameField.isEmpty() || birthdayField.isEmpty()
