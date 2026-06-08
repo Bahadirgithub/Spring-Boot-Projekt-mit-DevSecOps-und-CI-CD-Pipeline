@@ -32,7 +32,7 @@ import java.util.List;
  *
  */
 @Route(value = Globals.Pages.SHOW_CARS, layout = AppView.class)
-@PageTitle("Show Cars")
+@PageTitle("Gründungsideen")
 @CssImport("./styles/views/showcars/show-cars-view.css")
 public class ShowCarsView extends Div  {
 
@@ -60,12 +60,12 @@ public class ShowCarsView extends Div  {
         grid.setDataProvider(dataProvider);
 
         Grid.Column<CarDTO> brandColumn = grid
-                .addColumn(CarDTO::getBrand).setHeader("Brand");
+                .addColumn(CarDTO::getBrand).setHeader("Unternehmen");
         Grid.Column<CarDTO> modelColumn = grid.addColumn(CarDTO::getModel)
                 .setHeader("Model");
         Grid.Column<CarDTO> descriptionColumn = grid
                 .addColumn(CarDTO::getDescription)
-                .setHeader("Description");
+                .setHeader("Idee");
         Grid.Column<CarDTO> priceColumn = grid
                 .addColumn(CarDTO::getPrice)
                 .setHeader("Price");
@@ -100,7 +100,7 @@ public class ShowCarsView extends Div  {
     }
 
     private Component createTitle() {
-        return new H3("Search for Cars");
+        return new H3("Nach Gründungsideen suchen");
     }
 
 

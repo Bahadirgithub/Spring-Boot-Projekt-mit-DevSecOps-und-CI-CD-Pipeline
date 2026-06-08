@@ -12,52 +12,48 @@ import org.hbrs.se2.project.hellocar.control.LoginControl;
 import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View zur Darstellung der Startseite. Diese zeigt dem Benutzer ein Login-Formular an.
- * ToDo: Integration einer Seite zur Registrierung von Benutzern
  */
-@Route(value = "" )
+@Route(value = "")
 @RouteAlias(value = "login")
 public class MainView extends VerticalLayout {
 
-    // Default: Einfügung des LoginControl-Objekts als Singleton (Spring-Annotation)
-    // Frage: Gibt es hier vielleicht Probleme ... ?
-    @Autowired
-    private LoginControl loginControl;
+    private final LoginControl loginControl;
 
-    public MainView() {
+    // Konstruktor-Injection stellt sicher, dass loginControl vorhanden ist
+    public MainView(LoginControl loginControl) {
+        this.loginControl = loginControl;
+
         setSizeFull();
-        LoginForm component = new LoginForm();
+        setJustifyContentMode(JustifyContentMode.CENTER);
+        setAlignItems(Alignment.CENTER);
 
-        component.addLoginListener(e -> {
+        LoginForm loginForm = new LoginForm();
+        RouterLink registerLink = new RouterLink("Registrieren", RegistrationView.class);
 
-            boolean isAuthenticated = false;
+        // Komponenten werden beim Start der View zum Layout hinzugefügt
+        add(loginForm, registerLink);
+
+        // Listener definiert nur die Reaktion auf den Button-Klick
+        loginForm.addLoginListener(e -> {
             try {
-                isAuthenticated = loginControl.authentificate( e.getUsername() , e.getPassword() );
+                boolean isAuthenticated = loginControl.authentificate(e.getUsername(), e.getPassword());
 
+                if (isAuthenticated) {
+                    grabAndSetUserIntoSession();
+                    navigateToMainPage();
+                } else {
+                    loginForm.setError(true);
+                }
             } catch (DatabaseUserException databaseException) {
                 Dialog dialog = new Dialog();
-                dialog.add( new Text( databaseException.getReason()) );
+                dialog.add(new Text(databaseException.getReason()));
                 dialog.setWidth("400px");
-                dialog.setHeight("150px");
                 dialog.open();
             }
-            if (isAuthenticated) {
-                grabAndSetUserIntoSession();
-                navigateToMainPage();
-
-            } else {
-                // Kann noch optimiert werden
-                component.setError(true);
-            }
         });
-
-        add(component);
-        RouterLink registerLink = new RouterLink("Register new account", RegistrationView.class);
-        add(registerLink);
-        this.setAlignItems( Alignment.CENTER );
     }
 
     private void grabAndSetUserIntoSession() {
@@ -65,12 +61,7 @@ public class MainView extends VerticalLayout {
         UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, benutzerDTO);
     }
 
-
     private void navigateToMainPage() {
-        // Navigation zur Startseite, hier auf die Teil-Komponente Show-Cars.
-        // Die anzuzeigende Teil-Komponente kann man noch individualisieren, je nach Rolle,
-        // die ein Benutzer besitzt
         UI.getCurrent().navigate(Globals.Pages.SHOW_CARS);
-
     }
 }

@@ -27,18 +27,25 @@ public class RegistrationView extends VerticalLayout {
 
         // Standard-Abstände reduzieren
         setSpacing(false);
-        getStyle().set("gap", "4px");
+        getStyle().set("gap", "2px");
 
         // Eingabefelder
         TextField firstNameField = new TextField("Vorname");
         TextField lastNameField = new TextField("Nachname");
         DatePicker birthdayField = new DatePicker("Geburtsdatum");
+        birthdayField.setMax(java.time.LocalDate.now());
+
         EmailField emailField = new EmailField("E-Mail Adresse");
         TextField usernameField = new TextField("Benutzername");
 
         // Passwortfelder – Eingabe wird versteckt angezeigt
         PasswordField passwordField = new PasswordField("Passwort");
         PasswordField repeatPasswordField = new PasswordField("Passwort wiederholen");
+        passwordField.setMinLength(9);
+        repeatPasswordField.setMinLength(9);
+
+
+
 
         // Dropdown zur Auswahl ob Student oder Gründer
         Select<String> typeSelect = new Select<>();
@@ -68,6 +75,16 @@ public class RegistrationView extends VerticalLayout {
         Button registerButton = new Button("Speichern");
         registerButton.addClickListener(e -> {
 
+            // 2. NEU: Prüfung auf Passwort-Übereinstimmung
+            if (!passwordField.getValue().equals(repeatPasswordField.getValue())) {
+                Notification.show("Die Passwörter stimmen nicht überein!");
+                return; // Bricht die Registrierung ab
+            }
+
+            if(repeatPasswordField.getValue().length() <= 7){
+                Notification.show("Das Passwort ist zu kurz.");
+                return;
+            }
             // Pflichtfelder prüfen bevor Registrierung gestartet wird
             if (firstNameField.isEmpty() || lastNameField.isEmpty() || birthdayField.isEmpty()
                     || emailField.isEmpty() || usernameField.isEmpty()
@@ -124,7 +141,7 @@ public class RegistrationView extends VerticalLayout {
             //       Danach können wir hier im 'else'-Block die richtige Fehlermeldung anzeigen.
             // =================================================================================
             if (erfolg) {
-                // Erfolgreich registriert – weiterleiten zur Login-Seite
+                // Erfolgreich registriert – weiterleiten zur show-car-view
                 UI.getCurrent().navigate("");
             } else {
                 // Registrierung fehlgeschlagen

@@ -1,6 +1,8 @@
 package org.hbrs.se2.project.hellocar.entities;
 
+import com.vaadin.flow.component.notification.Notification;
 import jakarta.persistence.*;
+import org.jsoup.helper.ValidationException;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -86,6 +88,7 @@ public class Benutzer {
     }
 
     public void setPasswort(String passwort) {
+
         this.passwort = passwort;
     }
 

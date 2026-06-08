@@ -6,6 +6,7 @@ import org.hbrs.se2.project.hellocar.entities.Gruender;
 import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
+import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 
@@ -21,6 +22,7 @@ public class RegistrationControl {
     private final StudentRepository studentRepository;
     private final GruenderRepository gruenderRepository;
 
+
     // Constructor Injection – Spring injiziert die Repositories automatisch
     public RegistrationControl(BenutzerRepository benutzerRepository,
                                StudentRepository studentRepository,
@@ -29,6 +31,7 @@ public class RegistrationControl {
         this.benutzerRepository = benutzerRepository;
         this.studentRepository = studentRepository;
         this.gruenderRepository = gruenderRepository;
+
     }
 
 
@@ -45,6 +48,17 @@ public class RegistrationControl {
         if (benutzerRepository.existsByUsername(username)) {
             return false;
         }
+
+        if(passwort.length() <= 8){
+            return false;
+        }
+
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        if (!email.matches(emailRegex)) {
+            return false; // Validierung fehlgeschlagen
+        }
+
+        if(username.isEmpty()){return false;}
 
         // Benutzer anlegen über Hilfsmethode danach speichern
         Benutzer benutzer = erstelleBenutzer(vorname, nachname, geburtstag, username, email, passwort);
@@ -75,6 +89,15 @@ public class RegistrationControl {
         // Prüfen ob Username bereits existiert
         if (benutzerRepository.existsByUsername(username)) {
             return false;
+        }
+
+        if(passwort.length() <= 8){
+            return false;
+        }
+
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        if (!email.matches(emailRegex)) {
+            return false; // Validierung fehlgeschlagen
         }
 
         // Benutzer anlegen über Hilfsmethode danach speichern
