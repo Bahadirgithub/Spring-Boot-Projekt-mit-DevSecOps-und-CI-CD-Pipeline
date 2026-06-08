@@ -16,13 +16,13 @@ public class JDBCConnection {
 
     private static JDBCConnection connection = null;
 
-    private String url = "jdbc:postgresql://dumbo.inf.h-brs.de/demouser";
+    private final String url = "jdbc:postgresql://dumbo.inf.h-brs.de/demouser";
 
     private Connection conn;
 
-    private String login = "demouser";
+    private final String login = "demouser";
 
-    private String password = "demouser";
+    private final String password = "demouser";
 
     public static JDBCConnection getInstance() throws DatabaseLayerException {
 

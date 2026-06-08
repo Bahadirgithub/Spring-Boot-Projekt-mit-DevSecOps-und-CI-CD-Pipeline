@@ -29,17 +29,17 @@ import org.hbrs.se2.project.hellocar.util.Globals;
 @CssImport("./styles/views/entercar/enter-car-view.css")
 public class EnterCarView extends Div { // 3. Form (Spezialisierung / Vererbung)
 
-  private TextField brand = new TextField("Brand of car");
-  private TextField model = new TextField("Model");
-  private TextField description = new TextField("Description");
-  private DatePicker date = new DatePicker("Date of Admission");
-  private PhoneNumberField phone = new PhoneNumberField("Phone number of Owner");
-  private TextField price = new TextField("Price");
+  private final TextField brand = new TextField("Brand of car");
+  private final TextField model = new TextField("Model");
+  private final TextField description = new TextField("Description");
+  private final DatePicker date = new DatePicker("Date of Admission");
+  private final PhoneNumberField phone = new PhoneNumberField("Phone number of Owner");
+  private final TextField price = new TextField("Price");
 
-  private Button cancel = new Button("Cancel");
-  private Button save = new Button("Save");
+  private final Button cancel = new Button("Cancel");
+  private final Button save = new Button("Save");
 
-  private Binder<CarDTOImpl> binder = new Binder(CarDTOImpl.class);
+  private final Binder<CarDTOImpl> binder = new Binder(CarDTOImpl.class);
 
   public EnterCarView(ManageCarControl carService) {
     addClassName("enter-car-view");
@@ -110,8 +110,8 @@ public class EnterCarView extends Div { // 3. Form (Spezialisierung / Vererbung)
   }
 
   private static class PhoneNumberField extends CustomField<String> {
-    private ComboBox<String> countryCode = new ComboBox<>();
-    private TextField number = new TextField();
+    private final ComboBox<String> countryCode = new ComboBox<>();
+    private final TextField number = new TextField();
 
     public PhoneNumberField(String label) {
       setLabel(label);
