@@ -10,6 +10,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
 
@@ -35,6 +36,7 @@ public class VerwaltungView extends VerticalLayout {
         TextField firstNameField = new TextField("Vorname");
         TextField lastNameField = new TextField("Nachname");
         EmailField emailField = new EmailField("E-Mail Adresse");
+        NumberField telefonnummerField = new NumberField("Telefonnummer");
 
         // Passwortfelder – Eingabe muss versteckt angezeigt werden
         PasswordField passwordField = new PasswordField("Passwort");
@@ -65,8 +67,8 @@ public class VerwaltungView extends VerticalLayout {
         });
 
         // Update-Button mit Logik
-        Button registerButton = new Button("Aktualisieren");
-        registerButton.addClickListener(e -> {
+        Button updateButton = new Button("Aktualisieren");
+        updateButton.addClickListener(e -> {
 
             //Typ aus dem Dropdown holen
             String typ = typeSelect.getValue();
@@ -79,6 +81,7 @@ public class VerwaltungView extends VerticalLayout {
                         lastNameField.getValue(),
                         emailField.getValue(),
                         passwordField.getValue(),
+                        String.valueOf(telefonnummerField.getValue()),
                         universitaetField.getValue(),
                         Integer.parseInt(semesterField.getValue())
                 );
@@ -88,6 +91,7 @@ public class VerwaltungView extends VerticalLayout {
                         lastNameField.getValue(),
                         emailField.getValue(),
                         passwordField.getValue(),
+                        String.valueOf(telefonnummerField.getValue()),
                         unternehmensNameField.getValue()
                 );
             }
@@ -107,7 +111,7 @@ public class VerwaltungView extends VerticalLayout {
         typeSelect,
         universitaetField, semesterField, unternehmensNameField,
         new Hr(),
-        registerButton);
+        updateButton);
 
         // Ausrichtung
         setAlignItems(Alignment.CENTER);

@@ -26,7 +26,8 @@ public class VerwaltungControl {
     private Optional<Student> student= Optional.empty();
     private Optional<Gruender> gruender= Optional.empty();
 
-    public VerwaltungControl(BenutzerRepository benutzerRepository, StudentRepository studentRepository, GruenderRepository gruenderRepository) {
+    public VerwaltungControl(BenutzerRepository benutzerRepository, StudentRepository studentRepository,
+                             GruenderRepository gruenderRepository) {
         this.benutzerRepository = benutzerRepository;
         this.studentRepository = studentRepository;
         this.gruenderRepository = gruenderRepository;
@@ -41,36 +42,34 @@ public class VerwaltungControl {
         benutzerRepository.deleteById(x.getUserId());
     }
 
-    public boolean updateGruender(String a, String b, String c, String d, String e){
-        if(isNull(benutzer)){
-            System.out.println("Kein Benutzer gegeben");
-            return false;
-        }
+    private boolean updateBenutzer(String a, String b, String c, String d, String e){
         vornameAendern(a);
         nachnameAendern(b);
         emailAendern(c);
         passwortAendern(d);
-        //telefonnummerAendern();
+        telefonnummerAendern(e);
         benutzerRepository.save(benutzer);
-
-        unternehmensNameAendern(e);
         return true;
     }
 
-    public boolean updateStudent(String a, String b, String c, String d, String e, int f){
+    public boolean updateGruender(String a, String b, String c, String d, String e, String f){
         if(isNull(benutzer)){
             System.out.println("Kein Benutzer gegeben");
             return false;
         }
-        vornameAendern(a);
-        nachnameAendern(b);
-        emailAendern(c);
-        passwortAendern(d);
-        //telefonnummerAendern();
-        benutzerRepository.save(benutzer);
+        updateBenutzer(a,b,c,d,e);
+        unternehmensNameAendern(f);
+        return true;
+    }
 
-        universitaetAendern(e);
-        semesterAendern(f);
+    public boolean updateStudent(String a, String b, String c, String d, String e, String f, int g){
+        if(isNull(benutzer)){
+            System.out.println("Kein Benutzer gegeben");
+            return false;
+        }
+        updateBenutzer(a,b,c,d,e);
+        universitaetAendern(f);
+        semesterAendern(g);
         return true;
     }
 
@@ -112,7 +111,7 @@ public class VerwaltungControl {
 
     public boolean universitaetAendern(String x){
         if(!isNull(x))return true;
-        student=studentRepository.findByStudentId("s"+benutzer.getUserId());
+        student=studentRepository.findById(benutzer.getUserId());
         student.get().setUniversitaet(x);
         System.out.println("Die Universität "+x+" wurde eingegeben.");
         return true;
@@ -120,7 +119,7 @@ public class VerwaltungControl {
 
     public boolean semesterAendern(int x){
         if(!isNull(x))return true;
-        student=studentRepository.findByStudentId("s"+benutzer.getUserId());
+        student=studentRepository.findById(benutzer.getUserId());
         student.get().setSemester(x);
         System.out.println("Das Semester "+x+" wurde eingegeben.");
         return true;
@@ -128,7 +127,8 @@ public class VerwaltungControl {
 
     public boolean unternehmensNameAendern(String x){
         if(!isNull(x))return true;
-        gruender=gruenderRepository.findByGruenderId("s"+benutzer.getUserId());
+        gruender=gruenderRepository.findById(benutzer.getUserId());
+        gruender.get().setUnternehmensname(x);
         System.out.println("Das Unternehmen "+x+" wurde eingegeben.");
         return true;
     }
