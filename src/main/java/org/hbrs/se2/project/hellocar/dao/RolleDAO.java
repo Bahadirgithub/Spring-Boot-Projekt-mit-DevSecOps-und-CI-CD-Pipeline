@@ -32,7 +32,7 @@ public class RolleDAO {
             set = statement.executeQuery(
                     "SELECT * "
                        + "FROM carlook.user_to_rolle "
-                       + "WHERE carlook.user_to_rolle.userid = '" + userDTO.getId() + "'");
+                       + "WHERE carlook.user_to_rolle.userid = \'" + userDTO.getId() + "\'" );
 
         } catch (SQLException ex) {
 

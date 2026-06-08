@@ -37,8 +37,8 @@ public class UserDAO {
             set = statement.executeQuery(
                     "SELECT * "
                        + "FROM carlook.user "
-                       + "WHERE carlook.user.userid = '" + id + "'"
-                         + " AND carlook.user.password = '" + password + "'");
+                       + "WHERE carlook.user.userid = \'" + id + "\'"
+                         + " AND carlook.user.password = \'" + password + "\'");
 
             // JDBCConnection.getInstance().closeConnection();
 

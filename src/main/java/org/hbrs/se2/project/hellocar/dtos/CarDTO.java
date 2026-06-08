@@ -4,16 +4,16 @@ import java.time.LocalDate;
 
 public interface CarDTO {
 
-    String getBrand();
+    public String getBrand();
 
-    String getModel();
+    public String getModel();
 
-    String getDescription();
+    public String getDescription();
 
-    LocalDate getDate();
+    public LocalDate getDate();
 
-    String getPhone();
+    public String getPhone();
 
-    String getPrice();
+    public String getPrice();
 
 }
