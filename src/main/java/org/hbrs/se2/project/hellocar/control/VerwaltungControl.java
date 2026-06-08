@@ -11,11 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-/**
- * Bitte noch nicht mergen!
- * Es werden Änderungen und Verbesserungen hier noch geschehen.
- * :)
- */
 @Component
 public class VerwaltungControl {
     private final BenutzerRepository benutzerRepository;
