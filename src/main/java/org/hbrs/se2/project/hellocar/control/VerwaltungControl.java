@@ -8,8 +8,6 @@ import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
-import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
-import org.hbrs.se2.project.hellocar.dtos.impl.BenutzerDTOImpl;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,6 +78,22 @@ public class VerwaltungControl {
         dto.setEmail(benutzer.getEmail());
         dto.setTelefonnummer(benutzer.getTelefonnummer());
         return dto;
+    }
+
+    /**
+     * Lädt den Student neu aus der DB
+     */
+    public Student ladeStudent(int userId) {
+        Optional<Student> studentTMP = studentRepository.findById(userId);
+        return studentTMP.orElse(null);
+    }
+
+    /**
+     * Lädt den Gründer neu aus der DB
+     */
+    public Gruender ladeGruender(int userId) {
+        Optional<Gruender> gruenderTMP = gruenderRepository.findById(userId);
+        return gruenderTMP.orElse(null);
     }
 
 

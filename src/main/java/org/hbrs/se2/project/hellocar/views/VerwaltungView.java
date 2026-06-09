@@ -7,7 +7,6 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -16,12 +15,12 @@ import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
-import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.util.Globals;
-import org.hbrs.se2.project.hellocar.views.AppView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import org.hbrs.se2.project.hellocar.entities.Student;
+import org.hbrs.se2.project.hellocar.entities.Gruender;
 
 
 /**
@@ -101,11 +100,6 @@ public class VerwaltungView extends VerticalLayout {
             geburtstagField.setValue(currentUser.getGeburtstag());
         }
 
-        // Passwortfelder – Eingabe muss versteckt angezeigt werden
-        PasswordField passwordField = new PasswordField("Passwort");
-        PasswordField repeatPasswordField = new PasswordField("Passwort wiederholen");
-
-
         // Sichtbarkeit direkt nach Typ setzen
         TextField universitaetField = new TextField("Universität");
         TextField semesterField = new TextField("Semester");
@@ -122,6 +116,28 @@ public class VerwaltungView extends VerticalLayout {
         TextField standortField = new TextField("Standort");
         unternehmensNameField.setVisible(istGruender);
         standortField.setVisible(istGruender);
+
+
+        // Gründer-Felder ausfüllen
+        if (istGruender) {
+            Gruender gruender = vControl.ladeGruender(currentUser.getUserId());
+            if (gruender != null) {
+                unternehmensNameField.setValue(gruender.getUnternehmensname() == null ? "" : gruender.getUnternehmensname());
+                standortField.setValue(gruender.getStandort() == null ? "" : gruender.getStandort());
+            }
+        }
+
+        // Student-Felder ausfüllen
+        if (istStudent) {
+            Student student = vControl.ladeStudent(currentUser.getUserId());
+            if (student != null) {
+                universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
+                semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
+                abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
+                skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
+            }
+        }
+
 
 
         // Update-Button mit Logik
@@ -149,7 +165,7 @@ public class VerwaltungView extends VerticalLayout {
                         universitaetField.getValue(),
                         semesterField.getValue() == null || semesterField.getValue().isBlank()
                                 ? null
-                                : Integer.parseInt(semesterField.getValue()),
+                                : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
                         abschlussField.getValue(),
                         skillsField.getValue()
                 );
@@ -160,27 +176,85 @@ public class VerwaltungView extends VerticalLayout {
                         lastNameField.getValue(),
                         geburtstagField.getValue(),
                         emailField.getValue(),
-                        String.valueOf(telefonnummerField.getValue()),
+                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
                         unternehmensNameField.getValue(),
                         standortField.getValue()
                 );
             }
             if (erfolg) {
-                // erfolreich aktualisiert - Standort unverändert lassen
                 Notification.show("Profil erfolgreich aktualisiert.");
 
-                // Session aktualisieren damit die View die neuen Daten anzeigt
+                // Benutzer neu aus der DB laden
                 BenutzerDTO aktualisierterBenutzer = vControl.ladeBenutzer(aktuellerBenutzer.getUserId());
+
                 if (aktualisierterBenutzer != null) {
+                    // Session überschreiben damit beim nächsten View-Wechsel die neuen Daten geladen werden
                     UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, aktualisierterBenutzer);
+
+                    // Felder sofort aktualisieren
+                    // Falls ein Wert null ist, leeren String setzen damit kein Fehler entsteht
+                    firstNameField.setValue(aktualisierterBenutzer.getVorname() == null ? "" : aktualisierterBenutzer.getVorname());
+                    lastNameField.setValue(aktualisierterBenutzer.getNachname() == null ? "" : aktualisierterBenutzer.getNachname());
+                    emailField.setValue(aktualisierterBenutzer.getEmail() == null ? "" : aktualisierterBenutzer.getEmail());
+
+                    if (aktualisierterBenutzer.getGeburtstag() != null) {
+                        geburtstagField.setValue(aktualisierterBenutzer.getGeburtstag());
+                    }
+
+                    // Student-Felder aktualisieren
+                    if (istStudent) {
+                        Student student = vControl.ladeStudent(aktuellerBenutzer.getUserId());
+                        if (student != null) {
+                            universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
+                            // Semester ist ein int – 0 bedeutet nicht gesetzt, dann leerer String
+                            semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
+                            abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
+                            skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
+                        }
+                    }
+
+                    // Gründer-Felder aktualisieren
+                    if (istGruender) {
+                        Gruender gruender = vControl.ladeGruender(aktuellerBenutzer.getUserId());
+                        if (gruender != null) {
+                            unternehmensNameField.setValue(gruender.getUnternehmensname() == null ? "" : gruender.getUnternehmensname());
+                            standortField.setValue(gruender.getStandort() == null ? "" : gruender.getStandort());
+                        }
+                    }
                 }
 
-                UI.getCurrent().navigate("verwaltung");
             } else {
-                // aktualisierung fehlgeschlagen
                 Notification.show("Aktualisierung fehlgeschlagen.");
             }
         });
+
+        // Roter Löschen-Button
+        Button deleteButton = new Button("Account löschen");
+        deleteButton.getStyle().set("background-color", "#e53935");
+        deleteButton.getStyle().set("color", "white");
+
+        // Bestätigungsdialog vor dem Löschen
+        ConfirmDialog loeschenDialog = new ConfirmDialog();
+        loeschenDialog.setHeader("Account wirklich löschen?");
+        loeschenDialog.setText("Diese Aktion kann nicht rückgängig gemacht werden. Dein Account wird dauerhaft gelöscht.");
+        loeschenDialog.setCancelable(true);
+        loeschenDialog.setCancelText("Abbrechen");
+        loeschenDialog.setConfirmText("Ja, löschen");
+        loeschenDialog.setConfirmButtonTheme("error primary");
+
+        // Bei Bestätigung – Account löschen und zur Login-Seite
+        loeschenDialog.addConfirmListener(event -> {
+            boolean erfolg = vControl.loeschen(getCurrentUser());
+            if (erfolg) {
+                UI.getCurrent().getSession().close();
+                UI.getCurrent().navigate("");
+            } else {
+                Notification.show("Löschen fehlgeschlagen.");
+            }
+        });
+
+        // Button öffnet den Dialog
+        deleteButton.addClickListener(e -> loeschenDialog.open());
 
 
 
@@ -204,7 +278,7 @@ public class VerwaltungView extends VerticalLayout {
         spaltenLayout.setFlexGrow(1, rechtsLayout);
 
         // Alles zur View hinzufügen
-        add(spaltenLayout, new Hr(), updateButton);
+        add(spaltenLayout, new Hr(), updateButton, deleteButton);
 
         // Ausrichtung
         setAlignItems(Alignment.CENTER);
