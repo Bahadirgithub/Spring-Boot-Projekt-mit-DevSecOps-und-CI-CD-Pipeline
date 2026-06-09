@@ -6,7 +6,6 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -17,8 +16,13 @@ import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
+import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import org.hbrs.se2.project.hellocar.views.AppView;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+
 
 /**
  * durch "layout = AppView.class" behalten wir die navigation und den header
@@ -35,12 +39,15 @@ public class VerwaltungView extends VerticalLayout {
     }
 
     private VerwaltungControl vControl;
+    private AuthorizationControl authControl;
 
-    //Konstruktor
-    public VerwaltungView(VerwaltungControl vControl) {
+    // Constructor Injection – Spring injiziert beide Controls automatisch
+    public VerwaltungView(VerwaltungControl vControl, AuthorizationControl authControl) {
         this.vControl = vControl;
+        this.authControl = authControl;
 
         BenutzerDTO currentUser = getCurrentUser();
+
 
         if (currentUser == null) {
             Notification.show("Bitte zuerst einloggen.");
@@ -48,12 +55,35 @@ public class VerwaltungView extends VerticalLayout {
             return;
         }
 
-        //Seitentitel
-        add(new H2("Profilbearbeitung"));
+        // Typ des eingeloggten Benutzers ermitteln
+        boolean istStudent = authControl.isStudent(currentUser);
+        boolean istGruender = authControl.isGruender(currentUser);
 
-        // Standard-Abstände reduzieren
-        setSpacing(false);
-        getStyle().set("gap", "4px");
+        // Seitentitel
+        add(new H2("Profil anpassen"));
+
+        // Profilbild-Platzhalter als Avatar – zeigt Initialen wenn kein Bild vorhanden
+        Avatar avatar = new Avatar(currentUser.getVorname() + " " + currentUser.getNachname());
+        avatar.setWidth("80px");
+        avatar.setHeight("80px");
+        add(avatar);
+
+        // Benutzername nicht bearbeitbar anzeigen
+        add(new com.vaadin.flow.component.html.Paragraph("Benutzername: " + currentUser.getUsername()));
+
+        // Zweispaltiges Layout – links Benutzereinstellungen, rechts typ-spezifische Felder
+        HorizontalLayout spaltenLayout = new HorizontalLayout();
+        spaltenLayout.setSpacing(true);
+
+        // Linke Spalte – Benutzereinstellungen
+        VerticalLayout linksLayout = new VerticalLayout();
+        linksLayout.setSpacing(false);
+        linksLayout.getStyle().set("gap", "4px");
+
+        // Rechte Spalte – Student oder Gründer spezifisch
+        VerticalLayout rechtsLayout = new VerticalLayout();
+        rechtsLayout.setSpacing(false);
+        rechtsLayout.getStyle().set("gap", "4px");
 
         // Eingabefelder
         TextField firstNameField = new TextField("Vorname");
@@ -75,41 +105,24 @@ public class VerwaltungView extends VerticalLayout {
         PasswordField passwordField = new PasswordField("Passwort");
         PasswordField repeatPasswordField = new PasswordField("Passwort wiederholen");
 
-        // Student oder Gründer
-        Select<String> typeSelect = new Select<>();
-        typeSelect.setLabel("Kontotyp");
-        typeSelect.setItems("Student", "Gründer");
-        typeSelect.setPlaceholder("Bitte wählen");
 
-        // Felder der Studenten (zunächst versteckt)
+        // Sichtbarkeit direkt nach Typ setzen
         TextField universitaetField = new TextField("Universität");
         TextField semesterField = new TextField("Semester");
-        universitaetField.setVisible(false);
-        semesterField.setVisible(false);
+        universitaetField.setVisible(istStudent);
+        semesterField.setVisible(istStudent);
 
         TextField abschlussField = new TextField("Abschluss");
         TextField skillsField = new TextField("Skills");
-        abschlussField.setVisible(false);
-        skillsField.setVisible(false);
+        abschlussField.setVisible(istStudent);
+        skillsField.setVisible(istStudent);
 
         // Felder der Gründer
         TextField unternehmensNameField = new TextField("Unternehmensname");
-        unternehmensNameField.setVisible(false);
         TextField standortField = new TextField("Standort");
-        standortField.setVisible(false);
+        unternehmensNameField.setVisible(istGruender);
+        standortField.setVisible(istGruender);
 
-        // Felder ein-/ausblenden je Kontotyp
-        typeSelect.addValueChangeListener(event -> {
-            String typ = event.getValue();
-
-            universitaetField.setVisible("Student".equals(typ));
-            semesterField.setVisible("Student".equals(typ));
-            abschlussField.setVisible("Student".equals(typ));
-            skillsField.setVisible("Student".equals(typ));
-
-            unternehmensNameField.setVisible("Gründer".equals(typ));
-            standortField.setVisible("Gründer".equals(typ));
-        });
 
         // Update-Button mit Logik
         Button updateButton = new Button("Aktualisieren");
@@ -123,20 +136,16 @@ public class VerwaltungView extends VerticalLayout {
                 return;
             }
 
-            //Typ aus dem Dropdown holen
-            String typ = typeSelect.getValue();
-
             boolean erfolg = false;
 
-            if ("Student".equals(typ)) {
+            if (istStudent) {
                 erfolg = vControl.updateStudent(
                         aktuellerBenutzer,
                         firstNameField.getValue(),
                         lastNameField.getValue(),
                         geburtstagField.getValue(),
                         emailField.getValue(),
-                        passwordField.getValue(),
-                        String.valueOf(telefonnummerField.getValue()),
+                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
                         universitaetField.getValue(),
                         semesterField.getValue() == null || semesterField.getValue().isBlank()
                                 ? null
@@ -144,37 +153,58 @@ public class VerwaltungView extends VerticalLayout {
                         abschlussField.getValue(),
                         skillsField.getValue()
                 );
-            } else if ("Gründer".equals(typ)) {
+            } else if (istGruender) {
                 erfolg = vControl.updateGruender(
                         aktuellerBenutzer,
                         firstNameField.getValue(),
                         lastNameField.getValue(),
                         geburtstagField.getValue(),
                         emailField.getValue(),
-                        passwordField.getValue(),
                         String.valueOf(telefonnummerField.getValue()),
                         unternehmensNameField.getValue(),
                         standortField.getValue()
                 );
             }
             if (erfolg) {
-                // Erfolgreich registriert – weiterleiten zur Login-Seite
-                UI.getCurrent().navigate("");
+                // erfolreich aktualisiert - Standort unverändert lassen
+                Notification.show("Profil erfolgreich aktualisiert.");
+
+                // Session aktualisieren damit die View die neuen Daten anzeigt
+                BenutzerDTO aktualisierterBenutzer = vControl.ladeBenutzer(aktuellerBenutzer.getUserId());
+                if (aktualisierterBenutzer != null) {
+                    UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, aktualisierterBenutzer);
+                }
+
+                UI.getCurrent().navigate("verwaltung");
             } else {
-                // Registrierung fehlgeschlagen
+                // aktualisierung fehlgeschlagen
                 Notification.show("Aktualisierung fehlgeschlagen.");
             }
         });
 
-        add(firstNameField, lastNameField, geburtstagField, emailField,
-                new Hr(),
-                passwordField, repeatPasswordField,
-                new Hr(),
-                typeSelect,
-                universitaetField, semesterField, abschlussField, skillsField,
-                unternehmensNameField, standortField,
-                new Hr(),
-                updateButton);
+
+
+        // Felder in linke Spalte
+        linksLayout.add(firstNameField, lastNameField, geburtstagField, emailField);
+
+        // Felder in rechte Spalte
+        rechtsLayout.add(universitaetField, semesterField, abschlussField, skillsField,
+                unternehmensNameField, standortField);
+
+        // Vertikale Trennlinie
+        com.vaadin.flow.component.html.Div trennlinie = new com.vaadin.flow.component.html.Div();
+        trennlinie.getStyle().set("border-left", "1px solid #e0e0e0");
+        trennlinie.getStyle().set("height", "auto");
+        trennlinie.getStyle().set("align-self", "auto");
+
+        //Spalten zusammensetzen
+        spaltenLayout.add(linksLayout, trennlinie, rechtsLayout);
+
+        spaltenLayout.setFlexGrow(1, linksLayout);
+        spaltenLayout.setFlexGrow(1, rechtsLayout);
+
+        // Alles zur View hinzufügen
+        add(spaltenLayout, new Hr(), updateButton);
 
         // Ausrichtung
         setAlignItems(Alignment.CENTER);
