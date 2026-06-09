@@ -18,12 +18,13 @@ import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
+import org.hbrs.se2.project.hellocar.views.AppView;
 
 /**
- * Die View ist jetzt irrelevant, wegen dem neuen MockUp.
- * Ich muss das wieder neu machen, aber für das erste will ich das schon mal commiten.
+ * durch "layout = AppView.class" behalten wir die navigation und den header
+ * nur der Content bereich wird ausgetauscht
  */
-@Route(value = "verwaltung")
+@Route(value = "verwaltung", layout = AppView.class)
 public class VerwaltungView extends VerticalLayout {
 
     //Wichtigster Part! Das hier holt den aktuellen User aus der Vaadin Sitzung, dann als Getter als DTO Type - Marius

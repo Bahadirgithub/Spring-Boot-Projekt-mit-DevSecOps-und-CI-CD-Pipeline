@@ -179,6 +179,9 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
 
         // ToDo für die Teams: Weitere Tabs aus ihrem Projekt hier einfügen!
 
+        // Menüeintrag Profilverwaltung – für alle eingeloggten Benutzer sichtbar
+        tabs = Utils.append(tabs, createTab("Profil verwalten", VerwaltungView.class));
+
         return tabs;
     }
 
