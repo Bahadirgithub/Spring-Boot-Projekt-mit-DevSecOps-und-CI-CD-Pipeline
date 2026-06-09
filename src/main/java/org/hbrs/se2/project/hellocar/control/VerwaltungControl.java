@@ -1,6 +1,7 @@
 package org.hbrs.se2.project.hellocar.control;
 
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
+import org.hbrs.se2.project.hellocar.dtos.impl.BenutzerDTOImpl;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.entities.Gruender;
 import org.hbrs.se2.project.hellocar.entities.Student;
@@ -58,13 +59,51 @@ public class VerwaltungControl {
         return false;
     }
 
+
+    /**
+     * Lädt den aktuellen Benutzer frisch aus der DB und gibt ihn als DTO zurück.
+     * Wird nach einem Update aufgerufen um die Session zu aktualisieren.
+     */
+    public BenutzerDTO ladeBenutzer(int userId) {
+        Optional<Benutzer> benutzerTMP = benutzerRepository.findById(userId);
+        if (benutzerTMP.isEmpty()) return null;
+
+        Benutzer benutzer = benutzerTMP.get();
+        BenutzerDTOImpl dto = new BenutzerDTOImpl();
+        dto.setUserId(benutzer.getUserId());
+        dto.setVorname(benutzer.getVorname());
+        dto.setNachname(benutzer.getNachname());
+        dto.setGeburtstag(benutzer.getGeburtstag());
+        dto.setUsername(benutzer.getUsername());
+        dto.setEmail(benutzer.getEmail());
+        dto.setTelefonnummer(benutzer.getTelefonnummer());
+        return dto;
+    }
+
+    /**
+     * Lädt den Student neu aus der DB
+     */
+    public Student ladeStudent(int userId) {
+        Optional<Student> studentTMP = studentRepository.findById(userId);
+        return studentTMP.orElse(null);
+    }
+
+    /**
+     * Lädt den Gründer neu aus der DB
+     */
+    public Gruender ladeGruender(int userId) {
+        Optional<Gruender> gruenderTMP = gruenderRepository.findById(userId);
+        return gruenderTMP.orElse(null);
+    }
+
+
+
     @Transactional
     public boolean updateStudent(BenutzerDTO aktuellerBenutzer,
                                  String vorname,
                                  String nachname,
                                  LocalDate geburtstag,
                                  String email,
-                                 String passwort,
                                  String telefonnummer,
                                  String universitaet,
                                  Integer semester,
@@ -89,7 +128,6 @@ public class VerwaltungControl {
         nachnameAendern(benutzer, nachname);
         geburtstagAendern(benutzer, geburtstag);
         emailAendern(benutzer, email);
-        passwortAendern(benutzer, passwort);
         telefonnummerAendern(benutzer, telefonnummer);
 
         //Student-Spezifisch
@@ -109,7 +147,6 @@ public class VerwaltungControl {
                                   String nachname,
                                   LocalDate geburtstag,
                                   String email,
-                                  String passwort,
                                   String telefonnummer,
                                   String unternehmensname,
                                   String standort
@@ -134,7 +171,6 @@ public class VerwaltungControl {
         nachnameAendern(benutzer, nachname);
         geburtstagAendern(benutzer, geburtstag);
         emailAendern(benutzer, email);
-        passwortAendern(benutzer, passwort);
         telefonnummerAendern(benutzer, telefonnummer);
 
         //Gründer-Spezifisch
