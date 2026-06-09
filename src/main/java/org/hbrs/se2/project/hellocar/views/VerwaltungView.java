@@ -16,11 +16,14 @@ import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
+import org.hbrs.se2.project.hellocar.entities.Student;
+import org.hbrs.se2.project.hellocar.entities.Gruender;
+
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import org.hbrs.se2.project.hellocar.entities.Student;
-import org.hbrs.se2.project.hellocar.entities.Gruender;
+import com.vaadin.flow.component.textfield.TextArea;
+
 
 
 /**
@@ -65,6 +68,8 @@ public class VerwaltungView extends VerticalLayout {
         Avatar avatar = new Avatar(currentUser.getVorname() + " " + currentUser.getNachname());
         avatar.setWidth("80px");
         avatar.setHeight("80px");
+        // Farbe automatisch aus Benutzername ableiten – 7 vordefinierte Vaadin-Farben (Index 0-6)
+        avatar.setColorIndex(Math.abs(currentUser.getUsername().hashCode()) % 7);
         add(avatar);
 
         // Benutzername nicht bearbeitbar anzeigen
@@ -103,11 +108,18 @@ public class VerwaltungView extends VerticalLayout {
         // Sichtbarkeit direkt nach Typ setzen
         TextField universitaetField = new TextField("Universität");
         TextField semesterField = new TextField("Semester");
+        // Nur Zahlen erlauben
+        semesterField.setPattern("[0-9]*");
+        semesterField.setErrorMessage("Nur Zahlen erlaubt.");
         universitaetField.setVisible(istStudent);
         semesterField.setVisible(istStudent);
 
         TextField abschlussField = new TextField("Abschluss");
-        TextField skillsField = new TextField("Skills");
+
+        // Skills feld größer
+        TextArea skillsField = new TextArea("Skills");
+        skillsField.setHeight("120px");
+
         abschlussField.setVisible(istStudent);
         skillsField.setVisible(istStudent);
 
