@@ -69,7 +69,7 @@ public class VerwaltungView extends VerticalLayout {
         avatar.setWidth("80px");
         avatar.setHeight("80px");
         // Farbe automatisch aus Benutzername ableiten – 7 vordefinierte Vaadin-Farben (Index 0-6)
-        avatar.setColorIndex(Math.abs(currentUser.getUsername().hashCode()) % 7);
+        avatar.setColorIndex(Math.floorMod(currentUser.getUsername().hashCode(), 7));
         add(avatar);
 
         // Benutzername nicht bearbeitbar anzeigen
