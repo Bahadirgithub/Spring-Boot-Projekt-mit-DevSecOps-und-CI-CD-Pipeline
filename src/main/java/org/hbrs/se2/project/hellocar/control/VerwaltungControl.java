@@ -198,6 +198,10 @@ public class VerwaltungControl {
 
     public boolean emailAendern(Benutzer benutzer, String x){
         if(istLeer(x))return true;
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        if (!x.matches(emailRegex)) {
+            return false; // Validierung fehlgeschlagen
+        }
         benutzer.setEmail(x);
         System.out.println("Die E-Mail "+x+" wurde eingegeben.");
         return true;
