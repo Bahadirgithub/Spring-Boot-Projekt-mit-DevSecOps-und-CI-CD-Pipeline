@@ -210,6 +210,7 @@ public class VerwaltungControl {
     public boolean passwortAendern(Benutzer benutzer, String x){
         if(istLeer(x))return true;
         //hier muss eigentlich noch ne E-Mail gesendet werden als confirmation.
+        if(x.length() < 8){return false;} // passwort muss länger als 8 Zeichen sein
         benutzer.setPasswort(x);
         System.out.println("Das neue Passwort wurde eingegeben.");
         return true;
