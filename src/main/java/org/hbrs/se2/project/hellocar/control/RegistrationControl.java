@@ -40,25 +40,17 @@ public class RegistrationControl {
                                                  String username, String email, String passwort,
                                                  String universitaet, int semester) {
 
-        // Validierung der Eingaben
-        if (username == null || username.isBlank()) {
-            return RegistrationResult.USERNAME_IS_EMPTY;
-        }
-        if (isPasswordInvalid(passwort)) {
-            return RegistrationResult.PASSWORD_TOO_SHORT;
-        }
-        if (isEmailInvalid(email)) {
-            return RegistrationResult.INVALID_EMAIL_FORMAT;
-        }
-        if (benutzerRepository.existsByUsername(username)) {
-            return RegistrationResult.USERNAME_ALREADY_EXISTS;
+        // 1. Zentrale Validierung und Benutzer-Erstellung aufrufen
+        Object validationResult = validateAndCreateUser(vorname, nachname, geburtstag, username, email, passwort);
+
+        // 2. Prüfen, ob ein Fehler aufgetreten ist (Rückgabe ist ein RegistrationResult Enum)
+        if (validationResult instanceof RegistrationResult) {
+            return (RegistrationResult) validationResult;
         }
 
-        // Schritt 1: Benutzer anlegen und speichern
-        Benutzer benutzer = erstelleBenutzer(vorname, nachname, geburtstag, username, email, passwort);
-        benutzerRepository.saveAndFlush(benutzer);
-
-        // Schritt 2: Student anlegen mit der generierten userId
+        // 3. Wenn erfolgreich, den zurückgegebenen Benutzer nehmen und den Studententeil erledigen
+        Benutzer benutzer = (Benutzer) validationResult;
+        
         Student student = new Student();
         student.setUserId(benutzer.getUserId());
         student.setStudentId("s" + benutzer.getUserId());
@@ -79,7 +71,36 @@ public class RegistrationControl {
                                                   String username, String email, String passwort,
                                                   String unternehmensname) {
 
-        // Validierung der Eingaben
+        // 1. Zentrale Validierung und Benutzer-Erstellung aufrufen
+        Object validationResult = validateAndCreateUser(vorname, nachname, geburtstag, username, email, passwort);
+
+        // 2. Prüfen, ob ein Fehler aufgetreten ist (Rückgabe ist ein RegistrationResult Enum)
+        if (validationResult instanceof RegistrationResult) {
+            return (RegistrationResult) validationResult;
+        }
+
+        // 3. Wenn erfolgreich, den zurückgegebenen Benutzer nehmen und den Gründerteil erledigen
+        Benutzer benutzer = (Benutzer) validationResult;
+
+        Gruender gruender = new Gruender();
+        gruender.setUserId(benutzer.getUserId());
+        gruender.setGruenderId("g" + benutzer.getUserId());
+        gruender.setUnternehmensname(unternehmensname);
+        gruenderRepository.save(gruender);
+
+        return RegistrationResult.SUCCESS;
+    }
+
+    /**
+     * Zentrale Hilfsmethode, die den doppelten Code vermeidet.
+     * Sie validiert die allgemeinen Benutzerdaten und legt, falls gültig, den Benutzer an.
+     *
+     * @return Ein RegistrationResult (bei Validierungsfehlern) ODER das neue Benutzer-Objekt (bei Erfolg).
+     */
+    private Object validateAndCreateUser(String vorname, String nachname, LocalDate geburtstag,
+                                         String username, String email, String passwort) {
+        
+        // Gemeinsame Validierung
         if (username == null || username.isBlank()) {
             return RegistrationResult.USERNAME_IS_EMPTY;
         }
@@ -93,18 +114,11 @@ public class RegistrationControl {
             return RegistrationResult.USERNAME_ALREADY_EXISTS;
         }
 
-        // Schritt 1: Benutzer anlegen und speichern
+        // Gemeinsame Erstellung des Basis-Benutzers
         Benutzer benutzer = erstelleBenutzer(vorname, nachname, geburtstag, username, email, passwort);
         benutzerRepository.saveAndFlush(benutzer);
 
-        // Schritt 2: Gründer anlegen mit der generierten userId
-        Gruender gruender = new Gruender();
-        gruender.setUserId(benutzer.getUserId());
-        gruender.setGruenderId("g" + benutzer.getUserId());
-        gruender.setUnternehmensname(unternehmensname);
-        gruenderRepository.save(gruender);
-
-        return RegistrationResult.SUCCESS;
+        return benutzer;
     }
 
     /**
