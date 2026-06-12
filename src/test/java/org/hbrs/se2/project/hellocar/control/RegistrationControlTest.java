@@ -1,7 +1,7 @@
-package org.hbrs.se2.project.hellocar.test;
+package org.hbrs.se2.project.hellocar.control;
 
-import org.hbrs.se2.project.hellocar.control.RegistrationControl;
-import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
+import org.hbrs.se2.project.hellocar.entities.Benutzer;
+import org.hbrs.se2.project.hellocar.util.TestDatenFabrik;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,19 +25,21 @@ public class RegistrationControlTest {
     private RegistrationControl registrationControl;
 
     @Autowired
-    private BenutzerRepository benutzerRepository;
+    private TestDatenFabrik testDatenFabrik;
+
+    private Benutzer standardBenutzer;
 
     /**
      * Diese Methode wird vor jedem einzelnen Test ausgeführt.
-     * Sie legt einen Standard-Benutzer an, um die Tests für bereits existierende
-     * Benutzernamen oder E-Mails sauberer zu gestalten.
+     * Sie legt über die TestDatenFabrik einen Standard-Benutzer an, um die Tests
+     * für bereits existierende Benutzernamen oder E-Mails sauberer zu gestalten,
+     * ohne die zu testende RegistrationControl für das Setup zu verwenden.
      */
     @BeforeEach
     void setUp() {
-        // Vorbereitung: Einen Standard-Benutzer anlegen, damit der Name für Kollisions-Tests vergeben ist.
-        registrationControl.registriereStudent(
-                "Max", "Muster", LocalDate.now(), "stud_max", "erste_mail@mail.de", "Passwort123", "Uni Bonn", 1
-        );
+        // Vorbereitung: Einen Standard-Benutzer direkt in der DB anlegen.
+        // Username: "testuser_RegistrationSetup", Email: "test_RegistrationSetup@mail.de"
+        standardBenutzer = testDatenFabrik.erstelleUndSpeichereBenutzer("RegistrationSetup");
     }
 
     /**
@@ -57,12 +59,11 @@ public class RegistrationControlTest {
      */
     @Test
     void testRegistrierungSchlaegtFehlWennUsernameVergeben() {
-        // Der Benutzer "stud_max" wurde bereits in der @BeforeEach-Methode angelegt.
         // Eigentlicher Test: Versuch, den gleichen Namen nochmal zu nutzen.
         boolean result = registrationControl.registriereStudent(
-                "Anna", "Schmidt", LocalDate.now(), "stud_max", "andere_mail@mail.de", "Passwort123", "Uni Köln", 2
+                "Anna", "Schmidt", LocalDate.now(), standardBenutzer.getUsername(), "andere_mail@mail.de", "Passwort123", "Uni Köln", 2
         );
-        assertFalse(result, "Registrierung sollte fehlschlagen, da 'stud_max' bereits existiert.");
+        assertFalse(result, "Registrierung sollte fehlschlagen, da '" + standardBenutzer.getUsername() + "' bereits existiert.");
     }
 
     /**
@@ -70,10 +71,9 @@ public class RegistrationControlTest {
      */
     @Test
     void testRegistrierungErfolgreichTrotzDoppelterEmail() {
-        // Die E-Mail "erste_mail@mail.de" wurde bereits in @BeforeEach angelegt.
         // Eigentlicher Test: Anderer Username, aber GLEICHE E-Mail.
         boolean result = registrationControl.registriereStudent(
-                "Anna", "Schmidt", LocalDate.now(), "neuer_user_2", "erste_mail@mail.de", "SicheresPasswort99", "Uni Köln", 2
+                "Anna", "Schmidt", LocalDate.now(), "neuer_user_2", standardBenutzer.getEmail(), "SicheresPasswort99", "Uni Köln", 2
         );
         assertTrue(result, "Registrierung sollte erfolgreich sein, da doppelte E-Mails laut Anforderung erlaubt sind.");
     }
