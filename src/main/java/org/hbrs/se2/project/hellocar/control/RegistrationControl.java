@@ -1,15 +1,14 @@
 package org.hbrs.se2.project.hellocar.control;
 
+import org.hbrs.se2.project.hellocar.control.results.RegistrationResult;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.entities.Gruender;
 import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
-import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
-
 
 /**
  * Control-Klasse für die Registrierung neuer Benutzer.
@@ -22,95 +21,79 @@ public class RegistrationControl {
     private final StudentRepository studentRepository;
     private final GruenderRepository gruenderRepository;
 
-
     // Constructor Injection – Spring injiziert die Repositories automatisch
     public RegistrationControl(BenutzerRepository benutzerRepository,
                                StudentRepository studentRepository,
-                               GruenderRepository gruenderRepository)
-    {
+                               GruenderRepository gruenderRepository) {
         this.benutzerRepository = benutzerRepository;
         this.studentRepository = studentRepository;
         this.gruenderRepository = gruenderRepository;
-
     }
-
 
     /**
      * Registriert einen neuen Benutzer als Student.
-     * Speichert zuerst den Benutzer, dann den Student mit der generierten userId.
-     * Gibt true zurück wenn erfolgreich, false wenn Username bereits vergeben.
+     * Führt eine Reihe von Validierungen durch und gibt ein spezifisches Ergebnis zurück.
+     *
+     * @return Ein RegistrationResult-Enum, das den Erfolg oder den genauen Grund des Fehlschlags angibt.
      */
-    public boolean registriereStudent(String vorname, String nachname, LocalDate geburtstag,
-                                      String username, String email, String passwort,
-                                      String universitaet, int semester) {
+    public RegistrationResult registriereStudent(String vorname, String nachname, LocalDate geburtstag,
+                                                 String username, String email, String passwort,
+                                                 String universitaet, int semester) {
 
-        // Prüfen ob Username bereits existiert
+        // Validierung der Eingaben
+        if (username == null || username.isBlank()) {
+            return RegistrationResult.USERNAME_IS_EMPTY;
+        }
+        if (isPasswordInvalid(passwort)) {
+            return RegistrationResult.PASSWORD_TOO_SHORT;
+        }
+        if (isEmailInvalid(email)) {
+            return RegistrationResult.INVALID_EMAIL_FORMAT;
+        }
         if (benutzerRepository.existsByUsername(username)) {
-            return false;
+            return RegistrationResult.USERNAME_ALREADY_EXISTS;
         }
 
-        if(username.isBlank()){return false;}
-
-        if(pwd(passwort)){
-            return false;
-        }
-
-        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        if (!email.matches(emailRegex)) {
-            return false; // Validierung fehlgeschlagen
-        }
-
-
-        // Benutzer anlegen über Hilfsmethode danach speichern
+        // Schritt 1: Benutzer anlegen und speichern
         Benutzer benutzer = erstelleBenutzer(vorname, nachname, geburtstag, username, email, passwort);
         benutzerRepository.saveAndFlush(benutzer);
 
         // Schritt 2: Student anlegen mit der generierten userId
         Student student = new Student();
         student.setUserId(benutzer.getUserId());
-        student.setStudentId("s" + benutzer.getUserId()); // Muster aus den Tests
+        student.setStudentId("s" + benutzer.getUserId());
         student.setUniversitaet(universitaet);
         student.setSemester(semester);
-        // ToDo: Skills und Abschluss werden später im Profil ergänzt
         studentRepository.save(student);
 
-        return true;
+        return RegistrationResult.SUCCESS;
     }
-
-    public boolean pwd(String passwort){
-
-        if(passwort.length()< 8){return true;}
-
-        return false;
-    }
-
 
     /**
      * Registriert einen neuen Benutzer als Gründer.
-     * Speichert zuerst den Benutzer, dann den Gründer mit der generierten userId.
-     * Gibt true zurück wenn erfolgreich, false wenn Username bereits vergeben.
+     * Führt eine Reihe von Validierungen durch und gibt ein spezifisches Ergebnis zurück.
+     *
+     * @return Ein RegistrationResult-Enum, das den Erfolg oder den genauen Grund des Fehlschlags angibt.
      */
-    public boolean registriereGruender(String vorname, String nachname, LocalDate geburtstag,
-                                       String username, String email, String passwort,
-                                       String unternehmensname) {
+    public RegistrationResult registriereGruender(String vorname, String nachname, LocalDate geburtstag,
+                                                  String username, String email, String passwort,
+                                                  String unternehmensname) {
 
-        // Prüfen ob Username bereits existiert
+        // Validierung der Eingaben
+        if (username == null || username.isBlank()) {
+            return RegistrationResult.USERNAME_IS_EMPTY;
+        }
+        if (isPasswordInvalid(passwort)) {
+            return RegistrationResult.PASSWORD_TOO_SHORT;
+        }
+        if (isEmailInvalid(email)) {
+            return RegistrationResult.INVALID_EMAIL_FORMAT;
+        }
         if (benutzerRepository.existsByUsername(username)) {
-            return false;
+            return RegistrationResult.USERNAME_ALREADY_EXISTS;
         }
 
-        if(username.isBlank()){return false;}
-
-        if(pwd(passwort)){
-            return false;
-        }
-
-        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        if (!email.matches(emailRegex)) {
-            return false; // Validierung fehlgeschlagen
-        }
-
-        // Benutzer anlegen über Hilfsmethode danach speichern
+        // Schritt 1: Benutzer anlegen und speichern
         Benutzer benutzer = erstelleBenutzer(vorname, nachname, geburtstag, username, email, passwort);
         benutzerRepository.saveAndFlush(benutzer);
 
@@ -119,16 +102,31 @@ public class RegistrationControl {
         gruender.setUserId(benutzer.getUserId());
         gruender.setGruenderId("g" + benutzer.getUserId());
         gruender.setUnternehmensname(unternehmensname);
-        // ToDo: Standort wird später im Profil ergänzt
         gruenderRepository.save(gruender);
 
-        return true;
+        return RegistrationResult.SUCCESS;
     }
 
+    /**
+     * Private Hilfsmethode zur Passwort-Validierung.
+     * @return true, wenn das Passwort ungültig ist (null, leer oder zu kurz).
+     */
+    private boolean isPasswordInvalid(String passwort) {
+        return passwort == null || passwort.length() < 8;
+    }
 
     /**
-     * Erstellt einen neuen Benutzer ohne ihn zu speichern.
-     * Das Speichern übernimmt die aufrufende Methode.
+     * Private Hilfsmethode zur E-Mail-Validierung.
+     * @return true, wenn die E-Mail ein ungültiges Format hat.
+     */
+    private boolean isEmailInvalid(String email) {
+        if (email == null) return true;
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return !email.matches(emailRegex);
+    }
+
+    /**
+     * Erstellt ein neues Benutzer-Objekt (ohne es zu speichern).
      */
     private Benutzer erstelleBenutzer(String vorname, String nachname,
                                       LocalDate geburtstag, String username,
@@ -140,11 +138,6 @@ public class RegistrationControl {
         benutzer.setUsername(username);
         benutzer.setEmail(email);
         benutzer.setPasswort(passwort);
-        // ToDo: Passwort mit BCrypt verschlüsseln bevor es gespeichert wird
         return benutzer;
     }
-
-
 }
-
-
