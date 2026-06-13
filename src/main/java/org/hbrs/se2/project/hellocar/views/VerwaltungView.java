@@ -95,6 +95,7 @@ public class VerwaltungView extends VerticalLayout {
         EmailField emailField = new EmailField("E-Mail Adresse");
         NumberField telefonnummerField = new NumberField("Telefonnummer");
         DatePicker geburtstagField = new DatePicker("Geburtsdatum");
+        geburtstagField.setMax(java.time.LocalDate.now());
 
         // Aktuelle Benutzerdaten anzeigen
         firstNameField.setValue(currentUser.getVorname() == null ? "" : currentUser.getVorname());

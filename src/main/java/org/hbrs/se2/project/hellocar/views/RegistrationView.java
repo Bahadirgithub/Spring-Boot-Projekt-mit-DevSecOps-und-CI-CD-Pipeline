@@ -42,6 +42,11 @@ public class RegistrationView extends VerticalLayout {
         // Passwortfelder – Eingabe wird versteckt angezeigt
         PasswordField passwordField = new PasswordField("Passwort");
         PasswordField repeatPasswordField = new PasswordField("Passwort wiederholen");
+        passwordField.setMinLength(8);
+        repeatPasswordField.setMinLength(8);
+
+
+
 
         // Dropdown zur Auswahl ob Student oder Gründer
         Select<String> typeSelect = new Select<>();
