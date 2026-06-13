@@ -43,8 +43,8 @@ public class RegistrationView extends VerticalLayout {
         // Passwortfelder – Eingabe wird versteckt angezeigt
         PasswordField passwordField = new PasswordField("Passwort");
         PasswordField repeatPasswordField = new PasswordField("Passwort wiederholen");
-        passwordField.setMinLength(9);
-        repeatPasswordField.setMinLength(9);
+        passwordField.setMinLength(8);
+        repeatPasswordField.setMinLength(8);
 
 
 
