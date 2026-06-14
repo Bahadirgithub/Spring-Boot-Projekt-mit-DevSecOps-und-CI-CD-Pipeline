@@ -24,7 +24,7 @@ public class RegistrationView extends VerticalLayout {
     public RegistrationView(RegistrationControl registrationControl) {
 
         // Seitentitel
-        add(new H2("Register"));
+        add(new H2("Registrierung"));
 
         // Standard-Abstände reduzieren
         setSpacing(false);
