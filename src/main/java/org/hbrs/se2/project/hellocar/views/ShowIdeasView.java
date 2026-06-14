@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Route(value = Globals.Pages.SHOW_CARS, layout = AppView.class)
 @PageTitle("Gründungsideen")
-@CssImport("./styles/views/showcars/show-cars-view.css")
+@CssImport("./styles/views/showcars/show-ideas-view.css")
 public class ShowIdeasView extends Div  {
 
     private List<GruendungsideeDTO> ideeList;
