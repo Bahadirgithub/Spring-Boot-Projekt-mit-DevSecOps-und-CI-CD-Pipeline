@@ -5,7 +5,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -19,14 +18,11 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.PWA;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import org.hbrs.se2.project.hellocar.util.Utils;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -169,7 +165,7 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
 
     private Component[] createMenuItems() {
         // Jeder eingeloggte User sollte die Hauptseite sehen können.
-        Tab[] tabs = new Tab[]{ createTab("Gründungsideen anschauen", ShowCarsView.class) };
+        Tab[] tabs = new Tab[]{ createTab("Gründungsideen anschauen", ShowIdeasView.class) };
         // Neue Logik ohne Rollen:
         // Nur Gründer dürfen EnterCar sehen.
         if (this.authorizationControl.canAccessEnterCar(this.getCurrentUser())) {

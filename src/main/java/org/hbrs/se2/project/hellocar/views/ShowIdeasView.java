@@ -1,7 +1,6 @@
 package org.hbrs.se2.project.hellocar.views;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -10,15 +9,12 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.apache.commons.lang3.StringUtils;
 import org.hbrs.se2.project.hellocar.control.ManageIdeaControl;
 import org.hbrs.se2.project.hellocar.dtos.GruendungsideeDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -32,11 +28,11 @@ import java.util.List;
 @Route(value = Globals.Pages.SHOW_CARS, layout = AppView.class)
 @PageTitle("Gründungsideen")
 @CssImport("./styles/views/showcars/show-cars-view.css")
-public class ShowCarsView extends Div  {
+public class ShowIdeasView extends Div  {
 
     private List<GruendungsideeDTO> ideeList;
 
-    public ShowCarsView(ManageIdeaControl ideaControl) {
+    public ShowIdeasView(ManageIdeaControl ideaControl) {
             addClassName("show-cars-view");
 
             // Auslesen aller Gründungsideen aus der DB
