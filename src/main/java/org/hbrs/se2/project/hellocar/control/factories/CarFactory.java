@@ -1,11 +1,11 @@
 package org.hbrs.se2.project.hellocar.control.factories;
 
+import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.CarDTO;
-import org.hbrs.se2.project.hellocar.dtos.UserDTO;
 import org.hbrs.se2.project.hellocar.entities.Car;
 
 public class CarFactory {
-    public static Car createCar(CarDTO carDTO, UserDTO userDTO) {
+    public static Car createCar(CarDTO carDTO, BenutzerDTO userDTO) {
         // Erzeuge ein Car-Entity; die ID wird intern hochgezählt (@GeneratedValue auf ID)
         Car car = new Car();
         // ID könnte man ggf. noch mal anpassen: car.setID( xx );
@@ -19,7 +19,7 @@ public class CarFactory {
         car.setPrice( carDTO.getPrice() );
 
         // Setze die UserID des Users, welche das Auto eingestellt hat
-        car.setUserid( userDTO.getId() );
+        car.setUserid( userDTO.getUserId() );
 
         // und zurück das gute Stück:
         return car;
