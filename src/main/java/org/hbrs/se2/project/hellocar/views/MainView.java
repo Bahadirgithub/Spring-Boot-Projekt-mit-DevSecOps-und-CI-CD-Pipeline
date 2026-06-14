@@ -1,67 +1,41 @@
 package org.hbrs.se2.project.hellocar.views;
 
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.router.RouterLink;
-import org.hbrs.se2.project.hellocar.control.LoginControl;
-import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
-import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 
 /**
- * View zur Darstellung der Startseite. Diese zeigt dem Benutzer ein Login-Formular an.
+ * Der Haupteinstiegspunkt der Anwendung (Root-Route "").
+ * Diese Klasse fungiert als "Weiche" (Router):
+ * Sie zeigt selbst keine UI-Elemente an, sondern leitet den Benutzer
+ * sofort zur korrekten Seite weiter, basierend auf seinem Login-Status.
  */
 @Route(value = "")
-@RouteAlias(value = "login")
-public class MainView extends VerticalLayout {
+public class MainView extends VerticalLayout implements BeforeEnterObserver {
 
-    private final LoginControl loginControl;
-
-    // Konstruktor-Injection stellt sicher, dass loginControl vorhanden ist
-    public MainView(LoginControl loginControl) {
-        this.loginControl = loginControl;
-
-        setSizeFull();
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setAlignItems(Alignment.CENTER);
-
-        LoginForm loginForm = new LoginForm();
-        RouterLink registerLink = new RouterLink("Registrieren", RegistrationView.class);
-
-        // Komponenten werden beim Start der View zum Layout hinzugefügt
-        add(loginForm, registerLink);
-
-        // Listener definiert nur die Reaktion auf den Button-Klick
-        loginForm.addLoginListener(e -> {
-            try {
-                boolean isAuthenticated = loginControl.authentificate(e.getUsername(), e.getPassword());
-
-                if (isAuthenticated) {
-                    grabAndSetUserIntoSession();
-                    navigateToMainPage();
-                } else {
-                    loginForm.setError(true);
-                }
-            } catch (DatabaseUserException databaseException) {
-                Dialog dialog = new Dialog();
-                dialog.add(new Text(databaseException.getReason()));
-                dialog.setWidth("400px");
-                dialog.open();
-            }
-        });
+    public MainView() {
+        // Diese View ist leer. Alle Aktion passiert in der beforeEnter-Methode.
     }
 
-    private void grabAndSetUserIntoSession() {
-        BenutzerDTO benutzerDTO = loginControl.getCurrentUser();
-        UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, benutzerDTO);
-    }
+    /**
+     * Diese Methode wird ausgeführt, BEVOR die Seite (die eh leer ist) geladen wird.
+     * Hier treffen wir die Entscheidung, wo der Benutzer hingehört.
+     */
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        
+        // 1. Prüfen: Ist ein Benutzer-Objekt in der aktuellen Session gespeichert?
+        Object currentUser = UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
 
-    private void navigateToMainPage() {
-        UI.getCurrent().navigate(Globals.Pages.SHOW_CARS);
+        if (currentUser != null) {
+            // Benutzer IST eingeloggt -> Weiterleitung in den internen Bereich
+            event.forwardTo(Globals.Pages.SHOW_CARS);
+        } else {
+            // Benutzer IST NICHT eingeloggt -> Weiterleitung zur neuen Login-Seite
+            event.forwardTo(LoginView.class);
+        }
     }
 }
