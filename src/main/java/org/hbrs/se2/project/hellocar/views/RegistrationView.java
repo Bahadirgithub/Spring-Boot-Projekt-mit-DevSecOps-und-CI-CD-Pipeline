@@ -151,12 +151,45 @@ public class RegistrationView extends VerticalLayout {
             }
         });
 
-        // Alle Komponenten zur View hinzufügen
-        add(firstNameField, lastNameField, birthdayField, emailField, usernameField,
+        // Container erstellen und Breite definieren
+        VerticalLayout formContainer = new VerticalLayout();
+        formContainer.setMaxWidth("360px");
+        formContainer.setWidthFull();
+        formContainer.setPadding(false);
+        formContainer.setSpacing(true);
+
+        // Allen Feldern sagen, dass sie sich dem Container anpassen sollen
+        firstNameField.setWidthFull();
+        lastNameField.setWidthFull();
+        birthdayField.setWidthFull();
+        emailField.setWidthFull();
+        usernameField.setWidthFull();
+        passwordField.setWidthFull();
+        repeatPasswordField.setWidthFull();
+        typeSelect.setWidthFull();
+        universitaetField.setWidthFull();
+        semesterField.setWidthFull();
+        unternehmensNameField.setWidthFull();
+        registerButton.setWidthFull();
+
+        // Alle Felder in den Container packen
+        formContainer.add(
+                firstNameField, lastNameField, birthdayField, emailField, usernameField,
                 passwordField, repeatPasswordField,
                 typeSelect,
                 universitaetField, semesterField, unternehmensNameField,
-                registerButton);
+                registerButton
+        );
+
+        // Container zur Haupt-View hinzufügen
+        add(formContainer);
+
+        // Alle Komponenten zur View hinzufügen
+        //add(firstNameField, lastNameField, birthdayField, emailField, usernameField,
+        //        passwordField, repeatPasswordField,
+        //        typeSelect,
+        //        universitaetField, semesterField, unternehmensNameField,
+        //        registerButton);
 
         // Alles zentriert ausrichten
         setAlignItems(Alignment.CENTER);
