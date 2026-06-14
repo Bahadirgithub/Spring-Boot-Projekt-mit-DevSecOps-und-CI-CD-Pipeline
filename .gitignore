@@ -33,9 +33,6 @@ build/
 ### Vaadin ###
 frontend/generated/
 frontend/target/
-package-lock.json
-/src/main/dev-bundle/
-/src/main/webapp/VAADIN/build/
 
 ### VS Code ###
 .vscode/
