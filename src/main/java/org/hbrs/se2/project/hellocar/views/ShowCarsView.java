@@ -15,10 +15,8 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.apache.commons.lang3.StringUtils;
-import org.hbrs.se2.project.hellocar.control.ManageCarControl;
-import org.hbrs.se2.project.hellocar.dtos.CarDTO;
-import org.hbrs.se2.project.hellocar.dtos.UserDTO;
-import org.hbrs.se2.project.hellocar.repository.CarRepository;
+import org.hbrs.se2.project.hellocar.control.ManageIdeaControl;
+import org.hbrs.se2.project.hellocar.dtos.GruendungsideeDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,13 +34,13 @@ import java.util.List;
 @CssImport("./styles/views/showcars/show-cars-view.css")
 public class ShowCarsView extends Div  {
 
-    private List<CarDTO> personList;
+    private List<GruendungsideeDTO> ideeList;
 
-    public ShowCarsView( ManageCarControl carControl ) {
+    public ShowCarsView(ManageIdeaControl ideaControl) {
             addClassName("show-cars-view");
 
-            // Auslesen alle abgespeicherten Autos aus der DB (über das Control)
-            personList = carControl.readAllCars();
+            // Auslesen aller Gründungsideen aus der DB
+            this.ideeList = ideaControl.readAllIdeas();
 
             // Titel überhalb der Tabelle
             add(this.createTitle());
@@ -52,49 +50,44 @@ public class ShowCarsView extends Div  {
     }
 
     private Component createGridTable() {
-        Grid<CarDTO> grid = new Grid<>();
+        Grid<GruendungsideeDTO> grid = new Grid<>();
 
-        // Befüllen der Tabelle mit den zuvor ausgelesenen Autos
-        ListDataProvider<CarDTO> dataProvider = new ListDataProvider<>(
-                personList);
+        // Befüllen der Tabelle mit den Gründungsideen
+        ListDataProvider<GruendungsideeDTO> dataProvider = new ListDataProvider<>(ideeList);
         grid.setDataProvider(dataProvider);
 
-        Grid.Column<CarDTO> brandColumn = grid
-                .addColumn(CarDTO::getBrand).setHeader("Unternehmen");
-        Grid.Column<CarDTO> modelColumn = grid.addColumn(CarDTO::getModel)
-                .setHeader("Model");
-        Grid.Column<CarDTO> descriptionColumn = grid
-                .addColumn(CarDTO::getDescription)
-                .setHeader("Idee");
-        Grid.Column<CarDTO> priceColumn = grid
-                .addColumn(CarDTO::getPrice)
-                .setHeader("Price");
+        // Spalten-Definitionen basierend auf deinen DB-Feldern
+        Grid.Column<GruendungsideeDTO> unternehmenColumn = grid
+                .addColumn(GruendungsideeDTO::getUnternehmensname) // Fallback, solange kein Name da ist
+                .setHeader("Unternehmen / Gründer");
 
+        Grid.Column<GruendungsideeDTO> beschreibungColumn = grid
+                .addColumn(GruendungsideeDTO::getBeschreibung)
+                .setHeader("Beschreibung");
+
+        Grid.Column<GruendungsideeDTO> positionColumn = grid
+                .addColumn(GruendungsideeDTO::getPosition)
+                .setHeader("Position");
+
+        Grid.Column<GruendungsideeDTO> anforderungenColumn = grid
+                .addColumn(GruendungsideeDTO::getAnforderungen)
+                .setHeader("Anforderungen");
+
+        Grid.Column<GruendungsideeDTO> bedingungenColumn = grid
+                .addColumn(GruendungsideeDTO::getArbeitsbedingungen)
+                .setHeader("Arbeitsbedingungen");
+
+        // Ein Filter für die Spalte "Position"
         HeaderRow filterRow = grid.appendHeaderRow();
+        TextField positionFilterField = new TextField();
+        positionFilterField.addValueChangeListener(event -> dataProvider.addFilter(
+                idee -> StringUtils.containsIgnoreCase(idee.getPosition(), positionFilterField.getValue())
+        ));
+        positionFilterField.setValueChangeMode(ValueChangeMode.EAGER);
+        positionFilterField.setPlaceholder("Filter Position");
+        positionFilterField.setSizeFull();
 
-        // First filter
-        TextField modelField = new TextField();
-        modelField.addValueChangeListener(event -> dataProvider.addFilter(
-                car -> StringUtils.containsIgnoreCase(car.getModel(),
-                        modelField.getValue())));
-
-        modelField.setValueChangeMode(ValueChangeMode.EAGER);
-
-        filterRow.getCell(modelColumn).setComponent(modelField);
-        modelField.setSizeFull();
-        modelField.setPlaceholder("Filter");
-
-        // Second filter
-        TextField brandField = new TextField();
-        brandField.addValueChangeListener(event -> dataProvider
-                .addFilter(car -> StringUtils.containsIgnoreCase(
-                        String.valueOf(car.getBrand()), brandField.getValue())));
-
-        brandField.setValueChangeMode(ValueChangeMode.EAGER);
-
-        filterRow.getCell(brandColumn).setComponent(brandField);
-        brandField.setSizeFull();
-        brandField.setPlaceholder("Filter");
+        filterRow.getCell(positionColumn).setComponent(positionFilterField);
 
         return grid;
     }
