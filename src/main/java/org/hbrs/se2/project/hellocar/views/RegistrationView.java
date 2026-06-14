@@ -73,7 +73,7 @@ public class RegistrationView extends VerticalLayout {
         });
 
         // Registrieren-Button mit Logik
-        Button registerButton = new Button("Speichern");
+        Button registerButton = new Button("Account erstellen");
         registerButton.addClickListener(e -> {
 
             // Vorab-Prüfung auf UI-Ebene, die keine Backend-Logik benötigt
