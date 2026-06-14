@@ -25,3 +25,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.show-cars-view h3 {
+  margin-top: var(--lumo-space-m);
+  margin-bottom: var(--lumo-space-m);
+}
