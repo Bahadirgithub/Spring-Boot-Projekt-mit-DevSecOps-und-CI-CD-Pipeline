@@ -2,7 +2,6 @@ package org.hbrs.se2.project.hellocar.repository;
 
 import org.hbrs.se2.project.hellocar.dtos.CarDTO;
 import org.hbrs.se2.project.hellocar.entities.Car;
-import org.hbrs.se2.project.hellocar.entities.Rolle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
@@ -22,9 +21,9 @@ import java.util.List;
  */
 public interface CarRepository extends JpaRepository<Car, Integer> {
 
-    @Query("  SELECT c.brand, c.model, c.price, u.firstName, u.lastName" +
-            " FROM Car c, User u " +
-            " WHERE  c.userid = u.id ")
+    @Query("  SELECT c.brand, c.model, c.price, u.vorname, u.nachname" +
+            " FROM Car c, Benutzer u " +
+            " WHERE  c.userid = u.userId ")
     List<Object[]> findAllCarsAndTheirUsers();
 
     @Query("  SELECT c.brand, c.model, c.description, c.date, c.phone, c.price " +

@@ -20,7 +20,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.ManageCarControl;
-import org.hbrs.se2.project.hellocar.dtos.UserDTO;
+import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.impl.CarDTOImpl;
 import org.hbrs.se2.project.hellocar.util.Globals;
 
@@ -77,8 +77,8 @@ public class EnterCarView extends Div { // 3. Form (Spezialisierung / Vererbung)
           // Speicherung der Daten über das zuhörige Control-Object.
           // Daten des Autos werden aus Formular erfasst und als DTO übergeben.
           // Zusätzlich wird das aktuelle UserDTO übergeben.
-          UserDTO userDTO =
-              (UserDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
+          BenutzerDTO userDTO =
+              (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
           carService.createCar(binder.getBean(), userDTO);
 
           Notification.show("Car details stored.");
