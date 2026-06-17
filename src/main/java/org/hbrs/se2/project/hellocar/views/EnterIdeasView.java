@@ -15,6 +15,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
@@ -33,9 +34,10 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
 
   private TextField unternehmensname = new TextField("Unternehmensname");
   private TextField position = new TextField("Offene Position / Rolle");
-  private TextField beschreibung = new TextField("Beschreibung der Idee");
-  private TextField anforderungen = new TextField("Anforderungen an Bewerber");
-  private TextField arbeitsbedingungen = new TextField("Arbeitsbedingungen");
+
+  private TextArea beschreibung = new TextArea("Beschreibung der Idee");
+  private TextArea anforderungen = new TextArea("Anforderungen an Bewerber");
+  private TextArea arbeitsbedingungen = new TextArea("Arbeitsbedingungen");
 
   private Button cancel = new Button("Abbrechen");
   private Button save = new Button("Speichern");
