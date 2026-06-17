@@ -20,83 +20,94 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.ManageCarControl;
+import org.hbrs.se2.project.hellocar.control.ManageIdeaControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.impl.CarDTOImpl;
+import org.hbrs.se2.project.hellocar.dtos.impl.GruendungsideeDTOImpl;
 import org.hbrs.se2.project.hellocar.util.Globals;
 
-@Route(value = Globals.Pages.ENTER_CAR, layout = AppView.class)
-@PageTitle("Enter Car")
-@CssImport("./styles/views/entercar/enter-car-view.css")
+@Route(value = Globals.Pages.ENTER_IDEAS, layout = AppView.class)
+@PageTitle("Gründungsidee hinzufügen")
+@CssImport("./styles/views/enteridea/enter-idea-view.css")
 public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbung)
 
-  private TextField brand = new TextField("Brand of car");
-  private TextField model = new TextField("Model");
-  private TextField description = new TextField("Description");
-  private DatePicker date = new DatePicker("Date of Admission");
-  private PhoneNumberField phone = new PhoneNumberField("Phone number of Owner");
-  private TextField price = new TextField("Price");
+  private TextField unternehmensname = new TextField("Unternehmensname");
+  private TextField position = new TextField("Offene Position / Rolle");
+  private TextField beschreibung = new TextField("Beschreibung der Idee");
+  private TextField anforderungen = new TextField("Anforderungen an Bewerber");
+  private TextField arbeitsbedingungen = new TextField("Arbeitsbedingungen");
 
-  private Button cancel = new Button("Cancel");
-  private Button save = new Button("Save");
+  private Button cancel = new Button("Abbrechen");
+  private Button save = new Button("Speichern");
 
-  private Binder<CarDTOImpl> binder = new Binder(CarDTOImpl.class);
+  private Binder<GruendungsideeDTOImpl> binder = new Binder<>(GruendungsideeDTOImpl.class);
 
-  public EnterIdeasView(ManageCarControl carService) {
-    addClassName("enter-car-view");
+  private ManageIdeaControl ideaService;
+
+  public EnterIdeasView(ManageIdeaControl ideaService) {
+    this.ideaService = ideaService;
+    addClassName("enter-ideas-view");
+
+    // Das Unternehmensfeld soll vom Nutzer nicht verändert werden können
+    unternehmensname.setReadOnly(true);
 
     add(createTitle());
     add(createFormLayout());
     add(createButtonLayout());
 
-    description.addValueChangeListener(
-        event -> {
-          System.out.println("New Value: " + event.getValue());
-
-          // Weitere Bearbeitung des aktuell eingegebenen Werts (z.B. Abfrage in Richtung DB)
-        });
-
-    // Default Mapping of Cars attributes and the names of this View based on names
-    // Source: https://vaadin.com/docs/flow/binding-data/tutorial-flow-components-binder-beans.html
-    binder.bindInstanceFields(this); // Nr. 1 HOOK / API-Methode
+    // Automatisches Binding basierend auf den Variablennamen und DTO-Gettern
+    binder.bindInstanceFields(this);
     clearForm();
 
-    // Registrierung eines Listeners Nr. 1 (moderne Variante mit Lambda-Expression)
+    // Abbrechen leert das Formular wieder
     cancel.addClickListener(event -> clearForm());
 
-    // Registrierung eines Listeners Nr. 2 (traditionelle Variante mit anonymen Objekt)
-    cancel.addClickListener(
-        new ComponentEventListener() {
-          @Override
-          public void onComponentEvent(ComponentEvent event) { // Nr. 2 Callback!!
-            clearForm();
-          }
-        });
-
     save.addClickListener(
-        e -> {
-          // Speicherung der Daten über das zuhörige Control-Object.
-          // Daten des Autos werden aus Formular erfasst und als DTO übergeben.
-          // Zusätzlich wird das aktuelle UserDTO übergeben.
-          BenutzerDTO userDTO =
-              (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
-          carService.createCar(binder.getBean(), userDTO);
+      e -> {
+        BenutzerDTO userDTO =
+                (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
 
-          Notification.show("Car details stored.");
+        if (userDTO != null) {
+          GruendungsideeDTOImpl aktuelleIdee = binder.getBean();
+          // HIER ANPASSEN: .getUserId() statt .getId()
+          aktuelleIdee.setGruenderUserId(userDTO.getUserId());
+
+          ideaService.createIdea(aktuelleIdee);
+
+          Notification.show("Gründungsidee erfolgreich gespeichert.");
           clearForm();
-        });
+        } else {
+          Notification.show("Fehler: Kein angemeldeter Benutzer gefunden.");
+        }
+      });
   }
 
   private void clearForm() {
-    binder.setBean(new CarDTOImpl());
+    GruendungsideeDTOImpl frischesDto = new GruendungsideeDTOImpl();
+
+    //Eingeloggten Benutzer holen
+    BenutzerDTO userDTO = (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
+
+    if (userDTO != null) {
+      // Die ID des aktuellen Benutzers direkt im neuen DTO hinterlegen
+      frischesDto.setGruenderUserId(userDTO.getUserId());
+
+      // Den Namen des Gründers/Usernamen als Read-Only Text anzeigen,
+      // bis die Idee final gespeichert wird.
+      frischesDto.setUnternehmensname(userDTO.getVorname() + " " + userDTO.getNachname());
+    }
+
+    // Dem Binder das frisch vorbereitete DTO übergeben
+    binder.setBean(frischesDto);
   }
 
   private Component createTitle() {
-    return new H3("Car information");
+    return new H3("Neue Gründungsidee anlegen");
   }
 
   private Component createFormLayout() {
     FormLayout formLayout = new FormLayout();
-    formLayout.add(brand, model, date, phone, description, price);
+    formLayout.add(unternehmensname, beschreibung, position, anforderungen, arbeitsbedingungen);
     return formLayout;
   }
 
@@ -107,50 +118,5 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
     buttonLayout.add(save);
     buttonLayout.add(cancel);
     return buttonLayout;
-  }
-
-  private static class PhoneNumberField extends CustomField<String> {
-    private ComboBox<String> countryCode = new ComboBox<>();
-    private TextField number = new TextField();
-
-    public PhoneNumberField(String label) {
-      setLabel(label);
-      countryCode.setWidth("120px");
-      countryCode.setPlaceholder("Country");
-      countryCode.setPattern("\\+\\d*");
-      countryCode.setAllowedCharPattern("\\+\\d*");
-      countryCode.setItems(
-          "+354", "+91", "+62", "+98", "+964", "+353", "+44", "+972", "+39", "+225");
-      countryCode.addCustomValueSetListener(e -> countryCode.setValue(e.getDetail()));
-      number.setPattern("\\d*");
-      number.setAllowedCharPattern("\\d*");
-      HorizontalLayout layout = new HorizontalLayout(countryCode, number);
-      layout.setFlexGrow(1.0, number);
-      add(layout);
-    }
-
-    @Override
-    protected String generateModelValue() {
-      if (countryCode.getValue() != null && number.getValue() != null) {
-        String s = countryCode.getValue() + " " + number.getValue();
-        return s;
-      }
-      return "";
-    }
-
-    @Override
-    protected void setPresentationValue(String phoneNumber) {
-      String[] parts = phoneNumber != null ? phoneNumber.split(" ", 2) : new String[0];
-      if (parts.length == 1) {
-        countryCode.clear();
-        number.setValue(parts[0]);
-      } else if (parts.length == 2) {
-        countryCode.setValue(parts[0]);
-        number.setValue(parts[1]);
-      } else {
-        countryCode.clear();
-        number.clear();
-      }
-    }
   }
 }
