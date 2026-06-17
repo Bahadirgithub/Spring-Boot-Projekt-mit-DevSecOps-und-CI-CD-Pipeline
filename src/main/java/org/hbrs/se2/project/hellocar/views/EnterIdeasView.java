@@ -94,7 +94,8 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
 
       // Den Namen des Gründers/Usernamen als Read-Only Text anzeigen,
       // bis die Idee final gespeichert wird.
-      frischesDto.setUnternehmensname(userDTO.getVorname() + " " + userDTO.getNachname());
+      String Unternehmensname = ideaService.getUnternehmensnameByUserId(userDTO.getUserId());
+      frischesDto.setUnternehmensname(Unternehmensname);
     }
 
     // Dem Binder das frisch vorbereitete DTO übergeben
