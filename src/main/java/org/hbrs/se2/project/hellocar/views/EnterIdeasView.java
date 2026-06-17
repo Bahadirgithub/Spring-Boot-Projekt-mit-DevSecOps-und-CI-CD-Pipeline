@@ -27,7 +27,7 @@ import org.hbrs.se2.project.hellocar.util.Globals;
 @Route(value = Globals.Pages.ENTER_CAR, layout = AppView.class)
 @PageTitle("Enter Car")
 @CssImport("./styles/views/entercar/enter-car-view.css")
-public class EnterCarView extends Div { // 3. Form (Spezialisierung / Vererbung)
+public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbung)
 
   private TextField brand = new TextField("Brand of car");
   private TextField model = new TextField("Model");
@@ -41,7 +41,7 @@ public class EnterCarView extends Div { // 3. Form (Spezialisierung / Vererbung)
 
   private Binder<CarDTOImpl> binder = new Binder(CarDTOImpl.class);
 
-  public EnterCarView(ManageCarControl carService) {
+  public EnterIdeasView(ManageCarControl carService) {
     addClassName("enter-car-view");
 
     add(createTitle());
