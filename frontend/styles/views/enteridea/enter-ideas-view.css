@@ -8,3 +8,7 @@
   margin-bottom: var(--lumo-space-l);
   margin-top: var(--lumo-space-m);
 }
+.enter-ideas-view h3 {
+  margin-top: var(--lumo-space-m);
+  margin-bottom: var(--lumo-space-m);
+}
