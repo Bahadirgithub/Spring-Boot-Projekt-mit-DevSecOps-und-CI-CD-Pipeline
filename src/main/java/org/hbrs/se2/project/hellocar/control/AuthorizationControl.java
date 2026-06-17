@@ -53,11 +53,11 @@ public class AuthorizationControl {
     }
 
     public boolean canAccessFeature(BenutzerDTO benutzer, String feature) {
-        if (feature.equals(Globals.Pages.SHOW_CARS)) {
+        if (feature.equals(Globals.Pages.SHOW_IDEAS)) {
             return canAccessShowCars(benutzer);
         }
 
-        if (feature.equals(Globals.Pages.ENTER_CAR)) {
+        if (feature.equals(Globals.Pages.ENTER_IDEAS)) {
             return canAccessEnterCar(benutzer);
         }
 
