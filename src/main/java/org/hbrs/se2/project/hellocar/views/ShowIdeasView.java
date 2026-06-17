@@ -26,7 +26,7 @@ import java.util.List;
  *
  */
 @Route(value = Globals.Pages.SHOW_IDEAS, layout = AppView.class)
-@PageTitle("Gründungsideen")
+@PageTitle("Gründungsideen Übersicht")
 @CssImport("./styles/views/showideas/show-ideas-view.css")
 public class ShowIdeasView extends Div  {
 
