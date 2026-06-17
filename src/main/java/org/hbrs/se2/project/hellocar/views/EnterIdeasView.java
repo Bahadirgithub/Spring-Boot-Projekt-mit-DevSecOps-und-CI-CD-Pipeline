@@ -28,7 +28,7 @@ import org.hbrs.se2.project.hellocar.util.Globals;
 
 @Route(value = Globals.Pages.ENTER_IDEAS, layout = AppView.class)
 @PageTitle("Gründungsidee hinzufügen")
-@CssImport("./styles/views/enteridea/enter-idea-view.css")
+@CssImport("./styles/views/enteridea/enter-ideas-view.css")
 public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbung)
 
   private TextField unternehmensname = new TextField("Unternehmensname");
