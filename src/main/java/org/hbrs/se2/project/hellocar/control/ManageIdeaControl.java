@@ -62,4 +62,23 @@ public class ManageIdeaControl {
          * * return repository.findAllIdeas(); // Name der Methode an dein Repository anpassen!
          */
     }
+
+    /**
+     * Speichert eine neu erstellte Gründungsidee in der Datenbank.
+     */
+    public void createIdea(GruendungsideeDTOImpl dto) {
+        // 1. Eine neue leere Entity für die Datenbank erstellen
+        Gruendungsidee entity = new Gruendungsidee();
+
+        // 2. Die Werte aus dem DTO in die Entity kopieren (Mapping)
+        // Hinweis: Die ideeId wird von der DB per Auto-Increment (Id) erzeugt, daher setzen wir sie hier nicht.
+        entity.setGruenderUserId(dto.getGruenderUserId());
+        entity.setBeschreibung(dto.getBeschreibung());
+        entity.setPosition(dto.getPosition());
+        entity.setAnforderungen(dto.getAnforderungen());
+        entity.setArbeitsbedingungen(dto.getArbeitsbedingungen());
+
+        // 3. Die Entity über das Spring-Data-Repository in die DB schreiben
+        repository.save(entity);
+    }
 }
