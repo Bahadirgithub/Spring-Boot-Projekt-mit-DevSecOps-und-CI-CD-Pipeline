@@ -81,4 +81,13 @@ public class ManageIdeaControl {
         // 3. Die Entity über das Spring-Data-Repository in die DB schreiben
         repository.save(entity);
     }
+
+    //Hilfsmethode um Unternehmensname zu bekommen
+    public String getUnternehmensnameByUserId(int userId) {
+        // Wir suchen im Gründer-Repository nach der ID des eingeloggten Nutzers
+        return gruenderRepository.findById(userId)
+                .map(Gruender::getUnternehmensname)
+                .orElse("Kein Unternehmen hinterlegt");
+        // Fallback, falls der Nutzer (z.B. ein Admin oder Bewerber) kein Gründer ist
+    }
 }
