@@ -73,8 +73,31 @@ public class ShowIdeasView extends Div  {
                 .addColumn(GruendungsideeDTO::getArbeitsbedingungen)
                 .setHeader("Arbeitsbedingungen");
 
-        // Ein Filter für die Spalte "Position"
+        // Filter-Zeile im Header des Grids aktivieren
         HeaderRow filterRow = grid.appendHeaderRow();
+
+
+        // 1. Filter: Unternehmen / Gründer
+        TextField unternehmenFilterField = new TextField();
+        unternehmenFilterField.addValueChangeListener(event -> dataProvider.addFilter(
+                idee -> StringUtils.containsIgnoreCase(idee.getUnternehmensname(), unternehmenFilterField.getValue())
+        ));
+        unternehmenFilterField.setValueChangeMode(ValueChangeMode.EAGER);
+        unternehmenFilterField.setPlaceholder("Filter Unternehmen");
+        unternehmenFilterField.setSizeFull();
+        filterRow.getCell(unternehmenColumn).setComponent(unternehmenFilterField);
+
+        // 2. Filter: Beschreibung
+        TextField beschreibungFilterField = new TextField();
+        beschreibungFilterField.addValueChangeListener(event -> dataProvider.addFilter(
+                idee -> StringUtils.containsIgnoreCase(idee.getBeschreibung(), beschreibungFilterField.getValue())
+        ));
+        beschreibungFilterField.setValueChangeMode(ValueChangeMode.EAGER);
+        beschreibungFilterField.setPlaceholder("Filter Beschreibung");
+        beschreibungFilterField.setSizeFull();
+        filterRow.getCell(beschreibungColumn).setComponent(beschreibungFilterField);
+
+        // 3. Filter: Position
         TextField positionFilterField = new TextField();
         positionFilterField.addValueChangeListener(event -> dataProvider.addFilter(
                 idee -> StringUtils.containsIgnoreCase(idee.getPosition(), positionFilterField.getValue())
@@ -82,8 +105,27 @@ public class ShowIdeasView extends Div  {
         positionFilterField.setValueChangeMode(ValueChangeMode.EAGER);
         positionFilterField.setPlaceholder("Filter Position");
         positionFilterField.setSizeFull();
-
         filterRow.getCell(positionColumn).setComponent(positionFilterField);
+
+        // 4. Filter: Anforderungen
+        TextField anforderungenFilterField = new TextField();
+        anforderungenFilterField.addValueChangeListener(event -> dataProvider.addFilter(
+                idee -> StringUtils.containsIgnoreCase(idee.getAnforderungen(), anforderungenFilterField.getValue())
+        ));
+        anforderungenFilterField.setValueChangeMode(ValueChangeMode.EAGER);
+        anforderungenFilterField.setPlaceholder("Filter Anforderungen");
+        anforderungenFilterField.setSizeFull();
+        filterRow.getCell(anforderungenColumn).setComponent(anforderungenFilterField);
+
+        // 5. Filter: Arbeitsbedingungen
+        TextField bedingungenFilterField = new TextField();
+        bedingungenFilterField.addValueChangeListener(event -> dataProvider.addFilter(
+                idee -> StringUtils.containsIgnoreCase(idee.getArbeitsbedingungen(), bedingungenFilterField.getValue())
+        ));
+        bedingungenFilterField.setValueChangeMode(ValueChangeMode.EAGER);
+        bedingungenFilterField.setPlaceholder("Filter Bedingungen");
+        bedingungenFilterField.setSizeFull();
+        filterRow.getCell(bedingungenColumn).setComponent(bedingungenFilterField);
 
         return grid;
     }
