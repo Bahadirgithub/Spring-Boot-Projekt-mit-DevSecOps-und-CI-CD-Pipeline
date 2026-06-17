@@ -32,7 +32,7 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
 
         if (currentUser != null) {
             // Benutzer IST eingeloggt -> Weiterleitung in den internen Bereich
-            event.forwardTo(Globals.Pages.SHOW_CARS);
+            event.forwardTo(Globals.Pages.SHOW_IDEAS);
         } else {
             // Benutzer IST NICHT eingeloggt -> Weiterleitung zur neuen Login-Seite
             event.forwardTo(LoginView.class);
