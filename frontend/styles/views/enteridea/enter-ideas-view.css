@@ -1,10 +1,14 @@
-.enter-car-view {
+.enter-ideas-view {
   display: block;
   margin: 0 auto;
   max-width: 1024px;
   padding: 0 var(--lumo-space-l);
 }
-.enter-car-view .button-layout {
+.enter-ideas-view .button-layout {
   margin-bottom: var(--lumo-space-l);
   margin-top: var(--lumo-space-m);
+}
+.enter-ideas-view h3 {
+  margin-top: var(--lumo-space-m);
+  margin-bottom: var(--lumo-space-m);
 }

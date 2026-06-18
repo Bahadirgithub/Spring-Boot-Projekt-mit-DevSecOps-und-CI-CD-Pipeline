@@ -108,7 +108,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
      */
     private void navigateToMainPage() {
         // Das Ziel sollte die erste Seite sein, die ein eingeloggter Benutzer sieht.
-        UI.getCurrent().navigate(Globals.Pages.SHOW_CARS);
+        UI.getCurrent().navigate(Globals.Pages.SHOW_IDEAS);
     }
 
     /**
@@ -119,7 +119,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER) != null) {
-            event.forwardTo(Globals.Pages.SHOW_CARS);
+            event.forwardTo(Globals.Pages.SHOW_IDEAS);
         }
     }
 }
