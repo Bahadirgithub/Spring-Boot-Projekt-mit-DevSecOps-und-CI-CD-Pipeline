@@ -13,6 +13,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.RegistrationControl;
 import org.hbrs.se2.project.hellocar.control.results.RegistrationResult;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Image;
 
 /**
  * View zur Registrierung neuer Benutzer (Student oder Gründer).
@@ -23,12 +26,22 @@ public class RegistrationView extends VerticalLayout {
     // Constructor Injection – Spring injiziert die RegistrationControl automatisch
     public RegistrationView(RegistrationControl registrationControl) {
 
+        setSizeFull();
+        setJustifyContentMode(JustifyContentMode.CENTER);
+        setAlignItems(Alignment.CENTER);
+
         // Seitentitel
-        add(new H2("Registrierung"));
+        H2 title = new H2("Registrierung");
 
         // Standard-Abstände reduzieren
         setSpacing(false);
         getStyle().set("gap", "2px");
+
+        Image logo = new Image("images/logo.png", "Logo");
+        logo.setWidth("80px");
+
+        H1 brandText = new H1("St@rtMeUp");
+        brandText.getStyle().set("margin", "0 0 30px 0");
 
         // Eingabefelder
         TextField firstNameField = new TextField("Vorname");
@@ -182,7 +195,7 @@ public class RegistrationView extends VerticalLayout {
         );
 
         // Container zur Haupt-View hinzufügen
-        add(formContainer);
+        add(logo, brandText, title, formContainer);
 
         // Alle Komponenten zur View hinzufügen
         //add(firstNameField, lastNameField, birthdayField, emailField, usernameField,

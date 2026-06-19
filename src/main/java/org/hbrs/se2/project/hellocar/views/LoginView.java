@@ -15,6 +15,9 @@ import org.hbrs.se2.project.hellocar.control.LoginControl;
 import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Image;
 
 /**
  * View zur Darstellung des Login-Formulars.
@@ -34,6 +37,12 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         setJustifyContentMode(JustifyContentMode.CENTER);
         setAlignItems(Alignment.CENTER);
 
+        Image logo = new Image("images/logo.png", "Logo");
+        logo.setWidth("80px");
+
+        H1 brandText = new H1("St@rtMeUp");
+        brandText.getStyle().set("margin", "0 0 10px 0");
+
         // LoginForm-Komponente mit deutschen Texten erstellen
         LoginForm loginForm = new LoginForm();
         loginForm.setI18n(createGermanI18n());
@@ -41,7 +50,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         // Link zur Registrierungs-Seite
         RouterLink registerLink = new RouterLink("Noch kein Konto? Jetzt registrieren", RegistrationView.class);
 
-        add(loginForm, registerLink);
+        add(logo, brandText, loginForm, registerLink);
 
         // Listener für den Klick auf "Anmelden"
         loginForm.addLoginListener(e -> {

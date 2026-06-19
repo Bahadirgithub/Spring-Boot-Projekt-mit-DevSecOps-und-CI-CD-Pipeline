@@ -13,6 +13,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.LoginControl;
 import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Image;
 
 @Route("reset-password")
 @PageTitle("Passwort zurücksetzen | StartMeUp")
@@ -26,6 +29,12 @@ public class PasswordResetView extends VerticalLayout implements BeforeEnterObse
         setSizeFull();
         setJustifyContentMode(JustifyContentMode.CENTER);
         setAlignItems(Alignment.CENTER);
+
+        Image logo = new Image("images/logo.png", "Logo");
+        logo.setWidth("80px");
+
+        H1 brandText = new H1("St@rtMeUp");
+        brandText.getStyle().set("margin", "0 0 30px 0");
 
         // Abstände anpassen
         setSpacing(false);
@@ -105,7 +114,7 @@ public class PasswordResetView extends VerticalLayout implements BeforeEnterObse
 
         // Erst Felder in den Container, dann alles zentriert anzeigen
         formContainer.add( passwordField, confirmPasswordField, saveButton);
-        add(title, instructionText, formContainer);
+        add(logo, brandText, title, instructionText, formContainer);
     }
 
     /**
