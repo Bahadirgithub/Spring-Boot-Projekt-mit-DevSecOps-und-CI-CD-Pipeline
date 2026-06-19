@@ -60,6 +60,11 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                 dialog.open();
             }
         });
+
+        loginForm.addForgotPasswordListener(event -> {
+            // Navigiert direkt auf die neue, eigenständige Verifizierungsseite
+            UI.getCurrent().navigate("verify-identity");
+        });
     }
 
     /**
