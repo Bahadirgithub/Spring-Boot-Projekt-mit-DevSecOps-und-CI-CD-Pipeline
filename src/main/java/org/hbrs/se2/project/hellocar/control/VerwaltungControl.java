@@ -8,6 +8,7 @@ import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
+import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -198,8 +199,7 @@ public class VerwaltungControl {
 
     public boolean emailAendern(Benutzer benutzer, String x){
         if(istLeer(x))return true;
-        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        if (!x.matches(emailRegex)) {
+        if(!ValidateUserControl.validateEmail(x)){
             return false; // Validierung fehlgeschlagen
         }
         benutzer.setEmail(x);
@@ -251,6 +251,8 @@ public class VerwaltungControl {
     }
     public boolean geburtstagAendern(Benutzer benutzer, LocalDate x){
         if(x == null) return true;
+        LocalDate vor18Jahren = LocalDate.now().minusYears(18);
+        if(x.isBefore(vor18Jahren) ){return false;}
         benutzer.setGeburtstag(x);
         System.out.println("Das Geburtsdatum " + x + " wurde eingegeben.");
         return true;
