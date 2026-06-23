@@ -13,10 +13,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.RegistrationControl;
 import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
-import org.hbrs.se2.project.hellocar.control.exception.EMPTY_FIELD;
-import org.hbrs.se2.project.hellocar.control.exception.INVALID_EMAIL_FORMAT;
-import org.hbrs.se2.project.hellocar.control.exception.PASSWORD_INVALID;
-import org.hbrs.se2.project.hellocar.control.exception.USERNAME_ALREADY_EXISTS;
+import org.hbrs.se2.project.hellocar.control.exception.*;
 
 /**
  * View zur Registrierung neuer Benutzer (Student oder Gründer).
@@ -78,7 +75,15 @@ public class RegistrationView extends VerticalLayout {
             Button registerButton = new Button("Account erstellen");
             registerButton.addClickListener(p -> {
 
+
+                // Versuche die Felder einzutragen und fange Exceptions falls etwas nicht klappt
                 try {
+
+                    //PasswordMissMatch testen, es wird hier getestet, weil wir nur hier das Wiederholungsfeld haben
+                    if(!passwordField.getValue().equals(repeatPasswordField.getValue())){
+                        throw new PasswordMissmatchException("Passwörter ungleich");
+                    }
+
                     // 2. Den Aufruf in den try-Block
                     String type = typeSelect.getValue();
 
@@ -88,12 +93,14 @@ public class RegistrationView extends VerticalLayout {
                         if (!semesterField.getValue().isEmpty()) {
                             try {
                                 semester = Integer.parseInt(semesterField.getValue());
-                            } catch (NumberFormatException ex) {
-                                Notification.show("Bitte ein gültiges Semester (Zahl) eingeben.");
+                            }
+                            catch (NumberFormatException ex) {
+                                semesterField.setErrorMessage("Bitte ein gültiges Semester (Zahl) eingeben.");
+                                semesterField.setInvalid(true);
                                 return;
                             }
                         }
-                        // Aufruf der Control-Methode
+                        // Aufruf der Control-Methode - hier könnten exceptions geworfen werden
                         registrationControl.registriereStudent(
                                 firstNameField.getValue(), lastNameField.getValue(),
                                 birthdayField.getValue(), usernameField.getValue(),
@@ -108,39 +115,70 @@ public class RegistrationView extends VerticalLayout {
                                 unternehmensNameField.getValue()
                         );
                     } else {
-                        Notification.show("Bitte einen Kontotyp auswählen.");
+                        typeSelect.setErrorMessage("Bitte einen Kontotyp auswählen.");
+                        typeSelect.setInvalid(true);
                         return;
                     }
 
-                    // 3. Wenn wir hier ankommen, gab es keine Exception -> Erfolg!
-                    Notification.show("Erfolgreich registriert!");
                     UI.getCurrent().navigate(""); // Passe den String an deine Login-Route an
 
                 }
 
-                catch(USERNAME_ALREADY_EXISTS e ){
-                    usernameField.setErrorMessage("Nutzername ist bereits vergeben");
+                catch(PasswordMissmatchException e){
+                    passwordField.setErrorMessage("Passwörter stimmen nicht überein");
+                    passwordField.setInvalid(true);
+                    repeatPasswordField.setErrorMessage("Bitte passen Sie die Passwörter an.");
+                    repeatPasswordField.setInvalid(true);
+
+                }
+
+                catch(UsernameEmptyException e){
+                    usernameField.setErrorMessage("Der Nutzername darf nicht leer sein.");
                     usernameField.setInvalid(true);
                 }
 
-                catch(INVALID_EMAIL_FORMAT e){
+                catch(UsernameAlreadyExistsException e ){
+                    usernameField.setErrorMessage("Der Nutzername ist bereits vergeben");
+                    usernameField.setInvalid(true);
+                }
+
+                catch(InvalidEmailException e){
                     emailField.setErrorMessage("Die E-Mail ist ungültig.");
                     emailField.setInvalid(true); // Feld wird rot
                 }
 
-                catch(PASSWORD_INVALID e){
-
-                    passwordField.setErrorMessage("Das Passwort muss mindestens 8 Zeichen, min. 1 Groß und Kleinbuchstaben, Sonderzeichen und min eine Zahl enthalten.");
+                catch(PasswordInvalidException e){
+                    passwordField.setErrorMessage("Das Passwort muss min. 8 Zeichen, davon min. eine Zahl, einen Großbuchstaben, einen Kleinbuchstaben und min ein Sonderzeichen enthalten.");
                     passwordField.setInvalid(true); // Feld wird rot
                 }
 
-                catch(EMPTY_FIELD e){
-                    Notification.show("Bitte füllen Sie alle Felder aus.");
+                catch(IllegalArgumentException e){
+                    semesterField.setErrorMessage("Bitte geben Sie ein gültiges Semester ein.");
+                    semesterField.setInvalid(true);
+                }
 
+                catch(FirstNameEmptyException e){
+                    firstNameField.setErrorMessage("Bitte geben Sie Ihren Vornamen an.");
+                    firstNameField.setInvalid(true);
+                }
+
+                catch(LastNameEmptyException e){
+                    lastNameField.setErrorMessage("Bitte geben Sie Ihren Nachnamen an.");
+                    lastNameField.setInvalid(true);
+                }
+
+                catch(StartUpEmptyException e){
+                    unternehmensNameField.setErrorMessage("Bitte geben Sie Ihr Unternehmen an.");
+                    unternehmensNameField.setInvalid(true);
+                }
+
+                catch(UniEmptyException e){
+                    universitaetField.setErrorMessage("Bitte geben Sie Ihre Universität an.");
+                    universitaetField.setInvalid(true);
                 }
 
                 catch (Exception ex) {
-                    Notification.show("Fehler: " + ex.getMessage());
+                    Notification.show(ex.getMessage());
                 }
             });
 

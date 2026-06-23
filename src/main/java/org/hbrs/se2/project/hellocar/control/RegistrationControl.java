@@ -1,9 +1,6 @@
 package org.hbrs.se2.project.hellocar.control;
 
-import org.hbrs.se2.project.hellocar.control.exception.EMPTY_FIELD;
-import org.hbrs.se2.project.hellocar.control.exception.INVALID_EMAIL_FORMAT;
-import org.hbrs.se2.project.hellocar.control.exception.PASSWORD_INVALID;
-import org.hbrs.se2.project.hellocar.control.exception.USERNAME_ALREADY_EXISTS;
+import org.hbrs.se2.project.hellocar.control.exception.*;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.entities.Gruender;
@@ -36,17 +33,17 @@ public class RegistrationControl {
 
     public void registriereStudent(String vorname, String nachname, LocalDate geburtstag,
                                                  String username, String email, String passwort,
-                                                 String universitaet, int semester) {
-
-        Benutzer benutzer = createUser(vorname,nachname,geburtstag,username,email,passwort);
+                                                 String universitaet, int semester) throws Exception {
 
         if(!ValidateUserControl.validFieldNotEmpty(universitaet)){
-            throw new EMPTY_FIELD("Geben Sie die Universität ein an.");
+            throw new UniEmptyException("Bitte geben Sie Ihre Universität an");
         }
 
         if(semester <= 0){
             throw new IllegalArgumentException("Bitte geben Sie ein gültiges Semester ein");
         }
+
+        Benutzer benutzer = createUser(vorname,nachname,geburtstag,username,email,passwort);
 
         Student student = new Student();
         student.setUserId(benutzer.getUserId());
@@ -57,16 +54,16 @@ public class RegistrationControl {
 
     }
 
-
-
     public void registriereGruender(String vorname, String nachname, LocalDate geburtstag, String username,
-                                                  String email, String passwort, String unternehmensname){
+                                                  String email, String passwort, String unternehmensname)throws Exception{
 
-        Benutzer benutzer = createUser(vorname,nachname,geburtstag,username,email,passwort);
+
 
         if(!ValidateUserControl.validFieldNotEmpty(unternehmensname)){
-            throw new EMPTY_FIELD("Geben Sie den Unternehmensnamen an.");
+            throw new StartUpEmptyException("Geben Sie den Unternehmensnamen an.");
         }
+
+        Benutzer benutzer = createUser(vorname,nachname,geburtstag,username,email,passwort);
 
         Gruender gruender = new Gruender();
         gruender.setUserId(benutzer.getUserId());
@@ -76,10 +73,8 @@ public class RegistrationControl {
 
     }
 
-
-
     private Benutzer createUser(String vorname, String nachname,LocalDate geburtstag, String username,
-                                      String email, String passwort) throws RuntimeException {
+                                      String email, String passwort) throws Exception {
 
         validateBenutzer(vorname,  nachname, geburtstag,username, email,passwort);
         Benutzer benutzer = new Benutzer();
@@ -92,29 +87,31 @@ public class RegistrationControl {
         benutzerRepository.saveAndFlush(benutzer);
 
         return benutzer;
-
     }
 
-    private boolean validateBenutzer(String vorname, String nachname,LocalDate geburtstag, String username,
-                                     String email, String passwort) throws RuntimeException
-    {
-        if(!ValidateUserControl.validFieldNotEmpty(vorname) || !ValidateUserControl.validFieldNotEmpty(nachname)){
-            throw new EMPTY_FIELD("Die Pflichtfelder dürfen nicht leer sein.");
+    private void validateBenutzer(String vorname, String nachname, LocalDate geburtstag, String username,
+                                  String email, String passwort) throws Exception {
+        if(!ValidateUserControl.validFieldNotEmpty(vorname)){
+            throw new FirstNameEmptyException("Bitte geben Sie Ihren Vornamen an.");
+        }
+
+        if(!ValidateUserControl.validFieldNotEmpty(nachname)){
+            throw new LastNameEmptyException("Bitte geben Sie Ihren Nachnamen an.");
         }
 
         if(!ValidateUserControl.validateUserName(username,this.benutzerRepository)){
-            throw new USERNAME_ALREADY_EXISTS("Username existiert bereits!");
+            throw new UsernameAlreadyExistsException("Username existiert bereits!");
         }
+
+        if(!ValidateUserControl.validateUserNameNotEmpty(username)){
+            throw new UsernameEmptyException("Der Nutzername darf nicht leer sein.");
+        }
+
         if(!ValidateUserControl.validatePassword(passwort)){
-           throw new PASSWORD_INVALID("Passwort muss min 8 Zeichen sein, inkl. Groß-/Kleinbuchstaben, Zahl und Sonderzeichen.");
+           throw new PasswordInvalidException("Passwort muss min 8 Zeichen sein, inkl. Groß-/Kleinbuchstaben, Zahl und Sonderzeichen.");
         }
         if(!ValidateUserControl.validateEmail(email)){
-           throw new INVALID_EMAIL_FORMAT("Email ist ungültig.");
+           throw new InvalidEmailException("Email ist ungültig.");
         }
-
-        return true;
     }
-
-
-
 }

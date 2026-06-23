@@ -1,6 +1,5 @@
 package org.hbrs.se2.project.hellocar.control;
 
-import org.hbrs.se2.project.hellocar.control.results.RegistrationResult;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.util.TestDatenFabrik;
 import org.junit.jupiter.api.BeforeEach;

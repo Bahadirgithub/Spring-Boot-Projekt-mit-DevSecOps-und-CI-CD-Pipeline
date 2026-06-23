@@ -21,7 +21,7 @@ public class LoginControl {
         this.benutzerRepository = benutzerRepository;
     }
 
-    public boolean authentificate(String username, String password) throws DatabaseUserException {
+    public boolean authenticate(String username, String password) throws DatabaseUserException {
         BenutzerDTO tmpBenutzer = this.getBenutzerWithJPA(username, password);
 
         if (tmpBenutzer == null) {

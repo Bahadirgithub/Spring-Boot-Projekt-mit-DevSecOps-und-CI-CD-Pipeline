@@ -23,13 +23,18 @@ public class ValidateUserControl {
     // Passwort muss min 8 Zeichen, min 1 Großbuchstabe, min 1 Zahl, min 1 Kleinbuchstabe, 1 Zeichen
 
 
-    private static final Pattern PASSWORD_PATTERN = Pattern.compile("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=.])(?=\\S+$).{8,}");
-    private static final String emailRegex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@" + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";;
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+/=.?,;!*_'~])(?=\\S+$).{8,}");
+    private static final String emailRegex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@" + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
 
 // Tests geben true zurück, wenn Daten valide sind , ansonsten false.
 
     public static boolean validateUserName(String username, BenutzerRepository benutzerRepository){
-        return !benutzerRepository.existsByUsername(username) && !username.isBlank();
+        return !benutzerRepository.existsByUsername(username);
+    }
+
+    // prüfe ob der nutzername nicht leer ist -> falls leer -> false falls nicht leer -> true
+    public static boolean validateUserNameNotEmpty(String username){
+        return !username.isBlank();
     }
 
     public static boolean validateEmail(String email) {

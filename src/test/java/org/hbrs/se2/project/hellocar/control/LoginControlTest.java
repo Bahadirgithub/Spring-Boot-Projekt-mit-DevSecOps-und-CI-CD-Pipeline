@@ -38,7 +38,7 @@ public class LoginControlTest {
 
         // Eigentlicher Test: Login mit den Daten des erstellten Benutzers versuchen.
         assertDoesNotThrow(() -> {
-            boolean result = loginControl.authentificate(benutzer.getUsername(), benutzer.getPasswort());
+            boolean result = loginControl.authenticate(benutzer.getUsername(), benutzer.getPasswort());
             assertTrue(result, "Login sollte mit korrekten Daten erfolgreich sein.");
         }, "Ein erfolgreicher Login sollte keine DatabaseUserException werfen.");
     }
@@ -53,7 +53,7 @@ public class LoginControlTest {
 
         // Eigentlicher Test: Login mit falschem Passwort versuchen.
         assertDoesNotThrow(() -> {
-            boolean result = loginControl.authentificate(benutzer.getUsername(), "absolutFalschesPasswort");
+            boolean result = loginControl.authenticate(benutzer.getUsername(), "absolutFalschesPasswort");
             assertFalse(result, "Login sollte bei falschem Passwort fehlschlagen.");
         }, "Ein fehlschlagender Login sollte keine DatabaseUserException werfen.");
     }
@@ -65,7 +65,7 @@ public class LoginControlTest {
     void testLoginSchlaegtFehlBeiUnbekanntemBenutzernamen() {
         // Es wird kein Benutzer registriert, um einen unbekannten Benutzernamen zu simulieren.
         assertDoesNotThrow(() -> {
-            boolean result = loginControl.authentificate("unbekannter_user_12345", "AnyPassword");
+            boolean result = loginControl.authenticate("unbekannter_user_12345", "AnyPassword");
             assertFalse(result, "Login sollte fehlschlagen bei unbekanntem Benutzernamen.");
         }, "Ein unbekannter Benutzername sollte keine DatabaseUserException werfen.");
     }
@@ -76,7 +76,7 @@ public class LoginControlTest {
     @Test
     void testLoginSchlaegtFehlBeiLeeremBenutzernamen() {
         assertDoesNotThrow(() -> {
-            boolean result = loginControl.authentificate("", "SecurePassword123");
+            boolean result = loginControl.authenticate("", "SecurePassword123");
             assertFalse(result, "Login sollte fehlschlagen bei leerem Benutzernamen.");
         }, "Ein leerer Benutzername sollte keine DatabaseUserException werfen.");
     }
@@ -90,7 +90,7 @@ public class LoginControlTest {
         Benutzer benutzer = testDatenFabrik.erstelleUndSpeichereBenutzer("LeeresPasswort");
 
         assertDoesNotThrow(() -> {
-            boolean result = loginControl.authentificate(benutzer.getUsername(), "");
+            boolean result = loginControl.authenticate(benutzer.getUsername(), "");
             assertFalse(result, "Login sollte fehlschlagen bei leerem Passwort.");
         }, "Ein leeres Passwort sollte keine DatabaseUserException werfen.");
     }
