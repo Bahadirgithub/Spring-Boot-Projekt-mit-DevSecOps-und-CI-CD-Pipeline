@@ -12,7 +12,7 @@ public class Student {
     private String studentId;
     private String universitaet;
     private int semester;
-    private String skills;
+    private java.util.List<String> skills;
     private String abschluss;
 
     @Id
@@ -55,13 +55,14 @@ public class Student {
         this.semester = semester;
     }
 
-    @Basic
-    @Column(name = "skills")
-    public String getSkills() {
+    @ElementCollection
+    @CollectionTable(name = "student_skills", schema = "ahsogehts", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "skill")
+    public java.util.List<String> getSkills() {
         return skills;
     }
 
-    public void setSkills(String skills) {
+    public void setSkills(java.util.List<String> skills) {
         this.skills = skills;
     }
 

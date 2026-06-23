@@ -117,9 +117,10 @@ public class VerwaltungView extends VerticalLayout {
 
         TextField abschlussField = new TextField("Abschluss");
 
-        // Skills feld größer
-        TextArea skillsField = new TextArea("Skills");
-        skillsField.setHeight("120px");
+        // Skills als Mehrfachauswahl aus fester Liste
+        com.vaadin.flow.component.combobox.MultiSelectComboBox<String> skillsField =
+                new com.vaadin.flow.component.combobox.MultiSelectComboBox<>("Skills");
+        skillsField.setItems(org.hbrs.se2.project.hellocar.util.Skills.VERFUEGBARE_SKILLS);
 
         abschlussField.setVisible(istStudent);
         skillsField.setVisible(istStudent);
@@ -147,8 +148,9 @@ public class VerwaltungView extends VerticalLayout {
                 universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
                 semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
                 abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
-                skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
-            }
+                skillsField.setValue(student.getSkills() == null
+                        ? java.util.Collections.emptySet()
+                        : new java.util.HashSet<>(student.getSkills()));            }
         }
 
 
@@ -180,7 +182,7 @@ public class VerwaltungView extends VerticalLayout {
                                 ? null
                                 : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
                         abschlussField.getValue(),
-                        skillsField.getValue()
+                        new java.util.ArrayList<>(skillsField.getValue())
                 );
             } else if (istGruender) {
                 erfolg = vControl.updateGruender(
@@ -222,8 +224,9 @@ public class VerwaltungView extends VerticalLayout {
                             // Semester ist ein int – 0 bedeutet nicht gesetzt, dann leerer String
                             semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
                             abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
-                            skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
-                        }
+                            skillsField.setValue(student.getSkills() == null
+                                    ? java.util.Collections.emptySet()
+                                    : new java.util.HashSet<>(student.getSkills()));                        }
                     }
 
                     // Gründer-Felder aktualisieren

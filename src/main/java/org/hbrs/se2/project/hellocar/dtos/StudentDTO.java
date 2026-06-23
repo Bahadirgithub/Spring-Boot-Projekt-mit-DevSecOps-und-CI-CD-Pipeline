@@ -10,7 +10,7 @@ public interface StudentDTO {
 
     int getSemester();
 
-    String getSkills();
+    java.util.List<String> getSkills();
 
     String getAbschluss();
 }

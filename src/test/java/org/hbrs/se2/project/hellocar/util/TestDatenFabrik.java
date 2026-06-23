@@ -73,7 +73,7 @@ public class TestDatenFabrik {
         student.setStudentId("s" + benutzer.getUserId());
         student.setUniversitaet("H-BRS");
         student.setSemester(4);
-        student.setSkills("Java, Spring Boot, JPA");
+        student.setSkills(java.util.List.of("Java", "SQL"));
         student.setAbschluss("Bachelor");
         
         return studentRepository.saveAndFlush(student);
