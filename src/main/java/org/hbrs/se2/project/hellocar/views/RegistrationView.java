@@ -74,7 +74,7 @@ public class RegistrationView extends VerticalLayout {
 
             Button registerButton = new Button("Account erstellen");
             registerButton.addClickListener(p -> {
-
+                registerButton.setEnabled(false);
 
                 // Versuche die Felder einzutragen und fange Exceptions falls etwas nicht klappt
                 try {
@@ -179,6 +179,11 @@ public class RegistrationView extends VerticalLayout {
 
                 catch (Exception ex) {
                     Notification.show(ex.getMessage());
+                }
+
+                finally {
+                    //  Immer wieder freigeben, wenn wir nicht navigiert sind (Fehlerfall)
+                    registerButton.setEnabled(true);
                 }
             });
 
