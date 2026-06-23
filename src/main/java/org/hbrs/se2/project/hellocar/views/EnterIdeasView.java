@@ -68,14 +68,23 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
                 (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
 
         if (userDTO != null) {
-          GruendungsideeDTOImpl aktuelleIdee = binder.getBean();
-          // HIER ANPASSEN: .getUserId() statt .getId()
-          aktuelleIdee.setGruenderUserId(userDTO.getUserId());
+          // Idee erstellen
+          GruendungsideeDTOImpl aktuelleIdee = new GruendungsideeDTOImpl();
 
-          ideaService.createIdea(aktuelleIdee);
+          try {
+            // DTO mit UI Eingaben befüllen
+            binder.writeBean(aktuelleIdee);
 
-          Notification.show("Gründungsidee erfolgreich gespeichert.");
-          clearForm();
+            aktuelleIdee.setGruenderUserId(userDTO.getUserId());
+            ideaService.createIdea(aktuelleIdee);
+
+            Notification.show("Gründungsidee erfolgreich gespeichert.");
+            clearForm(); // Formular für die nächste Eingabe leeren
+
+          } catch (com.vaadin.flow.data.binder.ValidationException validationException) {
+            // Falls der Nutzer unvollständige Daten eingegeben hat
+            Notification.show("Fehler: Bitte überprüfen Sie Ihre Eingaben.");
+          }
         } else {
           Notification.show("Fehler: Kein angemeldeter Benutzer gefunden.");
         }

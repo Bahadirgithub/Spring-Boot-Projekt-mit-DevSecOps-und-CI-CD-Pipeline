@@ -166,12 +166,6 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
     private Component[] createMenuItems() {
         // Jeder eingeloggte User sollte die Hauptseite sehen können.
         Tab[] tabs = new Tab[]{ createTab("Gründungsideen anschauen", ShowIdeasView.class) };
-        // Neue Logik ohne Rollen:
-        // Nur Gründer dürfen EnterCar sehen.
-        if (this.authorizationControl.canAccessEnterCar(this.getCurrentUser())) {
-            System.out.println("User ist Gründer und darf Gründungsidee erstellen.");
-            tabs = Utils.append(tabs, createTab("Gründungsidee erstellen", EnterIdeasView.class));
-        }
 
         // ToDo für die Teams: Weitere Tabs aus ihrem Projekt hier einfügen!
 
