@@ -14,6 +14,7 @@ public class Gruendungsidee {
     private String position;
     private String anforderungen;
     private String arbeitsbedingungen;
+    private java.util.List<String> gesuchteSkills;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,6 +76,18 @@ public class Gruendungsidee {
     public void setArbeitsbedingungen(String arbeitsbedingungen) {
         this.arbeitsbedingungen = arbeitsbedingungen;
     }
+
+    @ElementCollection
+    @CollectionTable(name = "gruendungsidee_skills", schema = "ahsogehts", joinColumns = @JoinColumn(name = "idee_id"))
+    @Column(name = "skill")
+    public java.util.List<String> getGesuchteSkills() {
+        return gesuchteSkills;
+    }
+
+    public void setGesuchteSkills(java.util.List<String> gesuchteSkills) {
+        this.gesuchteSkills = gesuchteSkills;
+    }
+
 
     @Override
     public boolean equals(Object o) {

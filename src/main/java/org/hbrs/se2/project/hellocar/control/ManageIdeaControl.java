@@ -24,6 +24,7 @@ public class ManageIdeaControl {
     /**
      * Holt alle Gründungsideen aus der Datenbank und gibt sie als DTOs zurück.
      */
+    @org.springframework.transaction.annotation.Transactional
     public List<GruendungsideeDTO> readAllIdeas() {
         // Entities aus der Datenbank laden
         List<Gruendungsidee> entities = repository.findAll();
@@ -41,6 +42,7 @@ public class ManageIdeaControl {
             dto.setPosition(entity.getPosition());
             dto.setAnforderungen(entity.getAnforderungen());
             dto.setArbeitsbedingungen(entity.getArbeitsbedingungen());
+            dto.setGesuchteSkills(entity.getGesuchteSkills());
             dto.setGruender(null); // Dummy, solange keine Relation aktiv ist
 
             // Da der Gründer immer existiert, laden wir ihn direkt per .orElseThrow()
@@ -77,6 +79,7 @@ public class ManageIdeaControl {
         entity.setPosition(dto.getPosition());
         entity.setAnforderungen(dto.getAnforderungen());
         entity.setArbeitsbedingungen(dto.getArbeitsbedingungen());
+        entity.setGesuchteSkills(dto.getGesuchteSkills());
 
         // 3. Die Entity über das Spring-Data-Repository in die DB schreiben
         repository.save(entity);

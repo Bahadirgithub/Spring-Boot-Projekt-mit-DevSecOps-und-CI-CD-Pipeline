@@ -36,6 +36,8 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
   private TextArea beschreibung = new TextArea("Beschreibung der Idee");
   private TextArea anforderungen = new TextArea("Anforderungen an Bewerber");
   private TextArea arbeitsbedingungen = new TextArea("Arbeitsbedingungen");
+  private com.vaadin.flow.component.combobox.MultiSelectComboBox<String> gesuchteSkills =
+          new com.vaadin.flow.component.combobox.MultiSelectComboBox<>("Gesuchte Skills");
 
   private Button cancel = new Button("Abbrechen");
   private Button save = new Button("Speichern");
@@ -51,12 +53,18 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
     // Das Unternehmensfeld soll vom Nutzer nicht verändert werden können
     unternehmensname.setReadOnly(true);
 
+    gesuchteSkills.setItems(org.hbrs.se2.project.hellocar.util.Skills.VERFUEGBARE_SKILLS);
+
     add(createTitle());
     add(createFormLayout());
     add(createButtonLayout());
 
-    // Automatisches Binding basierend auf den Variablennamen und DTO-Gettern
-    binder.bindInstanceFields(this);
+    // Manuelles Binding um einen Typ Fehler zu vermeiden der duch die MultiSelectComboBox entstehen könnte
+    binder.forField(beschreibung).bind("beschreibung");
+    binder.forField(position).bind("position");
+    binder.forField(anforderungen).bind("anforderungen");
+    binder.forField(arbeitsbedingungen).bind("arbeitsbedingungen");
+    binder.forField(unternehmensname).bind("unternehmensname");
     clearForm();
 
     // Abbrechen leert das Formular wieder
@@ -76,6 +84,7 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
             binder.writeBean(aktuelleIdee);
 
             aktuelleIdee.setGruenderUserId(userDTO.getUserId());
+            aktuelleIdee.setGesuchteSkills(new java.util.ArrayList<>(gesuchteSkills.getValue()));
             ideaService.createIdea(aktuelleIdee);
 
             Notification.show("Gründungsidee erfolgreich gespeichert.");
@@ -106,6 +115,7 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
       String Unternehmensname = ideaService.getUnternehmensnameByUserId(userDTO.getUserId());
       frischesDto.setUnternehmensname(Unternehmensname);
     }
+    gesuchteSkills.clear();
 
     // Dem Binder das frisch vorbereitete DTO übergeben
     binder.setBean(frischesDto);
@@ -117,7 +127,7 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
 
   private Component createFormLayout() {
     FormLayout formLayout = new FormLayout();
-    formLayout.add(unternehmensname, beschreibung, position, anforderungen, arbeitsbedingungen);
+    formLayout.add(unternehmensname, beschreibung, position, anforderungen, arbeitsbedingungen, gesuchteSkills);
     return formLayout;
   }
 

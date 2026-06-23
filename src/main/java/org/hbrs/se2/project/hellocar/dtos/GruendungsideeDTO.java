@@ -16,6 +16,8 @@ public interface GruendungsideeDTO {
 
     public String getUnternehmensname();
 
+    public java.util.List<String> getGesuchteSkills();
+
     // Ermöglicht den Zugriff auf den Ersteller (Gründer) der Idee
     public GruenderDTO getGruender();
 }
