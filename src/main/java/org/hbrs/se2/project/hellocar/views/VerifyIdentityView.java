@@ -2,10 +2,7 @@ package org.hbrs.se2.project.hellocar.views;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
@@ -26,7 +23,12 @@ public class VerifyIdentityView extends VerticalLayout {
         logo.setWidth("80px");
 
         H1 brandText = new H1("St@rtMeUp");
-        brandText.getStyle().set("margin", "0 0 30px 0");
+        brandText.getStyle().set("margin", "0 0 2px 0");
+
+        Span subtitleText = new Span("powered by AhSoGehts");
+        subtitleText.getStyle().set("font-size", "14px");
+        subtitleText.getStyle().set("color", "gray");
+        subtitleText.getStyle().set("margin", "0 0 30px 0");
 
         // Seitentitel
         H2 title = new H2("Identität verifizieren");
@@ -76,7 +78,7 @@ public class VerifyIdentityView extends VerticalLayout {
 
         // Komponenten in den Container packen
         formContainer.add(usernameField, emailField, nextButton);
-        add(logo, brandText, title, instructionText, formContainer);
+        add(logo, brandText, subtitleText, title, instructionText, formContainer);
 
         // Alles zentrieren
         setAlignItems(Alignment.CENTER);

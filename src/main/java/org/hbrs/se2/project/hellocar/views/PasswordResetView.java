@@ -2,8 +2,7 @@ package org.hbrs.se2.project.hellocar.views;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -13,9 +12,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.LoginControl;
 import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Image;
 
 @Route("reset-password")
 @PageTitle("Passwort zurücksetzen | StartMeUp")
@@ -34,7 +30,12 @@ public class PasswordResetView extends VerticalLayout implements BeforeEnterObse
         logo.setWidth("80px");
 
         H1 brandText = new H1("St@rtMeUp");
-        brandText.getStyle().set("margin", "0 0 30px 0");
+        brandText.getStyle().set("margin", "0 0 2px 0");
+
+        Span subtitleText = new Span("powered by AhSoGehts");
+        subtitleText.getStyle().set("font-size", "14px");
+        subtitleText.getStyle().set("color", "gray");
+        subtitleText.getStyle().set("margin", "0 0 30px 0");
 
         // Abstände anpassen
         setSpacing(false);
@@ -114,7 +115,7 @@ public class PasswordResetView extends VerticalLayout implements BeforeEnterObse
 
         // Erst Felder in den Container, dann alles zentriert anzeigen
         formContainer.add( passwordField, confirmPasswordField, saveButton);
-        add(logo, brandText, title, instructionText, formContainer);
+        add(logo, brandText, subtitleText, title, instructionText, formContainer);
     }
 
     /**

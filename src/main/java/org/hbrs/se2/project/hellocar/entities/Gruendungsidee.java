@@ -16,6 +16,7 @@ public class Gruendungsidee {
     private String arbeitsbedingungen;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idee_id")
     public int getIdeeId() {
         return ideeId;

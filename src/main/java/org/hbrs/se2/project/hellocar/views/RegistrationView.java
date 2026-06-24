@@ -3,7 +3,7 @@ package org.hbrs.se2.project.hellocar.views;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -33,6 +33,17 @@ public class RegistrationView extends VerticalLayout {
         // Standard-Abstände reduzieren
         setSpacing(false);
         getStyle().set("gap", "2px");
+
+        Image logo = new Image("images/logo.png", "Logo");
+        logo.setWidth("80px");
+
+        H1 brandText = new H1("St@rtMeUp");
+        brandText.getStyle().set("margin", "0 0 2px 0");
+
+        Span subtitleText = new Span("powered by AhSoGehts");
+        subtitleText.getStyle().set("font-size", "14px");
+        subtitleText.getStyle().set("color", "gray");
+        subtitleText.getStyle().set("margin", "0 0 30px 0");
 
         // Eingabefelder
         TextField firstNameField = new TextField("Vorname");

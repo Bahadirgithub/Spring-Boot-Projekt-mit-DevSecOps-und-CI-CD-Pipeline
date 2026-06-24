@@ -1,11 +1,17 @@
 package org.hbrs.se2.project.hellocar.views;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -13,8 +19,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.apache.commons.lang3.StringUtils;
 import org.hbrs.se2.project.hellocar.control.ManageIdeaControl;
+import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.GruendungsideeDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
+import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 
 import java.util.List;
 
@@ -30,19 +38,60 @@ import java.util.List;
 @CssImport("./styles/views/showideas/show-ideas-view.css")
 public class ShowIdeasView extends Div  {
 
+    private final AuthorizationControl authorizationControl;
     private List<GruendungsideeDTO> ideeList;
 
-    public ShowIdeasView(ManageIdeaControl ideaControl) {
-            addClassName("show-cars-view");
+    public ShowIdeasView(AuthorizationControl authorizationControl, ManageIdeaControl ideaControl) {
+        this.authorizationControl = authorizationControl;
+        addClassName("show-cars-view");
 
-            // Auslesen aller Gründungsideen aus der DB
-            this.ideeList = ideaControl.readAllIdeas();
+        // Auslesen aller Gründungsideen aus der DB
+        this.ideeList = ideaControl.readAllIdeas();
 
-            // Titel überhalb der Tabelle
-            add(this.createTitle());
+        // Titel überhalb der Tabelle
+        add(this.createTitle());
 
-            // Hinzufügen der Tabelle (bei Vaadin: ein Grid)
-            add(this.createGridTable());
+        // Hinzufügen der Tabelle (bei Vaadin: ein Grid)
+        add(this.createGridTable());
+
+        BenutzerDTO currentUser = (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
+
+        if (currentUser != null && this.authorizationControl.canAccessEnterCar(currentUser)) {
+            // Nur wenn es ein Gründer ist, wird die Methode ausgeführt und der Button hinzugefügt
+            add(this.createAddIdeaButton());
+        }
+    }
+
+    private Component createAddIdeaButton() {
+        Button addIdeaButton = new Button();
+
+        // Icon & Text vorbereiten
+        Icon plusIcon = new Icon(VaadinIcon.PLUS);
+        plusIcon.getStyle().set("font-size", "24px");
+        Span buttonText = new Span("Gründungsidee hinzufügen");
+
+        addIdeaButton.setIcon(plusIcon);
+        addIdeaButton.setText("Gründungsidee hinzufügen");
+
+        // Das gewünschte vertikale Styling (Icon oben, Text unten)
+        addIdeaButton.getStyle().set("display", "flex");
+        addIdeaButton.getStyle().set("flex-direction", "column");
+        addIdeaButton.getStyle().set("align-items", "center");
+        addIdeaButton.getStyle().set("justify-content", "center");
+        addIdeaButton.getStyle().set("gap", "8px");
+        addIdeaButton.getStyle().set("height", "auto");
+        addIdeaButton.getStyle().set("padding", "16px 24px");
+
+        // Zentrierung unter dem Div & Abstand nach oben zur Tabelle
+        addIdeaButton.getStyle().set("margin", "25px auto 0 auto");
+
+        // StartMeUp Primär-Look (z.B. Blau/Grün)
+        addIdeaButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        // Klick-Logik: Weiterleitung zur Erstellungsseite (EnterIdeasView)
+        addIdeaButton.addClickListener(e -> UI.getCurrent().navigate(EnterIdeasView.class));
+
+        return addIdeaButton;
     }
 
     private Component createGridTable() {
@@ -126,6 +175,8 @@ public class ShowIdeasView extends Div  {
         bedingungenFilterField.setPlaceholder("Filter Bedingungen");
         bedingungenFilterField.setSizeFull();
         filterRow.getCell(bedingungenColumn).setComponent(bedingungenFilterField);
+
+        grid.setHeight("600px");
 
         return grid;
     }

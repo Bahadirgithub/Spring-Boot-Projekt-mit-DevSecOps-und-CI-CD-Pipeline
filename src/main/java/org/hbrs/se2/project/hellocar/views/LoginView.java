@@ -3,6 +3,7 @@ package org.hbrs.se2.project.hellocar.views;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -40,7 +41,12 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         logo.setWidth("80px");
 
         H1 brandText = new H1("St@rtMeUp");
-        brandText.getStyle().set("margin", "0 0 10px 0");
+        brandText.getStyle().set("margin", "0 0 -5px 0");
+
+        Span subtitleText = new Span("powered by AhSoGehts");
+        subtitleText.getStyle().set("font-size", "14px");
+        subtitleText.getStyle().set("color", "gray");
+        subtitleText.getStyle().set("margin", "0 0 10px 0");
 
         // LoginForm-Komponente mit deutschen Texten erstellen
         LoginForm loginForm = new LoginForm();
@@ -49,7 +55,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         // Link zur Registrierungs-Seite
         RouterLink registerLink = new RouterLink("Noch kein Konto? Jetzt registrieren", RegistrationView.class);
 
-        add(logo, brandText, loginForm, registerLink);
+        add(logo, brandText, subtitleText, loginForm, registerLink);
 
         // Listener für den Klick auf "Anmelden"
         loginForm.addLoginListener(e -> {
