@@ -11,13 +11,16 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.datepicker.DatePicker;
 
+
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
+import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.entities.Gruender;
+import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -94,8 +97,7 @@ public class VerwaltungView extends VerticalLayout {
         TextField lastNameField = new TextField("Nachname");
         EmailField emailField = new EmailField("E-Mail Adresse");
         NumberField telefonnummerField = new NumberField("Telefonnummer");
-        DatePicker geburtstagField = new DatePicker("Geburtsdatum");
-        geburtstagField.setMax(java.time.LocalDate.now());
+        DatePicker geburtstagField = ValidateUserControl.validDatePicker();
 
         // Aktuelle Benutzerdaten anzeigen
         firstNameField.setValue(currentUser.getVorname() == null ? "" : currentUser.getVorname());

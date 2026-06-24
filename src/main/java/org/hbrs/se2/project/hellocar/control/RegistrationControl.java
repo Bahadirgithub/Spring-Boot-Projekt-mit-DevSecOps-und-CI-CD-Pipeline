@@ -1,6 +1,6 @@
 package org.hbrs.se2.project.hellocar.control;
 
-import org.hbrs.se2.project.hellocar.control.results.RegistrationResult;
+import org.hbrs.se2.project.hellocar.control.exception.*;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.entities.Gruender;
@@ -8,6 +8,7 @@ import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
 import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
 
 /**
@@ -30,27 +31,20 @@ public class RegistrationControl {
         this.gruenderRepository = gruenderRepository;
     }
 
-    /**
-     * Registriert einen neuen Benutzer als Student.
-     * Führt eine Reihe von Validierungen durch und gibt ein spezifisches Ergebnis zurück.
-     *
-     * @return Ein RegistrationResult-Enum, das den Erfolg oder den genauen Grund des Fehlschlags angibt.
-     */
-    public RegistrationResult registriereStudent(String vorname, String nachname, LocalDate geburtstag,
+    public void registriereStudent(String vorname, String nachname, LocalDate geburtstag,
                                                  String username, String email, String passwort,
-                                                 String universitaet, int semester) {
+                                                 String universitaet, int semester) throws Exception {
 
-        // 1. Zentrale Validierung und Benutzer-Erstellung aufrufen
-        Object validationResult = validateAndCreateUser(vorname, nachname, geburtstag, username, email, passwort);
-
-        // 2. Prüfen, ob ein Fehler aufgetreten ist (Rückgabe ist ein RegistrationResult Enum)
-        if (validationResult instanceof RegistrationResult) {
-            return (RegistrationResult) validationResult;
+        if(!ValidateUserControl.validFieldNotEmpty(universitaet)){
+            throw new UniEmptyException("Bitte geben Sie Ihre Universität an");
         }
 
-        // 3. Wenn erfolgreich, den zurückgegebenen Benutzer nehmen und den Studententeil erledigen
-        Benutzer benutzer = (Benutzer) validationResult;
-        
+        if(semester <= 0){
+            throw new IllegalArgumentException("Bitte geben Sie ein gültiges Semester ein");
+        }
+
+        Benutzer benutzer = createUser(vorname,nachname,geburtstag,username,email,passwort);
+
         Student student = new Student();
         student.setUserId(benutzer.getUserId());
         student.setStudentId("s" + benutzer.getUserId());
@@ -58,29 +52,18 @@ public class RegistrationControl {
         student.setSemester(semester);
         studentRepository.save(student);
 
-        return RegistrationResult.SUCCESS;
     }
 
-    /**
-     * Registriert einen neuen Benutzer als Gründer.
-     * Führt eine Reihe von Validierungen durch und gibt ein spezifisches Ergebnis zurück.
-     *
-     * @return Ein RegistrationResult-Enum, das den Erfolg oder den genauen Grund des Fehlschlags angibt.
-     */
-    public RegistrationResult registriereGruender(String vorname, String nachname, LocalDate geburtstag,
-                                                  String username, String email, String passwort,
-                                                  String unternehmensname) {
+    public void registriereGruender(String vorname, String nachname, LocalDate geburtstag, String username,
+                                                  String email, String passwort, String unternehmensname)throws Exception{
 
-        // 1. Zentrale Validierung und Benutzer-Erstellung aufrufen
-        Object validationResult = validateAndCreateUser(vorname, nachname, geburtstag, username, email, passwort);
 
-        // 2. Prüfen, ob ein Fehler aufgetreten ist (Rückgabe ist ein RegistrationResult Enum)
-        if (validationResult instanceof RegistrationResult) {
-            return (RegistrationResult) validationResult;
+
+        if(!ValidateUserControl.validFieldNotEmpty(unternehmensname)){
+            throw new StartUpEmptyException("Geben Sie den Unternehmensnamen an.");
         }
 
-        // 3. Wenn erfolgreich, den zurückgegebenen Benutzer nehmen und den Gründerteil erledigen
-        Benutzer benutzer = (Benutzer) validationResult;
+        Benutzer benutzer = createUser(vorname,nachname,geburtstag,username,email,passwort);
 
         Gruender gruender = new Gruender();
         gruender.setUserId(benutzer.getUserId());
@@ -88,63 +71,12 @@ public class RegistrationControl {
         gruender.setUnternehmensname(unternehmensname);
         gruenderRepository.save(gruender);
 
-        return RegistrationResult.SUCCESS;
     }
 
-    /**
-     * Zentrale Hilfsmethode, die den doppelten Code vermeidet.
-     * Sie validiert die allgemeinen Benutzerdaten und legt, falls gültig, den Benutzer an.
-     *
-     * @return Ein RegistrationResult (bei Validierungsfehlern) ODER das neue Benutzer-Objekt (bei Erfolg).
-     */
-    private Object validateAndCreateUser(String vorname, String nachname, LocalDate geburtstag,
-                                         String username, String email, String passwort) {
-        
-        // Gemeinsame Validierung
-        if (username == null || username.isBlank()) {
-            return RegistrationResult.USERNAME_IS_EMPTY;
-        }
-        if (isPasswordInvalid(passwort)) {
-            return RegistrationResult.PASSWORD_TOO_SHORT;
-        }
-        if (isEmailInvalid(email)) {
-            return RegistrationResult.INVALID_EMAIL_FORMAT;
-        }
-        if (benutzerRepository.existsByUsername(username)) {
-            return RegistrationResult.USERNAME_ALREADY_EXISTS;
-        }
+    private Benutzer createUser(String vorname, String nachname,LocalDate geburtstag, String username,
+                                      String email, String passwort) throws Exception {
 
-        // Gemeinsame Erstellung des Basis-Benutzers
-        Benutzer benutzer = erstelleBenutzer(vorname, nachname, geburtstag, username, email, passwort);
-        benutzerRepository.saveAndFlush(benutzer);
-
-        return benutzer;
-    }
-
-    /**
-     * Private Hilfsmethode zur Passwort-Validierung.
-     * @return true, wenn das Passwort ungültig ist (null, leer oder zu kurz).
-     */
-    private boolean isPasswordInvalid(String passwort) {
-        return passwort == null || passwort.length() < 8;
-    }
-
-    /**
-     * Private Hilfsmethode zur E-Mail-Validierung.
-     * @return true, wenn die E-Mail ein ungültiges Format hat.
-     */
-    private boolean isEmailInvalid(String email) {
-        if (email == null) return true;
-        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        return !email.matches(emailRegex);
-    }
-
-    /**
-     * Erstellt ein neues Benutzer-Objekt (ohne es zu speichern).
-     */
-    private Benutzer erstelleBenutzer(String vorname, String nachname,
-                                      LocalDate geburtstag, String username,
-                                      String email, String passwort) {
+        validateBenutzer(vorname,  nachname, geburtstag,username, email,passwort);
         Benutzer benutzer = new Benutzer();
         benutzer.setVorname(vorname);
         benutzer.setNachname(nachname);
@@ -152,6 +84,34 @@ public class RegistrationControl {
         benutzer.setUsername(username);
         benutzer.setEmail(email);
         benutzer.setPasswort(passwort);
+        benutzerRepository.saveAndFlush(benutzer);
+
         return benutzer;
+    }
+
+    private void validateBenutzer(String vorname, String nachname, LocalDate geburtstag, String username,
+                                  String email, String passwort) throws Exception {
+        if(!ValidateUserControl.validFieldNotEmpty(vorname)){
+            throw new FirstNameEmptyException("Bitte geben Sie Ihren Vornamen an.");
+        }
+
+        if(!ValidateUserControl.validFieldNotEmpty(nachname)){
+            throw new LastNameEmptyException("Bitte geben Sie Ihren Nachnamen an.");
+        }
+
+        if(!ValidateUserControl.validateUserName(username,this.benutzerRepository)){
+            throw new UsernameAlreadyExistsException("Username existiert bereits!");
+        }
+
+        if(!ValidateUserControl.validateUserNameNotEmpty(username)){
+            throw new UsernameEmptyException("Der Nutzername darf nicht leer sein.");
+        }
+
+        if(!ValidateUserControl.validatePassword(passwort)){
+           throw new PasswordInvalidException("Passwort muss min 8 Zeichen sein, inkl. Groß-/Kleinbuchstaben, Zahl und Sonderzeichen.");
+        }
+        if(!ValidateUserControl.validateEmail(email)){
+           throw new InvalidEmailException("Email ist ungültig.");
+        }
     }
 }

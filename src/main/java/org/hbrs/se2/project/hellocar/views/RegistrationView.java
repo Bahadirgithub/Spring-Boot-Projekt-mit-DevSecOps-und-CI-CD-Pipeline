@@ -12,18 +12,23 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.RegistrationControl;
-import org.hbrs.se2.project.hellocar.control.results.RegistrationResult;
+import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
+import org.hbrs.se2.project.hellocar.control.exception.*;
 
 /**
  * View zur Registrierung neuer Benutzer (Student oder Gründer).
  */
+
+// try catch für Fehlermeldungen
+
 @Route("registration")
 public class RegistrationView extends VerticalLayout {
 
     // Constructor Injection – Spring injiziert die RegistrationControl automatisch
     public RegistrationView(RegistrationControl registrationControl) {
+
         // Seitentitel
-        H2 title = new H2("Registrierung");
+        add(new H2("Registrierung"));
 
         // Standard-Abstände reduzieren
         setSpacing(false);
@@ -43,8 +48,7 @@ public class RegistrationView extends VerticalLayout {
         // Eingabefelder
         TextField firstNameField = new TextField("Vorname");
         TextField lastNameField = new TextField("Nachname");
-        DatePicker birthdayField = new DatePicker("Geburtsdatum");
-        birthdayField.setMax(java.time.LocalDate.now());
+        DatePicker birthdayField = ValidateUserControl.validDatePicker();
 
         EmailField emailField = new EmailField("E-Mail Adresse");
         TextField usernameField = new TextField("Benutzername");
@@ -52,10 +56,6 @@ public class RegistrationView extends VerticalLayout {
         // Passwortfelder – Eingabe wird versteckt angezeigt
         PasswordField passwordField = new PasswordField("Passwort");
         PasswordField repeatPasswordField = new PasswordField("Passwort wiederholen");
-        passwordField.setMinLength(8);
-        repeatPasswordField.setMinLength(8);
-
-
 
 
         // Dropdown zur Auswahl ob Student oder Gründer
@@ -63,6 +63,7 @@ public class RegistrationView extends VerticalLayout {
         typeSelect.setLabel("Kontotyp");
         typeSelect.setItems("Student", "Gründer");
         typeSelect.setPlaceholder("Bitte wählen");
+
 
         // Felder nur für Studenten (zunächst versteckt)
         TextField universitaetField = new TextField("Universität");
@@ -82,126 +83,156 @@ public class RegistrationView extends VerticalLayout {
             unternehmensNameField.setVisible("Gründer".equals(typ));
         });
 
-        // Registrieren-Button mit Logik
-        Button registerButton = new Button("Account erstellen");
-        registerButton.addClickListener(e -> {
+            Button registerButton = new Button("Account erstellen");
+            registerButton.addClickListener(p -> {
+                registerButton.setEnabled(false);
 
-            // Vorab-Prüfung auf UI-Ebene, die keine Backend-Logik benötigt
-            if (!passwordField.getValue().equals(repeatPasswordField.getValue())) {
-                Notification.show("Die Passwörter stimmen nicht überein!");
-                return; // Bricht die Registrierung ab
-            }
+                // Versuche die Felder einzutragen und fange Exceptions falls etwas nicht klappt
+                try {
 
-            // Alle anderen Validierungen werden jetzt von der Control-Schicht übernommen.
-            // Das ist sauberer, da die UI nicht die Geschäftslogik kennen muss.
+                    //PasswordMissMatch testen, es wird hier getestet, weil wir nur hier das Wiederholungsfeld haben
+                    if(!passwordField.getValue().equals(repeatPasswordField.getValue())){
+                        throw new PasswordMissmatchException("Passwörter ungleich");
+                    }
 
-            String typ = typeSelect.getValue();
-            RegistrationResult result = null;
+                    // 2. Den Aufruf in den try-Block
+                    String type = typeSelect.getValue();
 
-            if ("Student".equals(typ)) {
-                // Semester sicher parsen (Fehler abfangen, falls keine Zahl eingegeben wurde)
-                int semester = 0; // Standardwert, falls Feld leer ist
-                if (!semesterField.getValue().isEmpty()) {
-                    try {
-                        semester = Integer.parseInt(semesterField.getValue());
-                    } catch (NumberFormatException ex) {
-                        Notification.show("Bitte ein gültiges Semester (Zahl) eingeben.");
+                    if ("Student".equals(type)) {
+                        // Semester sicher parsen
+                        int semester = 0;
+                        if (!semesterField.getValue().isEmpty()) {
+                            try {
+                                semester = Integer.parseInt(semesterField.getValue());
+                            }
+                            catch (NumberFormatException ex) {
+                                semesterField.setErrorMessage("Bitte ein gültiges Semester (Zahl) eingeben.");
+                                semesterField.setInvalid(true);
+                                return;
+                            }
+                        }
+                        // Aufruf der Control-Methode - hier könnten exceptions geworfen werden
+                        registrationControl.registriereStudent(
+                                firstNameField.getValue(), lastNameField.getValue(),
+                                birthdayField.getValue(), usernameField.getValue(),
+                                emailField.getValue(), passwordField.getValue(),
+                                universitaetField.getValue(), semester
+                        );
+                    } else if ("Gründer".equals(type)) {
+                        registrationControl.registriereGruender(
+                                firstNameField.getValue(), lastNameField.getValue(),
+                                birthdayField.getValue(), usernameField.getValue(),
+                                emailField.getValue(), passwordField.getValue(),
+                                unternehmensNameField.getValue()
+                        );
+                    } else {
+                        typeSelect.setErrorMessage("Bitte einen Kontotyp auswählen.");
+                        typeSelect.setInvalid(true);
                         return;
                     }
+
+                    UI.getCurrent().navigate(""); // Passe den String an deine Login-Route an
+
                 }
 
-                result = registrationControl.registriereStudent(
-                        firstNameField.getValue(),
-                        lastNameField.getValue(),
-                        birthdayField.getValue(),
-                        usernameField.getValue(),
-                        emailField.getValue(),
-                        passwordField.getValue(),
-                        universitaetField.getValue(),
-                        semester
-                );
-            } else if ("Gründer".equals(typ)) {
-                result = registrationControl.registriereGruender(
-                        firstNameField.getValue(),
-                        lastNameField.getValue(),
-                        birthdayField.getValue(),
-                        usernameField.getValue(),
-                        emailField.getValue(),
-                        passwordField.getValue(),
-                        unternehmensNameField.getValue()
-                );
-            }
+                catch(PasswordMissmatchException e){
+                    passwordField.setErrorMessage("Passwörter stimmen nicht überein");
+                    passwordField.setInvalid(true);
+                    repeatPasswordField.setErrorMessage("Bitte passen Sie die Passwörter an.");
+                    repeatPasswordField.setInvalid(true);
 
-            if (result == null) {
-                Notification.show("Bitte einen Kontotyp auswählen.");
-                return;
-            }
+                }
 
-            // Auswertung des RegistrationResult-Enums für spezifisches Benutzer-Feedback
-            switch (result) {
-                case SUCCESS:
-                    // Erfolgreich registriert – weiterleiten zur Startseite
-                    UI.getCurrent().navigate("");
-                    Notification.show("Erfolgreich registriert!");
-                    break;
-                case USERNAME_ALREADY_EXISTS:
-                    Notification.show("Dieser Benutzername ist leider schon vergeben.");
-                    break;
-                case USERNAME_IS_EMPTY:
-                    Notification.show("Der Benutzername darf nicht leer sein.");
-                    break;
-                case INVALID_EMAIL_FORMAT:
-                    Notification.show("Die E-Mail-Adresse hat ein ungültiges Format.");
-                    break;
-                case PASSWORD_TOO_SHORT:
-                    Notification.show("Das Passwort muss mindestens 8 Zeichen lang sein.");
-                    break;
-                default:
-                    Notification.show("Ein unbekannter Fehler ist aufgetreten.");
-            }
-        });
+                catch(UsernameEmptyException e){
+                    usernameField.setErrorMessage("Der Nutzername darf nicht leer sein.");
+                    usernameField.setInvalid(true);
+                }
 
-        // Container erstellen und Breite definieren
-        VerticalLayout formContainer = new VerticalLayout();
-        formContainer.setMaxWidth("360px");
-        formContainer.setWidthFull();
-        formContainer.setPadding(false);
-        formContainer.setSpacing(true);
+                catch(UsernameAlreadyExistsException e ){
+                    usernameField.setErrorMessage("Der Nutzername ist bereits vergeben");
+                    usernameField.setInvalid(true);
+                }
 
-        // Allen Feldern sagen, dass sie sich dem Container anpassen sollen
-        firstNameField.setWidthFull();
-        lastNameField.setWidthFull();
-        birthdayField.setWidthFull();
-        emailField.setWidthFull();
-        usernameField.setWidthFull();
-        passwordField.setWidthFull();
-        repeatPasswordField.setWidthFull();
-        typeSelect.setWidthFull();
-        universitaetField.setWidthFull();
-        semesterField.setWidthFull();
-        unternehmensNameField.setWidthFull();
-        registerButton.setWidthFull();
+                catch(InvalidEmailException e){
+                    emailField.setErrorMessage("Die E-Mail ist ungültig.");
+                    emailField.setInvalid(true); // Feld wird rot
+                }
 
-        // Alle Felder in den Container packen
-        formContainer.add(
-                firstNameField, lastNameField, birthdayField, emailField, usernameField,
-                passwordField, repeatPasswordField,
-                typeSelect,
-                universitaetField, semesterField, unternehmensNameField,
-                registerButton
-        );
+                catch(PasswordInvalidException e){
+                    passwordField.setErrorMessage("Das Passwort muss min. 8 Zeichen, davon min. eine Zahl, einen Großbuchstaben, einen Kleinbuchstaben und min ein Sonderzeichen enthalten.");
+                    passwordField.setInvalid(true); // Feld wird rot
+                }
 
-        // Container zur Haupt-View hinzufügen
-        add(logo, brandText, subtitleText, title, formContainer);
+                catch(IllegalArgumentException e){
+                    semesterField.setErrorMessage("Bitte geben Sie ein gültiges Semester ein.");
+                    semesterField.setInvalid(true);
+                }
 
-        // Alle Komponenten zur View hinzufügen
-        //add(firstNameField, lastNameField, birthdayField, emailField, usernameField,
-        //        passwordField, repeatPasswordField,
-        //        typeSelect,
-        //        universitaetField, semesterField, unternehmensNameField,
-        //        registerButton);
+                catch(FirstNameEmptyException e){
+                    firstNameField.setErrorMessage("Bitte geben Sie Ihren Vornamen an.");
+                    firstNameField.setInvalid(true);
+                }
 
-        // Alles zentriert ausrichten
-        setAlignItems(Alignment.CENTER);
+                catch(LastNameEmptyException e){
+                    lastNameField.setErrorMessage("Bitte geben Sie Ihren Nachnamen an.");
+                    lastNameField.setInvalid(true);
+                }
+
+                catch(StartUpEmptyException e){
+                    unternehmensNameField.setErrorMessage("Bitte geben Sie Ihr Unternehmen an.");
+                    unternehmensNameField.setInvalid(true);
+                }
+
+                catch(UniEmptyException e){
+                    universitaetField.setErrorMessage("Bitte geben Sie Ihre Universität an.");
+                    universitaetField.setInvalid(true);
+                }
+
+                catch (Exception ex) {
+                    Notification.show(ex.getMessage());
+                }
+
+                finally {
+                    //  Immer wieder freigeben, wenn wir nicht navigiert sind (Fehlerfall)
+                    registerButton.setEnabled(true);
+                }
+            });
+
+
+        ///////////////Design Änderungen//////////////////////////////
+            // Container erstellen und Breite definieren
+            VerticalLayout formContainer = new VerticalLayout();
+            formContainer.setMaxWidth("360px");
+            formContainer.setWidthFull();
+            formContainer.setPadding(false);
+            formContainer.setSpacing(true);
+
+            // Allen Feldern sagen, dass sie sich dem Container anpassen sollen
+            firstNameField.setWidthFull();
+            lastNameField.setWidthFull();
+            birthdayField.setWidthFull();
+            emailField.setWidthFull();
+            usernameField.setWidthFull();
+            passwordField.setWidthFull();
+            repeatPasswordField.setWidthFull();
+            typeSelect.setWidthFull();
+            universitaetField.setWidthFull();
+            semesterField.setWidthFull();
+            unternehmensNameField.setWidthFull();
+            registerButton.setWidthFull();
+
+            // Alle Felder in den Container packen
+            formContainer.add(
+                    firstNameField, lastNameField, birthdayField, emailField, usernameField,
+                    passwordField, repeatPasswordField,
+                    typeSelect,
+                    universitaetField, semesterField, unternehmensNameField,
+                    registerButton
+            );
+
+            // Container zur Haupt-View hinzufügen
+            add(formContainer);
+
+            setAlignItems(Alignment.CENTER);
+        }
     }
-}

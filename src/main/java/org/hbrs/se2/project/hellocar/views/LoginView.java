@@ -17,7 +17,6 @@ import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 
 /**
@@ -61,7 +60,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         // Listener für den Klick auf "Anmelden"
         loginForm.addLoginListener(e -> {
             try {
-                boolean isAuthenticated = loginControl.authentificate(e.getUsername(), e.getPassword());
+                boolean isAuthenticated = loginControl.authenticate(e.getUsername(), e.getPassword());
                 if (isAuthenticated) {
                     grabAndSetUserIntoSession();
                     navigateToMainPage();
