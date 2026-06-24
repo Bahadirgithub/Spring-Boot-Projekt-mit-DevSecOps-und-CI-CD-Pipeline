@@ -37,9 +37,9 @@ public class VerwaltungControl {
     }
 
     @Transactional
-    public boolean loeschen(BenutzerDTO currentUser){
+    public void loeschen(BenutzerDTO currentUser){
         if (currentUser == null) {
-            return false;
+            return;
         }
 
         int userId = currentUser.getUserId();
@@ -54,10 +54,7 @@ public class VerwaltungControl {
 
         if (benutzerRepository.existsById(userId)) {
             benutzerRepository.deleteById(userId);
-            return true;
         }
-
-        return false;
     }
 
 
@@ -183,92 +180,80 @@ public class VerwaltungControl {
         return true;
     }
 
-    public boolean vornameAendern(Benutzer benutzer, String x){
-        if(istLeer(x))return true;
+    public void vornameAendern(Benutzer benutzer, String x){
+        if(istLeer(x))return;
         benutzer.setVorname(x);
         System.out.println("Der Vorname "+x+" wurde eingegeben.");
-        return true;
     }
 
-    public boolean nachnameAendern(Benutzer benutzer,String x){
-        if(istLeer(x))return true;
+    public void nachnameAendern(Benutzer benutzer,String x){
+        if(istLeer(x))return;
         benutzer.setNachname(x);
         System.out.println("Der Nachname "+x+" wurde eingegeben.");
-        return true;
     }
 
-    public boolean emailAendern(Benutzer benutzer, String x){
-        if(istLeer(x))return true;
+    public void emailAendern(Benutzer benutzer, String x){
+        if(istLeer(x))return;
         if(!ValidateUserControl.validateEmail(x)){
-            return false; // Validierung fehlgeschlagen
+            return; // Validierung fehlgeschlagen
         }
         benutzer.setEmail(x);
         System.out.println("Die E-Mail "+x+" wurde eingegeben.");
-        return true;
     }
 
-    public boolean passwortAendern(Benutzer benutzer, String x){
-        if(istLeer(x))return true;
+    public void passwortAendern(Benutzer benutzer, String x){
+        if(istLeer(x))return;
         //hier muss eigentlich noch ne E-Mail gesendet werden als confirmation.
-        if(x.length() < 8){return false;} // passwort muss länger als 8 Zeichen sein
+        if(x.length() < 8){return;} // passwort muss länger als 8 Zeichen sein
         benutzer.setPasswort(x);
         System.out.println("Das neue Passwort wurde eingegeben.");
-        return true;
     }
 
-    public boolean telefonnummerAendern(Benutzer benutzer, String x){
-        if(istLeer(x))return true;
+    public void telefonnummerAendern(Benutzer benutzer, String x){
+        if(istLeer(x))return;
         benutzer.setTelefonnummer(x);
         System.out.println("Die Telefonnummer "+x+" wurde eingegeben.");
-        return true;
     }
 
-    public boolean universitaetAendern(Student student, String x){
-        if(istLeer(x))return true;
+    public void universitaetAendern(Student student, String x){
+        if(istLeer(x))return;
         student.setUniversitaet(x);
         System.out.println("Die Universität "+x+" wurde eingegeben.");
-        return true;
     }
 
-    public boolean semesterAendern(Student student, Integer x){
-        if(x == null)return true;
+    public void semesterAendern(Student student, Integer x){
+        if(x == null)return;
         student.setSemester(x);
         System.out.println("Das Semester "+x+" wurde eingegeben.");
-        return true;
     }
-    public boolean unternehmensNameAendern(Gruender gruender, String x){
-        if(istLeer(x)) return true;
+    public void unternehmensNameAendern(Gruender gruender, String x){
+        if(istLeer(x)) return;
         gruender.setUnternehmensname(x);
         System.out.println("Das Unternehmen " + x + " wurde eingegeben.");
-        return true;
     }
 
-    public boolean standortAendern(Gruender gruender, String x){
-        if(istLeer(x)) return true;
+    public void standortAendern(Gruender gruender, String x){
+        if(istLeer(x)) return;
         gruender.setStandort(x);
         System.out.println("Der Standort " + x + " wurde eingegeben.");
-        return true;
     }
-    public boolean geburtstagAendern(Benutzer benutzer, LocalDate x){
-        if(x == null) return true;
+    public void geburtstagAendern(Benutzer benutzer, LocalDate x){
+        if(x == null) return;
         LocalDate vor18Jahren = LocalDate.now().minusYears(18);
-        if(x.isBefore(vor18Jahren) ){return false;}
+        if(x.isBefore(vor18Jahren) ){return;}
         benutzer.setGeburtstag(x);
         System.out.println("Das Geburtsdatum " + x + " wurde eingegeben.");
-        return true;
     }
 
-    public boolean abschlussAendern(Student student, String x){
-        if(istLeer(x)) return true;
+    public void abschlussAendern(Student student, String x){
+        if(istLeer(x)) return;
         student.setAbschluss(x);
         System.out.println("Der Abschluss " + x + " wurde eingegeben.");
-        return true;
     }
 
-    public boolean skillsAendern(Student student, String x){
-        if(istLeer(x)) return true;
+    public void skillsAendern(Student student, String x){
+        if(istLeer(x)) return;
         student.setSkills(x);
         System.out.println("Die Skills " + x + " wurden eingegeben.");
-        return true;
     }
 }
