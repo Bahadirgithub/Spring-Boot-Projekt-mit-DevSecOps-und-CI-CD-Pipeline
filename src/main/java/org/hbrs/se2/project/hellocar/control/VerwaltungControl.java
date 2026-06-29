@@ -84,8 +84,10 @@ public class VerwaltungControl {
     /**
      * Lädt den Student neu aus der DB
      */
+    @Transactional
     public Student ladeStudent(int userId) {
         Optional<Student> studentTMP = studentRepository.findById(userId);
+        studentTMP.ifPresent(s -> s.getSkills().size()); // erzwingt das Laden der Skills innerhalb der Transaktion
         return studentTMP.orElse(null);
     }
 
@@ -109,7 +111,7 @@ public class VerwaltungControl {
                                  String universitaet,
                                  Integer semester,
                                  String abschluss,
-                                 String skills){
+                                 java.util.List<String> skills){
 
         if (aktuellerBenutzer == null){
             System.out.println("Kein Eingeloggter Benutzer");
@@ -265,8 +267,8 @@ public class VerwaltungControl {
         return true;
     }
 
-    public boolean skillsAendern(Student student, String x){
-        if(istLeer(x)) return true;
+    public boolean skillsAendern(Student student, java.util.List<String> x){
+        if(x == null || x.isEmpty()) return true;
         student.setSkills(x);
         System.out.println("Die Skills " + x + " wurden eingegeben.");
         return true;
