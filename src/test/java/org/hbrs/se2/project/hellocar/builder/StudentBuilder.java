@@ -3,6 +3,8 @@ package org.hbrs.se2.project.hellocar.builder;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.entities.Student;
 
+import java.util.Arrays;
+
 /**
  * Test-Builder für die Erstellung eines vollständigen Studenten (Benutzer + Student-Rolle).
  * Dieses Pattern ermöglicht die einfache und flexible Erstellung von Test-Objekten für Unit-Tests.
@@ -122,7 +124,7 @@ public class StudentBuilder {
         // 3. Befülle das Student-Objekt mit den spezifischen Werten dieses Builders.
         student.setUniversitaet(this.universitaet);
         student.setSemester(this.semester);
-        student.setSkills(this.skills);
+        student.setSkills(Arrays.asList(this.skills));
         student.setAbschluss(this.abschluss);
 
         // 4. Gib die beiden erstellten Objekte in einem sauberen Container zurück.
