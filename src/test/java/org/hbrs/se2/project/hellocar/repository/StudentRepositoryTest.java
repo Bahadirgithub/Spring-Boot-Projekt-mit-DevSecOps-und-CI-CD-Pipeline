@@ -1,5 +1,6 @@
 package org.hbrs.se2.project.hellocar.repository;
 
+import org.hbrs.se2.project.hellocar.entities.Skill;
 import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.builder.StudentBuilder;
@@ -10,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,6 +49,17 @@ class StudentRepositoryTest {
 
         // UserId setzen für DB-Beziehung
         testStudent.setUserId(testBenutzer.getUserId());
+    }
+
+    //Hilfsmethode um Skillset zu erstellen
+    private Set<Skill> createSkillSet(String[] skillNames) {
+        Set<Skill> skillSet = new HashSet<>();
+        for (String name : skillNames) {
+            Skill skill = new Skill();
+            skill.setName(name);
+            skillSet.add(skill);
+        }
+        return skillSet;
     }
 
     @Test
@@ -123,7 +133,7 @@ class StudentRepositoryTest {
         // Act - Daten ändern
         gespeicherterStudent.setUniversitaet("RWTH Aachen");
         gespeicherterStudent.setSemester(5);
-        gespeicherterStudent.setSkills(Arrays.asList("Python", "Docker"));
+        gespeicherterStudent.setSkillEntities(createSkillSet(new String[]{"Python", "Docker"}));
         Student aktualisierterStudent = studentRepository.save(gespeicherterStudent);
 
         // Assert - Round Trip: Änderungen persistiert?
@@ -156,7 +166,7 @@ class StudentRepositoryTest {
     @Test
     void testStudentMitLeerenSkills() {
         // Arrange
-        testStudent.setSkills(Arrays.asList());
+        testStudent.setSkillEntities(new HashSet<>());
         studentRepository.save(testStudent);
 
         // Act
@@ -173,8 +183,7 @@ class StudentRepositoryTest {
     @Test
     void testStudentMitVielenSkills() {
         // Arrange
-        List<String> vieleSkills = Arrays.asList("Java", "Spring", "React", "Angular", "Vue", "Node.js", "Python");
-        testStudent.setSkills(vieleSkills);
+        testStudent.setSkillEntities(createSkillSet(new String[]{"Java", "Spring", "React", "Angular", "Vue", "Node.js", "Python"}));
         studentRepository.save(testStudent);
 
         // Act
