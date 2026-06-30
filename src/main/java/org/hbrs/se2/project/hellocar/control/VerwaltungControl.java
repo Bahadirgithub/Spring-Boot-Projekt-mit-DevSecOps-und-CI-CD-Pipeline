@@ -1,5 +1,6 @@
 package org.hbrs.se2.project.hellocar.control;
 
+import org.hbrs.se2.project.hellocar.control.exception.InvalidEmailException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.impl.BenutzerDTOImpl;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
@@ -106,7 +107,7 @@ public class VerwaltungControl {
                                  String universitaet,
                                  Integer semester,
                                  String abschluss,
-                                 String skills){
+                                 String skills) throws InvalidEmailException {
 
         if (aktuellerBenutzer == null){
             System.out.println("Kein Eingeloggter Benutzer");
@@ -149,7 +150,7 @@ public class VerwaltungControl {
                                   String unternehmensname,
                                   String standort
 
-                                  ){
+                                  ) throws InvalidEmailException {
 
         if (aktuellerBenutzer == null){
             System.out.println("Kein Eingeloggter Benutzer");
@@ -192,10 +193,10 @@ public class VerwaltungControl {
         System.out.println("Der Nachname "+x+" wurde eingegeben.");
     }
 
-    public void emailAendern(Benutzer benutzer, String x){
+    public void emailAendern(Benutzer benutzer, String x) throws InvalidEmailException {
         if(istLeer(x))return;
         if(!ValidateUserControl.validateEmail(x)){
-            return; // Validierung fehlgeschlagen
+            throw new InvalidEmailException("Das ist keine validierte Email"); // Validierung fehlgeschlagen
         }
         benutzer.setEmail(x);
         System.out.println("Die E-Mail "+x+" wurde eingegeben.");
