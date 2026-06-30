@@ -88,7 +88,7 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
                   ideaService.createIdea(aktuelleIdee);
 
                   Notification.show("Gründungsidee erfolgreich gespeichert.");
-                  clearForm(); // Formular für die nächste Eingabe leeren
+                  UI.getCurrent().navigate(ShowIdeasView.class);
 
                 } catch (com.vaadin.flow.data.binder.ValidationException validationException) {
                   // Falls der Nutzer unvollständige Daten eingegeben hat
