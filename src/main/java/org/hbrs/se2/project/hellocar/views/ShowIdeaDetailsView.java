@@ -159,7 +159,11 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
                 }
                 bewertungControl.bewertungErstellen(currentUser, currentIdeaId, selectedStars[0], commentField.getValue());
                 com.vaadin.flow.component.notification.Notification.show("Bewertung gespeichert!");
-                UI.getCurrent().getPage().reload();
+
+                commentField.clear();
+                selectedStars[0] = 0;
+                updateStars(starRatingLayout, 0);
+                loadReviews(currentIdeaId);
             });
 
             reviewFormContainer.add(commentField, saveButton);
