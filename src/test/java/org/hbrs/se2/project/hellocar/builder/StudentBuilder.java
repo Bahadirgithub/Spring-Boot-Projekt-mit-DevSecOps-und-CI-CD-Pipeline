@@ -146,7 +146,7 @@ public class StudentBuilder {
         // 3. Befülle das Student-Objekt mit den spezifischen Werten dieses Builders.
         student.setUniversitaet(this.universitaet);
         student.setSemester(this.semester);
-        student.setSkills(Arrays.asList(this.skills));
+        student.setSkillEntities(baueSkillEntities(this.skills));
         student.setAbschluss(this.abschluss);
 
         // 4. Gib die beiden erstellten Objekte in einem sauberen Container zurück.
