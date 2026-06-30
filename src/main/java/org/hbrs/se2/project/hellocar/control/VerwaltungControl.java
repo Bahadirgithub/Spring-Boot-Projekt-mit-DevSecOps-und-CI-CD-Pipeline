@@ -98,7 +98,7 @@ public class VerwaltungControl {
 
 
     @Transactional
-    public boolean updateStudent(BenutzerDTO aktuellerBenutzer,
+    public void updateStudent(BenutzerDTO aktuellerBenutzer,
                                  String vorname,
                                  String nachname,
                                  LocalDate geburtstag,
@@ -110,15 +110,13 @@ public class VerwaltungControl {
                                  String skills) throws InvalidEmailException {
 
         if (aktuellerBenutzer == null){
-            System.out.println("Kein Eingeloggter Benutzer");
-            return false;
+            throw new IllegalArgumentException("Kein Benutzer angegeben");
         }
         Optional <Benutzer> benutzerTMP = benutzerRepository.findById(aktuellerBenutzer.getUserId());
         Optional <Student> studentTMP = studentRepository.findById(aktuellerBenutzer.getUserId());
 
         if (benutzerTMP.isEmpty() || studentTMP.isEmpty()) {
-            System.out.println("Benutzer oder Student wurde nicht gefunden.");
-            return false;
+            throw new IllegalArgumentException("Benutzer oder Student nicht gefunden.");
         }
         Benutzer benutzer = benutzerTMP.get();
         Student student = studentTMP.get();
@@ -137,11 +135,10 @@ public class VerwaltungControl {
 
         benutzerRepository.save(benutzer);
         studentRepository.save(student);
-        return true;
     }
 
     @Transactional
-    public boolean updateGruender(BenutzerDTO aktuellerBenutzer,
+    public void updateGruender(BenutzerDTO aktuellerBenutzer,
                                   String vorname,
                                   String nachname,
                                   LocalDate geburtstag,
@@ -153,15 +150,13 @@ public class VerwaltungControl {
                                   ) throws InvalidEmailException {
 
         if (aktuellerBenutzer == null){
-            System.out.println("Kein Eingeloggter Benutzer");
-            return false;
+            throw new IllegalArgumentException("Kein Benutzer angegeben");
         }
         Optional <Benutzer> benutzerTMP = benutzerRepository.findById(aktuellerBenutzer.getUserId());
         Optional <Gruender> gruenderTMP = gruenderRepository.findById(aktuellerBenutzer.getUserId());
 
         if (benutzerTMP.isEmpty() || gruenderTMP.isEmpty()) {
-            System.out.println("Benutzer oder Gründer nicht gefunden.");
-            return false;
+            throw new IllegalArgumentException("Benutzer oder Student nicht gefunden.");
         }
         Benutzer benutzer = benutzerTMP.get();
         Gruender gruender = gruenderTMP.get();
@@ -178,7 +173,6 @@ public class VerwaltungControl {
 
         benutzerRepository.save(benutzer);
         gruenderRepository.save(gruender);
-        return true;
     }
 
     public void vornameAendern(Benutzer benutzer, String x){
