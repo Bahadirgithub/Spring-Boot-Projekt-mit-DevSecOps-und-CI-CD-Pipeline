@@ -12,90 +12,85 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Datenbanktest für die Entity Gruendungsidee (US #43).
- * Schicht: Integrationstest — testet das Zusammenspiel von
- * JPA-Repository, Hibernate und der echten PostgreSQL-Datenbank.
+ * Integrationstests für die Entity Gruendungsidee (US #43).
+ * Testet das Zusammenspiel von JPA-Repository, Hibernate und PostgreSQL.
+ * @Rollback macht alle DB-Änderungen nach jedem Test automatisch rückgängig.
  */
 @SpringBootTest
 @Transactional
 @Rollback
 public class DatenbankTest {
+
     @Autowired
     private BenutzerRepository benutzerRepository;
+
     @Autowired
     private GruendungsideeRepository gruendungsideeRepository;
-    // Injizieren der neuen TestDatenFabrik
+
+    /**
+     * Neu: TestDatenFabrik ersetzt die alte private Hilfsmethode erstelleTestGruender().
+     * Vorteil: Testdaten-Erstellung ist zentralisiert — wenn sich eine Entity ändert,
+     * muss nur die Fabrik angepasst werden, nicht jeder Test einzeln.
+     */
     @Autowired
     private TestDatenFabrik testDatenFabrik;
+
     /**
-     * Der EntityManager verwaltet den JPA First-Level-Cache (RAM-Zwischenspeicher).
-     * entityManager.clear() leert diesen Cache und zwingt JPA beim nächsten
-     * Lesezugriff, wirklich in die PostgreSQL-Datenbank zu schauen — und nicht
-     * das bereits im Cache liegende Java-Objekt zurückzugeben.
-     * Ohne clear() wäre der Round-Trip-Test kein echter Integrationstest.
+     * Leert den JPA First-Level-Cache.
+     * Notwendig damit findById() wirklich aus der DB liest
+     * und nicht das bereits im RAM liegende Objekt zurückgibt.
      */
     @PersistenceContext
     private EntityManager entityManager;
-    // -------------------------------------------------------
-    // TEST 1 — DB-Verbindungstest
-    // -------------------------------------------------------
+
+
     /**
-     * Prüft, ob die Anwendung beim Start erfolgreich eine Verbindung
-     * zur PostgreSQL-Datenbank aufbaut.
-     * Testziel: VPN aktiv, Zugangsdaten in application.properties korrekt,
-     * kein Netzwerkproblem zwischen App und dumbo.inf.h-brs.de.
-     * Methode: Das Repository wird injiziert und count() aufgerufen —
-     * eine lesende, nicht-verändernde Abfrage.
-     * Bei Verbindungsproblemen würde hier eine PSQLException geworfen.
+     * TEST 1 — DB-Verbindungstest.
+     * Prüft ob Spring das Repository injiziert hat und
+     * ob eine einfache DB-Abfrage ohne Exception durchläuft.
+     * Schlägt fehl wenn kein VPN aktiv oder application.properties falsch.
      */
     @Test
     void testDatenbankVerbindung() {
-        // assertNotNull: Spring muss das Repository erfolgreich injiziert haben
-        assertNotNull(
-                benutzerRepository,
-                "BenutzerRepository ist null — Dependency Injection fehlgeschlagen."
-        );
-        // assertDoesNotThrow: count() darf keine Exception werfen.
-        // Schlägt fehl wenn DB nicht erreichbar (kein VPN, falsche Credentials).
-        assertDoesNotThrow(
-                () -> benutzerRepository.count(),
-                "DB-Verbindung fehlgeschlagen — VPN und application.properties prüfen."
-        );
+        assertNotNull(benutzerRepository,
+                "BenutzerRepository ist null — Dependency Injection fehlgeschlagen.");
+
+        assertDoesNotThrow(() -> benutzerRepository.count(),
+                "DB-Verbindung fehlgeschlagen — VPN und application.properties prüfen.");
     }
-    // -------------------------------------------------------
-    // TEST 2 — Round-Trip-Test (C-R-Ass-D)
-    // -------------------------------------------------------
+
+
     /**
-     * Vollständiger Round-Trip-Test für Gruendungsidee (Create, Read, Assert, Delete).
-     * Testziel: Alle Pflichtfelder der Gruendungsidee werden korrekt in
-     * PostgreSQL gespeichert und byte-identisch wieder ausgelesen.
-     * Die Gruendungsidee ist die zentrale Entity der Plattform —
-     * funktioniert sie nicht, können weder Gründer Ideen veröffentlichen
-     * noch Studenten sich bewerben.
-     * Technische Besonderheit beim Delete:
-     * Gruendungsidee.ideeId hat kein @GeneratedValue. Java setzt den
-     * Standardwert 0. Spring Data's delete(entity) prüft intern isNew() —
-     * bei ideeId=0 hält es das Objekt fälschlicherweise für "neu" und
-     * bricht kommentarlos ab. Deshalb nutzen wir deleteAllInBatch(), das
-     * direkt SQL "DELETE WHERE idee_id IN (...)" generiert und isNew()
-     * komplett umgeht.
+     * TEST 2 — Round-Trip-Test (C-R-Ass-D) für Gruendungsidee.
+     *
+     * Änderungen gegenüber der alten Version:
+     *
+     * 1. TestDatenFabrik statt eigener Hilfsmethode für die Testvorbereitung.
+     *
+     * 2. Gruendungsidee hat jetzt @GeneratedValue(IDENTITY) — die DB vergibt
+     *    die ideeId automatisch. Nach saveAndFlush() ist ideeId > 0.
+     *    Dadurch können wir jetzt findById() und deleteById() benutzen —
+     *    der alte deleteAllInBatch()-Workaround ist nicht mehr nötig.
+     *
+     * 3. Der Update-Schritt (U) wurde entfernt, da aktualisiereBeschreibung()
+     *    nicht mehr im GruendungsideeRepository vorhanden ist.
      */
     @Test
     void testGruendungsideeRoundTrip() {
-        // Voraussetzung: Gründer anlegen (Fremdschlüssel-Abhängigkeit)
-        // Nutzung der Fabrik anstelle der alten Hilfsmethode
+
+        // Vorbereitung: Fabrik erstellt Benutzer + Gründer in der DB
         Benutzer benutzer = testDatenFabrik.erstelleUndSpeichereBenutzer("RoundTripTest");
         Gruender gruender = testDatenFabrik.erstelleUndSpeichereGruender(benutzer);
         int gruenderUserId = gruender.getUserId();
+
+
         // -------------------------------------------
         // C — Create: Gruendungsidee speichern
-        // Felder aus Gruendungsidee.java:
-        //   gruenderUserId, beschreibung, position, anforderungen, arbeitsbedingungen
         // -------------------------------------------
         Gruendungsidee idee = new Gruendungsidee();
         idee.setGruenderUserId(gruenderUserId);
@@ -104,48 +99,60 @@ public class DatenbankTest {
         idee.setAnforderungen("Java, Spring Boot, React");
         idee.setArbeitsbedingungen("Remote, flexible Arbeitszeiten");
         gruendungsideeRepository.saveAndFlush(idee);
+
+        // NEU: Dank @GeneratedValue(IDENTITY) setzt die DB jetzt die ID.
+        // ideeId ist nach saveAndFlush() korrekt befüllt — nicht mehr 0!
+        int gespeicherteId = idee.getIdeeId();
+        assertTrue(gespeicherteId > 0,
+                "ideeId ist 0 — @GeneratedValue(IDENTITY) hat nicht funktioniert.");
+
+
         // -------------------------------------------
         // R — Read: Idee aus der echten DB laden
-        //
-        // entityManager.clear() leert den JPA-Cache.
-        // Ohne clear() würde findByGruenderUserId() das Java-Objekt
-        // aus dem RAM zurückgeben (= dieselbe Instanz wie oben).
-        // assertNotSame() würde dann fälschlicherweise fehlschlagen.
+        // Cache leeren → erzwingt echten DB-Zugriff
         // -------------------------------------------
         entityManager.clear();
-        // findByGruenderUserId() kommt aus GruendungsideeRepository —
-        // sucht über den fachlichen Fremdschlüssel, nicht über die technische ID
-        List<Gruendungsidee> gefundeneIdeen =
-                gruendungsideeRepository.findByGruenderUserId(gruenderUserId);
-        assertFalse(
-                gefundeneIdeen.isEmpty(),
-                "Keine Gruendungsidee für gruenderUserId=" + gruenderUserId + " gefunden."
-        );
-        Gruendungsidee geleseneIdee = gefundeneIdeen.get(0);
+
+        // NEU: findById() statt findByGruenderUserId() —
+        // das ist jetzt möglich weil die ID korrekt gesetzt ist.
+        Optional<Gruendungsidee> wrapper =
+                gruendungsideeRepository.findById(gespeicherteId);
+
+        assertTrue(wrapper.isPresent(),
+                "Gruendungsidee mit ID " + gespeicherteId + " nicht in DB gefunden.");
+
+        Gruendungsidee geleseneIdee = wrapper.get();
+
+
         // -------------------------------------------
         // Ass — Assert: Feldweise Gleichheitsprüfung
+        // -------------------------------------------
+        assertEquals(gruenderUserId,
+                geleseneIdee.getGruenderUserId(),    "gruenderUserId stimmt nicht.");
+        assertEquals("KI-gestützte Lernplattform für Studenten",
+                geleseneIdee.getBeschreibung(),      "beschreibung stimmt nicht.");
+        assertEquals("Full-Stack Entwickler",
+                geleseneIdee.getPosition(),          "position stimmt nicht.");
+        assertEquals("Java, Spring Boot, React",
+                geleseneIdee.getAnforderungen(),     "anforderungen stimmen nicht.");
+        assertEquals("Remote, flexible Arbeitszeiten",
+                geleseneIdee.getArbeitsbedingungen(),"arbeitsbedingungen stimmen nicht.");
+
+        // Zwei verschiedene Objekte → Cache war wirklich leer
+        assertNotSame(idee, geleseneIdee,
+                "Gleiche Instanz — entityManager.clear() hat nicht gewirkt.");
+
+
+        // -------------------------------------------
+        // D — Delete: Löschen und verifizieren
         //
-        // assertEquals: inhaltlich gleich (Wert aus DB stimmt überein)
-        // assertNotSame: verschiedene Java-Objekte (echter DB-Zugriff hat stattgefunden)
+        // NEU: deleteById() statt deleteAllInBatch().
+        // Funktioniert jetzt korrekt weil gespeicherteId > 0 ist.
         // -------------------------------------------
-        assertEquals(gruenderUserId,                             geleseneIdee.getGruenderUserId(),    "gruenderUserId stimmt nicht.");
-        assertEquals("KI-gestützte Lernplattform für Studenten", geleseneIdee.getBeschreibung(),      "beschreibung stimmt nicht.");
-        assertEquals("Full-Stack Entwickler",                    geleseneIdee.getPosition(),           "position stimmt nicht.");
-        assertEquals("Java, Spring Boot, React",                 geleseneIdee.getAnforderungen(),      "anforderungen stimmen nicht.");
-        assertEquals("Remote, flexible Arbeitszeiten",           geleseneIdee.getArbeitsbedingungen(), "arbeitsbedingungen stimmen nicht.");
-        // Zwei verschiedene Objekte — beweist: Cache war leer, DB wurde wirklich gelesen
-        assertNotSame(idee, geleseneIdee, "Gleiche Instanz — entityManager.clear() hat nicht gewirkt.");
-        // -------------------------------------------
-        // D — Delete: Idee löschen und verifizieren
-        //
-        // deleteAllInBatch() generiert: DELETE WHERE idee_id IN (0)
-        // Das umgeht den isNew()-Bug bei ideeId=0.
-        // -------------------------------------------
-        gruendungsideeRepository.deleteAllInBatch(gefundeneIdeen);
-        entityManager.clear();
-        assertFalse(
-                gruendungsideeRepository.existsByGruenderUserId(gruenderUserId),
-                "Gruendungsidee noch vorhanden — deleteAllInBatch() hat nicht funktioniert."
-        );
+        gruendungsideeRepository.deleteById(gespeicherteId);
+        entityManager.flush();
+
+        assertFalse(gruendungsideeRepository.existsById(gespeicherteId),
+                "Idee noch vorhanden — deleteById() hat nicht funktioniert.");
     }
 }
