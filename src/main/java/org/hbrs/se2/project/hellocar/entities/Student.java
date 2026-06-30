@@ -2,7 +2,11 @@ package org.hbrs.se2.project.hellocar.entities;
 
 import jakarta.persistence.*;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "student", schema = "ahsogehts")
@@ -12,8 +16,9 @@ public class Student {
     private String studentId;
     private String universitaet;
     private int semester;
-    private java.util.List<String> skills;
     private String abschluss;
+
+    private Set<Skill> skillEntities = new HashSet<>();
 
     @Id
     @Column(name = "user_id")
@@ -55,17 +60,6 @@ public class Student {
         this.semester = semester;
     }
 
-    @ElementCollection
-    @CollectionTable(name = "student_skills", schema = "ahsogehts", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "skill")
-    public java.util.List<String> getSkills() {
-        return skills;
-    }
-
-    public void setSkills(java.util.List<String> skills) {
-        this.skills = skills;
-    }
-
     @Basic
     @Column(name = "abschluss")
     public String getAbschluss() {
@@ -74,6 +68,33 @@ public class Student {
 
     public void setAbschluss(String abschluss) {
         this.abschluss = abschluss;
+    }
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "student_skills",
+            schema = "ahsogehts",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id", referencedColumnName = "skill_id")
+    )
+    public Set<Skill> getSkillEntities() {
+        return skillEntities;
+    }
+
+    public void setSkillEntities(Set<Skill> skillEntities) {
+        this.skillEntities = skillEntities == null ? new HashSet<>() : skillEntities;
+    }
+    @Transient
+    public List<String> getSkills() {
+        if (skillEntities == null) {
+            return Collections.emptyList();
+        }
+
+        return skillEntities.stream()
+                .map(Skill::getName)
+                .filter(Objects::nonNull)
+                .sorted()
+                .toList();
     }
 
     @Override
