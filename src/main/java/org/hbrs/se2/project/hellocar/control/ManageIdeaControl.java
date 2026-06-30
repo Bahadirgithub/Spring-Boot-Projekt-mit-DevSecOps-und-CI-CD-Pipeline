@@ -36,42 +36,40 @@ public class ManageIdeaControl {
                 .toList();
     }
 
+    private GruendungsideeDTO mapToDTO(Gruendungsidee entity) {
+        GruendungsideeDTOImpl dto = new GruendungsideeDTOImpl();
+        dto.setIdeeId(entity.getIdeeId());
+        dto.setGruenderUserId(entity.getGruenderUserId());
+        dto.setBeschreibung(entity.getBeschreibung());
+        dto.setPosition(entity.getPosition());
+        dto.setAnforderungen(entity.getAnforderungen());
+        dto.setArbeitsbedingungen(entity.getArbeitsbedingungen());
+        dto.setGesuchteSkills(entity.getGesuchteSkills()); // Falls deine Entity das direkt zurückgibt
+
+        // Gründerdaten laden
+        Gruender gruender = gruenderRepository.findById(entity.getGruenderUserId())
+                .orElseThrow(() -> new IllegalStateException("Datenkonsistenz verletzt!"));
+        dto.setUnternehmensname(gruender.getUnternehmensname());
+
+        return dto;
+    }
+
+    @Transactional
+    public GruendungsideeDTO findIdeaById(int ideeId) {
+        return repository.findById(ideeId)
+                .map(this::mapToDTO)
+                .orElse(null);
+    }
+
     /**
      * Holt alle Gründungsideen aus der Datenbank und gibt sie als DTOs zurück.
      */
     @Transactional
     public List<GruendungsideeDTO> readAllIdeas() {
-        // Entities aus der Datenbank laden
-        List<Gruendungsidee> entities = repository.findAll();
-
-        // Leere Liste für die DTO-Interfaces erstellen
-        List<GruendungsideeDTO> dtoList = new ArrayList<>();
-
-        // Jede Entity einzeln durchgehen und Werte kopieren
-        for (Gruendungsidee entity : entities) {
-            GruendungsideeDTOImpl dto = new GruendungsideeDTOImpl();
-
-            dto.setIdeeId(entity.getIdeeId());
-            dto.setGruenderUserId(entity.getGruenderUserId());
-            dto.setBeschreibung(entity.getBeschreibung());
-            dto.setPosition(entity.getPosition());
-            dto.setAnforderungen(entity.getAnforderungen());
-            dto.setArbeitsbedingungen(entity.getArbeitsbedingungen());
-            dto.setGesuchteSkills(entity.getGesuchteSkills());
-            dto.setGruender(null); // Dummy, solange keine Relation aktiv ist
-
-            // Da der Gründer immer existiert, laden wir ihn direkt per .orElseThrow()
-            Gruender gruender = gruenderRepository.findById(entity.getGruenderUserId())
-                    .orElseThrow(() -> new IllegalStateException("Datenkonsistenz verletzt: Gründer mit ID " + entity.getGruenderUserId() + " nicht gefunden!"));
-
-            // Unternehmensnamen direkt übergeben
-            dto.setUnternehmensname(gruender.getUnternehmensname());
-
-            // Das befüllte DTO in die Interface-Liste einfügen
-            dtoList.add(dto);
-        }
-
-        return dtoList;
+        // Nutze Stream und die Hilfsmethode, statt die Liste manuell zu befüllen
+        return repository.findAll().stream()
+                .map(this::mapToDTO)
+                .toList();
     }
 
     /**
