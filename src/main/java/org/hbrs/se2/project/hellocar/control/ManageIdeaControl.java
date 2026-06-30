@@ -4,13 +4,18 @@ import org.hbrs.se2.project.hellocar.dtos.GruendungsideeDTO;
 import org.hbrs.se2.project.hellocar.dtos.impl.GruendungsideeDTOImpl;
 import org.hbrs.se2.project.hellocar.entities.Gruender;
 import org.hbrs.se2.project.hellocar.entities.Gruendungsidee;
+import org.hbrs.se2.project.hellocar.entities.Skill;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
 import org.hbrs.se2.project.hellocar.repository.GruendungsideeRepository;
+import org.hbrs.se2.project.hellocar.repository.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class ManageIdeaControl {
@@ -21,10 +26,20 @@ public class ManageIdeaControl {
     @Autowired
     private GruenderRepository gruenderRepository;
 
+    @Autowired
+    private SkillRepository skillRepository;
+
+    public List<String> ladeAlleSkillNamen() {
+        return skillRepository.findAllByOrderByKategorieAscNameAsc()
+                .stream()
+                .map(Skill::getName)
+                .toList();
+    }
+
     /**
      * Holt alle Gründungsideen aus der Datenbank und gibt sie als DTOs zurück.
      */
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public List<GruendungsideeDTO> readAllIdeas() {
         // Entities aus der Datenbank laden
         List<Gruendungsidee> entities = repository.findAll();
@@ -57,17 +72,12 @@ public class ManageIdeaControl {
         }
 
         return dtoList;
-
-        /* * Variante B: Falls dein GruendungsideeRepository bereits eine eigene Methode hat,
-         * die direkt eine Liste von DTOs zurückgibt (analog zu findCarsByDateIsNotNull oben),
-         * kannst du stattdessen einfach das hier schreiben:
-         * * return repository.findAllIdeas(); // Name der Methode an dein Repository anpassen!
-         */
     }
 
     /**
      * Speichert eine neu erstellte Gründungsidee in der Datenbank.
      */
+    @Transactional
     public void createIdea(GruendungsideeDTOImpl dto) {
         // 1. Eine neue leere Entity für die Datenbank erstellen
         Gruendungsidee entity = new Gruendungsidee();
@@ -79,10 +89,28 @@ public class ManageIdeaControl {
         entity.setPosition(dto.getPosition());
         entity.setAnforderungen(dto.getAnforderungen());
         entity.setArbeitsbedingungen(dto.getArbeitsbedingungen());
-        entity.setGesuchteSkills(dto.getGesuchteSkills());
+        entity.setGesuchteSkillEntities(ladeSkillEntities(dto.getGesuchteSkills()));
 
         // 3. Die Entity über das Spring-Data-Repository in die DB schreiben
         repository.save(entity);
+    }
+
+    private Set<Skill> ladeSkillEntities(List<String> skillNamen) {
+        if (skillNamen == null || skillNamen.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        List<String> namen = skillNamen.stream()
+                .filter(name -> name != null && !name.isBlank())
+                .map(String::trim)
+                .distinct()
+                .toList();
+
+        if (namen.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        return new HashSet<>(skillRepository.findByNameIn(namen));
     }
 
     //Hilfsmethode um Unternehmensname zu bekommen

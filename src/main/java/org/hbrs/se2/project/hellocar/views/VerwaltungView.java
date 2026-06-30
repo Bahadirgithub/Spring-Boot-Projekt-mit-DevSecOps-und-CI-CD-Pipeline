@@ -1,50 +1,48 @@
 package org.hbrs.se2.project.hellocar.views;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.datepicker.DatePicker;
-
-
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
-import org.hbrs.se2.project.hellocar.util.Globals;
-import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.entities.Gruender;
-import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
+import org.hbrs.se2.project.hellocar.entities.Student;
+import org.hbrs.se2.project.hellocar.util.Globals;
 
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.textfield.TextArea;
-
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 
 /**
- * durch "layout = AppView.class" behalten wir die navigation und den header
- * nur der Content bereich wird ausgetauscht
+ * Durch "layout = AppView.class" behalten wir die Navigation und den Header.
+ * Nur der Content-Bereich wird ausgetauscht.
  */
 @Route(value = "verwaltung", layout = AppView.class)
 public class VerwaltungView extends VerticalLayout {
 
-    //Wichtigster Part! Das hier holt den aktuellen User aus der Vaadin Sitzung, dann als Getter als DTO Type - Marius
+    // Wichtigster Part! Das hier holt den aktuellen User aus der Vaadin-Sitzung, dann als Getter als DTO Type - Marius
     private BenutzerDTO getCurrentUser() {
         return (BenutzerDTO) UI.getCurrent()
                 .getSession()
                 .getAttribute(Globals.CURRENT_USER);
     }
 
-    private VerwaltungControl vControl;
-    private AuthorizationControl authControl;
+    private final VerwaltungControl vControl;
+    private final AuthorizationControl authControl;
 
     // Constructor Injection – Spring injiziert beide Controls automatisch
     public VerwaltungView(VerwaltungControl vControl, AuthorizationControl authControl) {
@@ -52,7 +50,6 @@ public class VerwaltungView extends VerticalLayout {
         this.authControl = authControl;
 
         BenutzerDTO currentUser = getCurrentUser();
-
 
         if (currentUser == null) {
             Notification.show("Bitte zuerst einloggen.");
@@ -71,7 +68,6 @@ public class VerwaltungView extends VerticalLayout {
         Avatar avatar = new Avatar(currentUser.getVorname() + " " + currentUser.getNachname());
         avatar.setWidth("80px");
         avatar.setHeight("80px");
-        // Farbe automatisch aus Benutzername ableiten – 7 vordefinierte Vaadin-Farben (Index 0-6)
         avatar.setColorIndex(Math.floorMod(currentUser.getUsername().hashCode(), 7));
         add(avatar);
 
@@ -104,6 +100,14 @@ public class VerwaltungView extends VerticalLayout {
         lastNameField.setValue(currentUser.getNachname() == null ? "" : currentUser.getNachname());
         emailField.setValue(currentUser.getEmail() == null ? "" : currentUser.getEmail());
 
+        if (currentUser.getTelefonnummer() != null && !currentUser.getTelefonnummer().isBlank()) {
+            try {
+                telefonnummerField.setValue(Double.valueOf(currentUser.getTelefonnummer()));
+            } catch (NumberFormatException ignored) {
+                // Falls alte Telefonnummern nicht rein numerisch sind, Feld leer lassen.
+            }
+        }
+
         if (currentUser.getGeburtstag() != null) {
             geburtstagField.setValue(currentUser.getGeburtstag());
         }
@@ -111,7 +115,6 @@ public class VerwaltungView extends VerticalLayout {
         // Sichtbarkeit direkt nach Typ setzen
         TextField universitaetField = new TextField("Universität");
         TextField semesterField = new TextField("Semester");
-        // Nur Zahlen erlauben
         semesterField.setPattern("[0-9]*");
         semesterField.setErrorMessage("Nur Zahlen erlaubt.");
         universitaetField.setVisible(istStudent);
@@ -119,10 +122,9 @@ public class VerwaltungView extends VerticalLayout {
 
         TextField abschlussField = new TextField("Abschluss");
 
-        // Skills als Mehrfachauswahl aus fester Liste
-        com.vaadin.flow.component.combobox.MultiSelectComboBox<String> skillsField =
-                new com.vaadin.flow.component.combobox.MultiSelectComboBox<>("Skills");
-        skillsField.setItems(org.hbrs.se2.project.hellocar.util.Skills.VERFUEGBARE_SKILLS);
+        // Skills als Mehrfachauswahl aus DB-Tabelle ahsogehts.skill
+        MultiSelectComboBox<String> skillsField = new MultiSelectComboBox<>("Skills");
+        skillsField.setItems(vControl.ladeAlleSkillNamen());
 
         abschlussField.setVisible(istStudent);
         skillsField.setVisible(istStudent);
@@ -132,7 +134,6 @@ public class VerwaltungView extends VerticalLayout {
         TextField standortField = new TextField("Standort");
         unternehmensNameField.setVisible(istGruender);
         standortField.setVisible(istGruender);
-
 
         // Gründer-Felder ausfüllen
         if (istGruender) {
@@ -151,11 +152,10 @@ public class VerwaltungView extends VerticalLayout {
                 semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
                 abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
                 skillsField.setValue(student.getSkills() == null
-                        ? java.util.Collections.emptySet()
-                        : new java.util.HashSet<>(student.getSkills()));            }
+                        ? Collections.emptySet()
+                        : new HashSet<>(student.getSkills()));
+            }
         }
-
-
 
         // Update-Button mit Logik
         Button updateButton = new Button("Aktualisieren");
@@ -178,13 +178,13 @@ public class VerwaltungView extends VerticalLayout {
                         lastNameField.getValue(),
                         geburtstagField.getValue(),
                         emailField.getValue(),
-                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
+                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue().longValue()) : "",
                         universitaetField.getValue(),
                         semesterField.getValue() == null || semesterField.getValue().isBlank()
                                 ? null
                                 : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
                         abschlussField.getValue(),
-                        new java.util.ArrayList<>(skillsField.getValue())
+                        new ArrayList<>(skillsField.getValue())
                 );
             } else if (istGruender) {
                 erfolg = vControl.updateGruender(
@@ -193,11 +193,12 @@ public class VerwaltungView extends VerticalLayout {
                         lastNameField.getValue(),
                         geburtstagField.getValue(),
                         emailField.getValue(),
-                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
+                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue().longValue()) : "",
                         unternehmensNameField.getValue(),
                         standortField.getValue()
                 );
             }
+
             if (erfolg) {
                 Notification.show("Profil erfolgreich aktualisiert.");
 
@@ -209,7 +210,6 @@ public class VerwaltungView extends VerticalLayout {
                     UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, aktualisierterBenutzer);
 
                     // Felder sofort aktualisieren
-                    // Falls ein Wert null ist, leeren String setzen damit kein Fehler entsteht
                     firstNameField.setValue(aktualisierterBenutzer.getVorname() == null ? "" : aktualisierterBenutzer.getVorname());
                     lastNameField.setValue(aktualisierterBenutzer.getNachname() == null ? "" : aktualisierterBenutzer.getNachname());
                     emailField.setValue(aktualisierterBenutzer.getEmail() == null ? "" : aktualisierterBenutzer.getEmail());
@@ -223,12 +223,12 @@ public class VerwaltungView extends VerticalLayout {
                         Student student = vControl.ladeStudent(aktuellerBenutzer.getUserId());
                         if (student != null) {
                             universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
-                            // Semester ist ein int – 0 bedeutet nicht gesetzt, dann leerer String
                             semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
                             abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
                             skillsField.setValue(student.getSkills() == null
-                                    ? java.util.Collections.emptySet()
-                                    : new java.util.HashSet<>(student.getSkills()));                        }
+                                    ? Collections.emptySet()
+                                    : new HashSet<>(student.getSkills()));
+                        }
                     }
 
                     // Gründer-Felder aktualisieren
@@ -274,10 +274,8 @@ public class VerwaltungView extends VerticalLayout {
         // Button öffnet den Dialog
         deleteButton.addClickListener(e -> loeschenDialog.open());
 
-
-
         // Felder in linke Spalte
-        linksLayout.add(firstNameField, lastNameField, geburtstagField, emailField);
+        linksLayout.add(firstNameField, lastNameField, geburtstagField, emailField, telefonnummerField);
 
         // Felder in rechte Spalte
         rechtsLayout.add(universitaetField, semesterField, abschlussField, skillsField,
@@ -289,7 +287,7 @@ public class VerwaltungView extends VerticalLayout {
         trennlinie.getStyle().set("height", "auto");
         trennlinie.getStyle().set("align-self", "auto");
 
-        //Spalten zusammensetzen
+        // Spalten zusammensetzen
         spaltenLayout.add(linksLayout, trennlinie, rechtsLayout);
 
         spaltenLayout.setFlexGrow(1, linksLayout);

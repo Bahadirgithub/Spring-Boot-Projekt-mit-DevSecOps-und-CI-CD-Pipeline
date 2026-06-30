@@ -53,7 +53,7 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
     // Das Unternehmensfeld soll vom Nutzer nicht verändert werden können
     unternehmensname.setReadOnly(true);
 
-    gesuchteSkills.setItems(org.hbrs.se2.project.hellocar.util.Skills.VERFUEGBARE_SKILLS);
+    gesuchteSkills.setItems(ideaService.ladeAlleSkillNamen());
 
     add(createTitle());
     add(createFormLayout());
@@ -71,33 +71,33 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
     cancel.addClickListener(event -> clearForm());
 
     save.addClickListener(
-      e -> {
-        BenutzerDTO userDTO =
-                (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
+            e -> {
+              BenutzerDTO userDTO =
+                      (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
 
-        if (userDTO != null) {
-          // Idee erstellen
-          GruendungsideeDTOImpl aktuelleIdee = new GruendungsideeDTOImpl();
+              if (userDTO != null) {
+                // Idee erstellen
+                GruendungsideeDTOImpl aktuelleIdee = new GruendungsideeDTOImpl();
 
-          try {
-            // DTO mit UI Eingaben befüllen
-            binder.writeBean(aktuelleIdee);
+                try {
+                  // DTO mit UI Eingaben befüllen
+                  binder.writeBean(aktuelleIdee);
 
-            aktuelleIdee.setGruenderUserId(userDTO.getUserId());
-            aktuelleIdee.setGesuchteSkills(new java.util.ArrayList<>(gesuchteSkills.getValue()));
-            ideaService.createIdea(aktuelleIdee);
+                  aktuelleIdee.setGruenderUserId(userDTO.getUserId());
+                  aktuelleIdee.setGesuchteSkills(new java.util.ArrayList<>(gesuchteSkills.getValue()));
+                  ideaService.createIdea(aktuelleIdee);
 
-            Notification.show("Gründungsidee erfolgreich gespeichert.");
-            clearForm(); // Formular für die nächste Eingabe leeren
+                  Notification.show("Gründungsidee erfolgreich gespeichert.");
+                  clearForm(); // Formular für die nächste Eingabe leeren
 
-          } catch (com.vaadin.flow.data.binder.ValidationException validationException) {
-            // Falls der Nutzer unvollständige Daten eingegeben hat
-            Notification.show("Fehler: Bitte überprüfen Sie Ihre Eingaben.");
-          }
-        } else {
-          Notification.show("Fehler: Kein angemeldeter Benutzer gefunden.");
-        }
-      });
+                } catch (com.vaadin.flow.data.binder.ValidationException validationException) {
+                  // Falls der Nutzer unvollständige Daten eingegeben hat
+                  Notification.show("Fehler: Bitte überprüfen Sie Ihre Eingaben.");
+                }
+              } else {
+                Notification.show("Fehler: Kein angemeldeter Benutzer gefunden.");
+              }
+            });
   }
 
   private void clearForm() {

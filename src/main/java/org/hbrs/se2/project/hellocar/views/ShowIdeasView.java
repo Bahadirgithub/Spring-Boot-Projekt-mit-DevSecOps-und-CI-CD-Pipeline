@@ -24,6 +24,7 @@ import org.hbrs.se2.project.hellocar.dtos.GruendungsideeDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -118,6 +119,10 @@ public class ShowIdeasView extends Div  {
                 .addColumn(GruendungsideeDTO::getAnforderungen)
                 .setHeader("Anforderungen");
 
+        Grid.Column<GruendungsideeDTO> skillsColumn = grid
+                .addColumn(idee -> formatSkillsPreview(idee.getGesuchteSkills()))
+                .setHeader("Gesuchte Skills");
+
         Grid.Column<GruendungsideeDTO> bedingungenColumn = grid
                 .addColumn(GruendungsideeDTO::getArbeitsbedingungen)
                 .setHeader("Arbeitsbedingungen");
@@ -166,7 +171,18 @@ public class ShowIdeasView extends Div  {
         anforderungenFilterField.setSizeFull();
         filterRow.getCell(anforderungenColumn).setComponent(anforderungenFilterField);
 
-        // 5. Filter: Arbeitsbedingungen
+        // 5. Filter: Gesuchte Skills
+        TextField skillsFilterField = new TextField();
+        skillsFilterField.addValueChangeListener(event -> dataProvider.addFilter(
+                idee -> idee.getGesuchteSkills() != null && idee.getGesuchteSkills().stream()
+                        .anyMatch(skill -> StringUtils.containsIgnoreCase(skill, skillsFilterField.getValue()))
+        ));
+        skillsFilterField.setValueChangeMode(ValueChangeMode.EAGER);
+        skillsFilterField.setPlaceholder("Filter Skills");
+        skillsFilterField.setSizeFull();
+        filterRow.getCell(skillsColumn).setComponent(skillsFilterField);
+
+        // 6. Filter: Arbeitsbedingungen
         TextField bedingungenFilterField = new TextField();
         bedingungenFilterField.addValueChangeListener(event -> dataProvider.addFilter(
                 idee -> StringUtils.containsIgnoreCase(idee.getArbeitsbedingungen(), bedingungenFilterField.getValue())
@@ -181,9 +197,31 @@ public class ShowIdeasView extends Div  {
         return grid;
     }
 
+    private String formatSkillsPreview(List<String> skills) {
+        if (skills == null || skills.isEmpty()) {
+            return "-";
+        }
+
+        List<String> sortierteSkills = skills.stream()
+                .filter(skill -> skill != null && !skill.isBlank())
+                .map(String::trim)
+                .distinct()
+                .sorted()
+                .toList();
+
+        if (sortierteSkills.isEmpty()) {
+            return "-";
+        }
+
+        int maxAnzeigen = 3;
+        int anzahl = Math.min(maxAnzeigen, sortierteSkills.size());
+        String preview = String.join(", ", sortierteSkills.subList(0, anzahl));
+        int rest = sortierteSkills.size() - anzahl;
+
+        return rest > 0 ? preview + " +" + rest : preview;
+    }
+
     private Component createTitle() {
         return new H3("Nach Gründungsideen suchen");
     }
-
-
-};
+}

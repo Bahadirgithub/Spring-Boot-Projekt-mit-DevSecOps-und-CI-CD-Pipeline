@@ -2,6 +2,9 @@ package org.hbrs.se2.project.hellocar.builder;
 
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.entities.Student;
+import org.hbrs.se2.project.hellocar.entities.Skill;
+
+import java.util.Collections;
 
 import java.util.Arrays;
 
@@ -110,6 +113,25 @@ public class StudentBuilder {
         return this;
     }
 
+    private java.util.Set<Skill> baueSkillEntities(String skillsText) {
+        java.util.Set<Skill> skillSet = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+
+        if (skillsText == null || skillsText.isBlank()) {
+            return skillSet;
+        }
+
+        for (String skillName : skillsText.split(",")) {
+            String name = skillName.trim();
+
+            if (!name.isEmpty()) {
+                Skill skill = new Skill();
+                skill.setName(name);
+                skillSet.add(skill);
+            }
+        }
+
+        return skillSet;
+    }
     /**
      * Baut die {@link Student}- und {@link Benutzer}-Objekte aus den konfigurierten Werten.
      * @return Ein {@link TestStudent}-Objekt, das den ungespeicherten Benutzer und Studenten enthält.

@@ -4,33 +4,46 @@ import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.impl.BenutzerDTOImpl;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.entities.Gruender;
+import org.hbrs.se2.project.hellocar.entities.Skill;
 import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
+import org.hbrs.se2.project.hellocar.repository.SkillRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
-import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 
-// Wir greifen per Views auf den aktuellen User zu mit Vadiin Session! Und hier übergeben wir diesen User nur - Marius
+// Wir greifen per Views auf den aktuellen User zu mit Vaadin Session! Und hier übergeben wir diesen User nur - Marius
 
 @Component
 public class VerwaltungControl {
     private final BenutzerRepository benutzerRepository;
     private final StudentRepository studentRepository;
     private final GruenderRepository gruenderRepository;
+    private final SkillRepository skillRepository;
 
-    public VerwaltungControl(BenutzerRepository benutzerRepository, StudentRepository studentRepository,
-                             GruenderRepository gruenderRepository) {
+    public VerwaltungControl(BenutzerRepository benutzerRepository,
+                             StudentRepository studentRepository,
+                             GruenderRepository gruenderRepository,
+                             SkillRepository skillRepository) {
         this.benutzerRepository = benutzerRepository;
         this.studentRepository = studentRepository;
         this.gruenderRepository = gruenderRepository;
+        this.skillRepository = skillRepository;
     }
 
+    public List<String> ladeAlleSkillNamen() {
+        return skillRepository.findAllByOrderByKategorieAscNameAsc()
+                .stream()
+                .map(Skill::getName)
+                .toList();
+    }
 
     private boolean istLeer(String x) {
         return x == null || x.isBlank();
@@ -60,7 +73,6 @@ public class VerwaltungControl {
         return false;
     }
 
-
     /**
      * Lädt den aktuellen Benutzer frisch aus der DB und gibt ihn als DTO zurück.
      * Wird nach einem Update aufgerufen um die Session zu aktualisieren.
@@ -82,12 +94,14 @@ public class VerwaltungControl {
     }
 
     /**
-     * Lädt den Student neu aus der DB
+     * Lädt den Student neu aus der DB.
+     * Die Skill-Collection wird innerhalb der Transaktion initialisiert,
+     * damit die View danach student.getSkills() verwenden kann.
      */
     @Transactional
     public Student ladeStudent(int userId) {
         Optional<Student> studentTMP = studentRepository.findById(userId);
-        studentTMP.ifPresent(s -> s.getSkills().size()); // erzwingt das Laden der Skills innerhalb der Transaktion
+        studentTMP.ifPresent(s -> s.getSkillEntities().size());
         return studentTMP.orElse(null);
     }
 
@@ -99,8 +113,6 @@ public class VerwaltungControl {
         return gruenderTMP.orElse(null);
     }
 
-
-
     @Transactional
     public boolean updateStudent(BenutzerDTO aktuellerBenutzer,
                                  String vorname,
@@ -111,12 +123,13 @@ public class VerwaltungControl {
                                  String universitaet,
                                  Integer semester,
                                  String abschluss,
-                                 java.util.List<String> skills){
+                                 List<String> skills){
 
         if (aktuellerBenutzer == null){
-            System.out.println("Kein Eingeloggter Benutzer");
+            System.out.println("Kein eingeloggter Benutzer");
             return false;
         }
+
         Optional <Benutzer> benutzerTMP = benutzerRepository.findById(aktuellerBenutzer.getUserId());
         Optional <Student> studentTMP = studentRepository.findById(aktuellerBenutzer.getUserId());
 
@@ -124,20 +137,21 @@ public class VerwaltungControl {
             System.out.println("Benutzer oder Student wurde nicht gefunden.");
             return false;
         }
+
         Benutzer benutzer = benutzerTMP.get();
         Student student = studentTMP.get();
 
-        vornameAendern(benutzer, vorname);
-        nachnameAendern(benutzer, nachname);
-        geburtstagAendern(benutzer, geburtstag);
-        emailAendern(benutzer, email);
-        telefonnummerAendern(benutzer, telefonnummer);
+        if (!vornameAendern(benutzer, vorname)) return false;
+        if (!nachnameAendern(benutzer, nachname)) return false;
+        if (!geburtstagAendern(benutzer, geburtstag)) return false;
+        if (!emailAendern(benutzer, email)) return false;
+        if (!telefonnummerAendern(benutzer, telefonnummer)) return false;
 
-        //Student-Spezifisch
-        universitaetAendern(student, universitaet);
-        semesterAendern(student, semester);
-        abschlussAendern(student, abschluss);
-        skillsAendern(student, skills);
+        // Student-spezifisch
+        if (!universitaetAendern(student, universitaet)) return false;
+        if (!semesterAendern(student, semester)) return false;
+        if (!abschlussAendern(student, abschluss)) return false;
+        if (!skillsAendern(student, skills)) return false;
 
         benutzerRepository.save(benutzer);
         studentRepository.save(student);
@@ -152,14 +166,13 @@ public class VerwaltungControl {
                                   String email,
                                   String telefonnummer,
                                   String unternehmensname,
-                                  String standort
-
-                                  ){
+                                  String standort){
 
         if (aktuellerBenutzer == null){
-            System.out.println("Kein Eingeloggter Benutzer");
+            System.out.println("Kein eingeloggter Benutzer");
             return false;
         }
+
         Optional <Benutzer> benutzerTMP = benutzerRepository.findById(aktuellerBenutzer.getUserId());
         Optional <Gruender> gruenderTMP = gruenderRepository.findById(aktuellerBenutzer.getUserId());
 
@@ -167,18 +180,19 @@ public class VerwaltungControl {
             System.out.println("Benutzer oder Gründer nicht gefunden.");
             return false;
         }
+
         Benutzer benutzer = benutzerTMP.get();
         Gruender gruender = gruenderTMP.get();
 
-        vornameAendern(benutzer, vorname);
-        nachnameAendern(benutzer, nachname);
-        geburtstagAendern(benutzer, geburtstag);
-        emailAendern(benutzer, email);
-        telefonnummerAendern(benutzer, telefonnummer);
+        if (!vornameAendern(benutzer, vorname)) return false;
+        if (!nachnameAendern(benutzer, nachname)) return false;
+        if (!geburtstagAendern(benutzer, geburtstag)) return false;
+        if (!emailAendern(benutzer, email)) return false;
+        if (!telefonnummerAendern(benutzer, telefonnummer)) return false;
 
-        //Gründer-Spezifisch
-        unternehmensNameAendern(gruender, unternehmensname);
-        standortAendern(gruender, standort);
+        // Gründer-spezifisch
+        if (!unternehmensNameAendern(gruender, unternehmensname)) return false;
+        if (!standortAendern(gruender, standort)) return false;
 
         benutzerRepository.save(benutzer);
         gruenderRepository.save(gruender);
@@ -186,58 +200,58 @@ public class VerwaltungControl {
     }
 
     public boolean vornameAendern(Benutzer benutzer, String x){
-        if(istLeer(x))return true;
+        if(istLeer(x)) return true;
         benutzer.setVorname(x);
-        System.out.println("Der Vorname "+x+" wurde eingegeben.");
+        System.out.println("Der Vorname " + x + " wurde eingegeben.");
         return true;
     }
 
     public boolean nachnameAendern(Benutzer benutzer,String x){
-        if(istLeer(x))return true;
+        if(istLeer(x)) return true;
         benutzer.setNachname(x);
-        System.out.println("Der Nachname "+x+" wurde eingegeben.");
+        System.out.println("Der Nachname " + x + " wurde eingegeben.");
         return true;
     }
 
     public boolean emailAendern(Benutzer benutzer, String x){
-        if(istLeer(x))return true;
+        if(istLeer(x)) return true;
         if(!ValidateUserControl.validateEmail(x)){
-            return false; // Validierung fehlgeschlagen
+            return false;
         }
         benutzer.setEmail(x);
-        System.out.println("Die E-Mail "+x+" wurde eingegeben.");
+        System.out.println("Die E-Mail " + x + " wurde eingegeben.");
         return true;
     }
 
     public boolean passwortAendern(Benutzer benutzer, String x){
-        if(istLeer(x))return true;
-        //hier muss eigentlich noch ne E-Mail gesendet werden als confirmation.
-        if(x.length() < 8){return false;} // passwort muss länger als 8 Zeichen sein
+        if(istLeer(x)) return true;
+        if(x.length() < 8) return false;
         benutzer.setPasswort(x);
         System.out.println("Das neue Passwort wurde eingegeben.");
         return true;
     }
 
     public boolean telefonnummerAendern(Benutzer benutzer, String x){
-        if(istLeer(x))return true;
+        if(istLeer(x)) return true;
         benutzer.setTelefonnummer(x);
-        System.out.println("Die Telefonnummer "+x+" wurde eingegeben.");
+        System.out.println("Die Telefonnummer " + x + " wurde eingegeben.");
         return true;
     }
 
     public boolean universitaetAendern(Student student, String x){
-        if(istLeer(x))return true;
+        if(istLeer(x)) return true;
         student.setUniversitaet(x);
-        System.out.println("Die Universität "+x+" wurde eingegeben.");
+        System.out.println("Die Universität " + x + " wurde eingegeben.");
         return true;
     }
 
     public boolean semesterAendern(Student student, Integer x){
-        if(x == null)return true;
+        if(x == null) return true;
         student.setSemester(x);
-        System.out.println("Das Semester "+x+" wurde eingegeben.");
+        System.out.println("Das Semester " + x + " wurde eingegeben.");
         return true;
     }
+
     public boolean unternehmensNameAendern(Gruender gruender, String x){
         if(istLeer(x)) return true;
         gruender.setUnternehmensname(x);
@@ -251,10 +265,11 @@ public class VerwaltungControl {
         System.out.println("Der Standort " + x + " wurde eingegeben.");
         return true;
     }
+
     public boolean geburtstagAendern(Benutzer benutzer, LocalDate x){
         if(x == null) return true;
-        LocalDate vor18Jahren = LocalDate.now().minusYears(18);
-        if(x.isBefore(vor18Jahren) ){return false;}
+        // Keine Zukunftsdaten erlauben.
+        if(x.isAfter(LocalDate.now())) return false;
         benutzer.setGeburtstag(x);
         System.out.println("Das Geburtsdatum " + x + " wurde eingegeben.");
         return true;
@@ -267,10 +282,32 @@ public class VerwaltungControl {
         return true;
     }
 
-    public boolean skillsAendern(Student student, java.util.List<String> x){
-        if(x == null || x.isEmpty()) return true;
-        student.setSkills(x);
-        System.out.println("Die Skills " + x + " wurden eingegeben.");
+    public boolean skillsAendern(Student student, List<String> x) {
+        if (x == null) {
+            return true;
+        }
+
+        List<String> skillNamen = x.stream()
+                .filter(name -> name != null && !name.isBlank())
+                .map(String::trim)
+                .distinct()
+                .toList();
+
+        if (skillNamen.isEmpty()) {
+            student.setSkillEntities(new HashSet<>());
+            System.out.println("Alle Skills wurden entfernt.");
+            return true;
+        }
+
+        List<Skill> skillsAusDb = skillRepository.findByNameIn(skillNamen);
+
+        if (skillsAusDb.size() != skillNamen.size()) {
+            System.out.println("Mindestens ein Skill wurde nicht in der Datenbank gefunden: " + skillNamen);
+            return false;
+        }
+
+        student.setSkillEntities(new HashSet<>(skillsAusDb));
+        System.out.println("Die Skills " + skillNamen + " wurden eingegeben.");
         return true;
     }
 }
