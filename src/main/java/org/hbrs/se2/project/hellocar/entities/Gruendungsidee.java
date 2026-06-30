@@ -2,7 +2,12 @@ package org.hbrs.se2.project.hellocar.entities;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "gruendungsidee", schema = "ahsogehts")
@@ -14,7 +19,11 @@ public class Gruendungsidee {
     private String position;
     private String anforderungen;
     private String arbeitsbedingungen;
-    private java.util.List<String> gesuchteSkills;
+
+    private Set<Skill> gesuchteSkillEntities = new HashSet<>();
+
+    // Nur als nicht-persistenter Fallback für DTO-/Testcode.
+    private List<String> gesuchteSkillsNamen = new ArrayList<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,17 +86,44 @@ public class Gruendungsidee {
         this.arbeitsbedingungen = arbeitsbedingungen;
     }
 
-    @ElementCollection
-    @CollectionTable(name = "gruendungsidee_skills", schema = "ahsogehts", joinColumns = @JoinColumn(name = "idee_id"))
-    @Column(name = "skill")
-    public java.util.List<String> getGesuchteSkills() {
-        return gesuchteSkills;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "gruendungsidee_skills",
+            schema = "ahsogehts",
+            joinColumns = @JoinColumn(name = "idee_id", referencedColumnName = "idee_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id", referencedColumnName = "skill_id")
+    )
+    public Set<Skill> getGesuchteSkillEntities() {
+        return gesuchteSkillEntities;
     }
 
-    public void setGesuchteSkills(java.util.List<String> gesuchteSkills) {
-        this.gesuchteSkills = gesuchteSkills;
+    public void setGesuchteSkillEntities(Set<Skill> gesuchteSkillEntities) {
+        this.gesuchteSkillEntities = gesuchteSkillEntities == null ? new HashSet<>() : gesuchteSkillEntities;
     }
 
+    /**
+     * Nur Hilfsmethode für DTO/View: gibt die Namen der gesuchten Skills zurück.
+     * Wird nicht als eigene Datenbankspalte gemappt.
+     */
+    @Transient
+    public List<String> getGesuchteSkills() {
+        if (gesuchteSkillEntities != null && !gesuchteSkillEntities.isEmpty()) {
+            return gesuchteSkillEntities.stream()
+                    .map(Skill::getName)
+                    .filter(Objects::nonNull)
+                    .sorted()
+                    .toList();
+        }
+
+        return gesuchteSkillsNamen == null ? Collections.emptyList() : gesuchteSkillsNamen;
+    }
+
+    /**
+     * Kompatibilitäts-Setter für DTO-/Testcode. Persistiert wird über setGesuchteSkillEntities(...).
+     */
+    public void setGesuchteSkills(List<String> gesuchteSkills) {
+        this.gesuchteSkillsNamen = gesuchteSkills == null ? new ArrayList<>() : new ArrayList<>(gesuchteSkills);
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -36,6 +36,9 @@ public class TestDatenFabrik {
     @Autowired
     private BewertungRepository bewertungRepository;
 
+    @Autowired
+    private SkillRepository skillRepository;
+
     /**
      * Erstellt einen Standard-Benutzer mit validen Daten und speichert ihn in der DB.
      * 
@@ -73,7 +76,7 @@ public class TestDatenFabrik {
         student.setStudentId("s" + benutzer.getUserId());
         student.setUniversitaet("H-BRS");
         student.setSemester(4);
-        student.setSkills(java.util.List.of("Java", "SQL"));
+        student.setSkillEntities(ladeOderErstelleSkills("Java", "MySQL"));
         student.setAbschluss("Bachelor");
         
         return studentRepository.saveAndFlush(student);
@@ -153,5 +156,54 @@ public class TestDatenFabrik {
         
         // Korrektur: Speichert das 'bewertung'-Objekt, nicht 'bewerbung'
         return bewertungRepository.saveAndFlush(bewertung);
+    }
+
+    private java.util.Set<Skill> ladeOderErstelleSkills(String... skillNamen) {
+        java.util.Set<Skill> result = new java.util.HashSet<>();
+
+        java.util.List<String> namen = java.util.Arrays.stream(skillNamen)
+                .filter(name -> name != null && !name.isBlank())
+                .map(String::trim)
+                .distinct()
+                .toList();
+
+        if (namen.isEmpty()) {
+            return result;
+        }
+
+        java.util.List<Skill> vorhandeneSkills = skillRepository.findByNameIn(namen);
+
+        java.util.Map<String, Skill> skillMap = vorhandeneSkills.stream()
+                .collect(java.util.stream.Collectors.toMap(Skill::getName, skill -> skill));
+
+        for (String name : namen) {
+            Skill skill = skillMap.get(name);
+
+            if (skill == null) {
+                skill = new Skill();
+                skill.setName(name);
+                skill.setKategorie(bestimmeKategorie(name));
+                skill = skillRepository.saveAndFlush(skill);
+            }
+
+            result.add(skill);
+        }
+
+        return result;
+    }
+
+    private String bestimmeKategorie(String skillName) {
+        return switch (skillName) {
+            case "Java", "Python", "JavaScript", "HTML", "CSS", "Spring Boot" -> "Programmierung";
+            case "MySQL", "PostgreSQL" -> "Datenbanken";
+            case "Figma", "UI Design", "UX Design" -> "Design";
+            case "Social Media", "SEO", "Content-Erstellung" -> "Marketing";
+            case "Projektplanung", "Teamkoordination" -> "Organisation";
+            case "Recherche", "Marktforschung", "Datenanalyse" -> "Analyse";
+            case "Präsentieren", "Teamarbeit", "Kundenkontakt" -> "Kommunikation";
+            case "Deutsch", "Englisch" -> "Sprachen";
+            case "Fotografie", "Videobearbeitung", "Texterstellung" -> "Medien & Content";
+            default -> "Sonstiges";
+        };
     }
 }
