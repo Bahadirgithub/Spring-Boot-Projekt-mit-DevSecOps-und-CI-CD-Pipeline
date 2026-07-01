@@ -169,36 +169,38 @@ public class VerwaltungView extends VerticalLayout {
                 return;
             }
 
-            boolean erfolg = false;
+            boolean erfolg = true;
 
-            if (istStudent) {
-                erfolg = vControl.updateStudent(
-                        aktuellerBenutzer,
-                        firstNameField.getValue(),
-                        lastNameField.getValue(),
-                        geburtstagField.getValue(),
-                        emailField.getValue(),
-                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue().longValue()) : "",
-                        universitaetField.getValue(),
-                        semesterField.getValue() == null || semesterField.getValue().isBlank()
-                                ? null
-                                : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
-                        abschlussField.getValue(),
-                        new ArrayList<>(skillsField.getValue())
-                );
-            } else if (istGruender) {
-                erfolg = vControl.updateGruender(
-                        aktuellerBenutzer,
-                        firstNameField.getValue(),
-                        lastNameField.getValue(),
-                        geburtstagField.getValue(),
-                        emailField.getValue(),
-                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue().longValue()) : "",
-                        unternehmensNameField.getValue(),
-                        standortField.getValue()
-                );
+            try {
+                if (istStudent) {
+                    vControl.updateStudent(
+                            aktuellerBenutzer,
+                            firstNameField.getValue(),
+                            lastNameField.getValue(),
+                            geburtstagField.getValue(),
+                            emailField.getValue(),
+                            telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
+                            universitaetField.getValue(),
+                            semesterField.getValue() == null || semesterField.getValue().isBlank()
+                                    ? null
+                                    : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
+                            abschlussField.getValue(),
+                            skillsField.getValue()
+                    );
+                } else if (istGruender) {
+                    vControl.updateGruender(
+                            aktuellerBenutzer,
+                            firstNameField.getValue(),
+                            lastNameField.getValue(),
+                            geburtstagField.getValue(),
+                            emailField.getValue(),
+                            telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
+                            unternehmensNameField.getValue(),
+                            standortField.getValue()
+                    );
+                }
             }
-
+            catch (Exception ex) {}
             if (erfolg) {
                 Notification.show("Profil erfolgreich aktualisiert.");
 
@@ -262,11 +264,12 @@ public class VerwaltungView extends VerticalLayout {
 
         // Bei Bestätigung – Account löschen und zur Login-Seite
         loeschenDialog.addConfirmListener(event -> {
-            boolean erfolg = vControl.loeschen(getCurrentUser());
-            if (erfolg) {
+            try {
+                vControl.loeschen(getCurrentUser());
                 UI.getCurrent().getSession().close();
                 UI.getCurrent().navigate("");
-            } else {
+            }
+            catch(Exception ex){
                 Notification.show("Löschen fehlgeschlagen.");
             }
         });
