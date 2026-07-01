@@ -13,6 +13,7 @@ public class GruendungsideeDTOImpl implements GruendungsideeDTO {
     private GruenderDTO gruender;
     private int gruenderUserId;
     private String unternehmensname;
+    private java.util.List<String> gesuchteSkills;
 
     @Override
     public int getIdeeId() {
@@ -84,5 +85,14 @@ public class GruendungsideeDTOImpl implements GruendungsideeDTO {
 
     public void setUnternehmensname(String unternehmensname) {
         this.unternehmensname = unternehmensname;
+    }
+
+    @Override
+    public java.util.List<String> getGesuchteSkills() {
+        return gesuchteSkills;
+    }
+
+    public void setGesuchteSkills(java.util.List<String> gesuchteSkills) {
+        this.gesuchteSkills = gesuchteSkills;
     }
 }

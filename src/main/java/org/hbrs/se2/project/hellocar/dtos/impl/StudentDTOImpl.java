@@ -8,7 +8,7 @@ public class StudentDTOImpl implements StudentDTO {
     private String studentId;
     private String universitaet;
     private int semester;
-    private String skills;
+    private java.util.List<String> skills;
     private String abschluss;
 
     public void setUserId(int userId) {
@@ -27,9 +27,7 @@ public class StudentDTOImpl implements StudentDTO {
         this.semester = semester;
     }
 
-    public void setSkills(String skills) {
-        this.skills = skills;
-    }
+    public void setSkills(java.util.List<String> skills) { this.skills = skills;}
 
     public void setAbschluss(String abschluss) {
         this.abschluss = abschluss;
@@ -56,9 +54,7 @@ public class StudentDTOImpl implements StudentDTO {
     }
 
     @Override
-    public String getSkills() {
-        return skills;
-    }
+    public java.util.List<String> getSkills() { return skills; }
 
     @Override
     public String getAbschluss() {
