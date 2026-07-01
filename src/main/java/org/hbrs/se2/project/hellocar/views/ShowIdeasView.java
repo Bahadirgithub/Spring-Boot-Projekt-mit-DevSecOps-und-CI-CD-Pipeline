@@ -194,6 +194,14 @@ public class ShowIdeasView extends Div  {
 
         grid.setHeight("600px");
 
+        grid.addItemDoubleClickListener(event -> {
+            GruendungsideeDTO selectedIdea = event.getItem();
+            if (selectedIdea != null) {
+                // Umwandlung des int (aus dem DTO) in einen Long (erwartet von der View)
+                UI.getCurrent().navigate(ShowIdeaDetailsView.class, Long.valueOf(selectedIdea.getIdeeId()));
+            }
+        });
+
         return grid;
     }
 

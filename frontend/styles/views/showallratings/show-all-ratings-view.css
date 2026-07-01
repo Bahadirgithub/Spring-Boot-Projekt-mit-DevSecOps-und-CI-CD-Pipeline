@@ -1,0 +1,18 @@
+.show-all-ratings-view {
+    display: block;
+    margin: 0 auto;
+    max-width: 1024px;
+    padding: 0 var(--lumo-space-l);
+}
+.show-all-ratings-view .button-layout {
+    margin-bottom: var(--lumo-space-l);
+    margin-top: var(--lumo-space-m);
+}
+.show-all-ratings-view h3 {
+    margin-top: var(--lumo-space-m);
+    margin-bottom: var(--lumo-space-m);
+}
+
+.show-all-ratings-view vaadin-vertical-layout {
+    width: 100%;
+}

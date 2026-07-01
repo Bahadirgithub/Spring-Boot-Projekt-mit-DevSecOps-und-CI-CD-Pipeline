@@ -18,6 +18,7 @@ public class Bewertung {
 
     @Id
     @Column(name = "bewertung_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getBewertungId() {
         return bewertungId;
     }
