@@ -1,5 +1,7 @@
 package org.hbrs.se2.project.hellocar.control;
 
+import org.hbrs.se2.project.hellocar.control.exception.FirstNameEmptyException;
+import org.hbrs.se2.project.hellocar.control.exception.LastNameEmptyException;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.util.TestDatenFabrik;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,8 +46,25 @@ public class RegistrationControlTest {
         standardBenutzer = testDatenFabrik.erstelleUndSpeichereBenutzer("RegistrationSetup");
     }
 
+
+
+    @Test
+    void nameNichtleer(){
+        assertThrows(FirstNameEmptyException.class , () ->  registrationControl.registriereGruender("", "we" , LocalDate.of(2006,3,3) , "koko", "kdkd@dd.de", "123.123.Aa", "ewr"));
+    }
+
+    @Test
+    void NachnameNichtleer(){
+        assertThrows(LastNameEmptyException.class , () ->  registrationControl.registriereGruender("aa", "" , LocalDate.of(2006,3,3) , "koko", "kdkd@dd.de", "123.123.Aa", "ewr"));
+    }
+
+    //assertNot
+
     /**
      * Testfall 1: Positivtest - Alle Registrierungsdaten sind valide und der Username ist frei.
+
+
+
 
     @Test
     void testRegistrierungErfolgreich() {

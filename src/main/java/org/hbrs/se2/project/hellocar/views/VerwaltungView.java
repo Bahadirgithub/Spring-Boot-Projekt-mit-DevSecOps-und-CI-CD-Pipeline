@@ -16,6 +16,8 @@ import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
+import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
+import org.hbrs.se2.project.hellocar.control.exception.InvalidBirthdayException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import org.hbrs.se2.project.hellocar.entities.Student;
@@ -153,8 +155,6 @@ public class VerwaltungView extends VerticalLayout {
             }
         }
 
-
-
         // Update-Button mit Logik
         Button updateButton = new Button("Aktualisieren");
         updateButton.addClickListener(e -> {
@@ -170,72 +170,100 @@ public class VerwaltungView extends VerticalLayout {
             boolean erfolg = false;
 
             if (istStudent) {
-                erfolg = vControl.updateStudent(
-                        aktuellerBenutzer,
-                        firstNameField.getValue(),
-                        lastNameField.getValue(),
-                        geburtstagField.getValue(),
-                        emailField.getValue(),
-                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
-                        universitaetField.getValue(),
-                        semesterField.getValue() == null || semesterField.getValue().isBlank()
-                                ? null
-                                : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
-                        abschlussField.getValue(),
-                        skillsField.getValue()
-                );
+                try {
+                    vControl.updateStudent(
+                            aktuellerBenutzer,
+                            firstNameField.getValue(),
+                            lastNameField.getValue(),
+                            geburtstagField.getValue(),
+                            emailField.getValue(),
+                            telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
+                            universitaetField.getValue(),
+                            semesterField.getValue() == null || semesterField.getValue().isBlank()
+                                    ? null
+                                    : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
+                            abschlussField.getValue(),
+                            skillsField.getValue()
+                    );
+
+                    // TODO Erfolgsvariable entfernen und auf Exceptions umstellen!
+                    erfolg = true;
+
+                } catch (NullPointerException ex) {
+                   // TODO Wird geworfen, wenn aktuellerBenutzer == null ist
+
+                } catch (DatabaseUserException ex) {
+                    // TODO Wird geworfen, wenn der Benutzer oder Student nicht in der Datenbank zu finden sind
+
+                } catch (InvalidBirthdayException ex) {
+                    geburtstagField.setErrorMessage("Sie müssen min. 18 Jahre alt sein.");
+                }
+
             } else if (istGruender) {
-                erfolg = vControl.updateGruender(
-                        aktuellerBenutzer,
-                        firstNameField.getValue(),
-                        lastNameField.getValue(),
-                        geburtstagField.getValue(),
-                        emailField.getValue(),
-                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
-                        unternehmensNameField.getValue(),
-                        standortField.getValue()
-                );
+                try {
+                    erfolg = vControl.updateGruender(
+                            aktuellerBenutzer,
+                            firstNameField.getValue(),
+                            lastNameField.getValue(),
+                            geburtstagField.getValue(),
+                            emailField.getValue(),
+                            telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
+                            unternehmensNameField.getValue(),
+                            standortField.getValue()
+                    );
+                } catch (InvalidBirthdayException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
+
             if (erfolg) {
                 Notification.show("Profil erfolgreich aktualisiert.");
 
-                // Benutzer neu aus der DB laden
-                BenutzerDTO aktualisierterBenutzer = vControl.ladeBenutzer(aktuellerBenutzer.getUserId());
+                try {
+                    // Benutzer neu aus der DB laden
+                    BenutzerDTO aktualisierterBenutzer = vControl.ladeBenutzer(aktuellerBenutzer.getUserId());
 
-                if (aktualisierterBenutzer != null) {
-                    // Session überschreiben damit beim nächsten View-Wechsel die neuen Daten geladen werden
-                    UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, aktualisierterBenutzer);
+                    if (aktualisierterBenutzer != null) {
+                        // Session überschreiben damit beim nächsten View-Wechsel die neuen Daten geladen werden
+                        UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, aktualisierterBenutzer);
 
-                    // Felder sofort aktualisieren
-                    // Falls ein Wert null ist, leeren String setzen damit kein Fehler entsteht
-                    firstNameField.setValue(aktualisierterBenutzer.getVorname() == null ? "" : aktualisierterBenutzer.getVorname());
-                    lastNameField.setValue(aktualisierterBenutzer.getNachname() == null ? "" : aktualisierterBenutzer.getNachname());
-                    emailField.setValue(aktualisierterBenutzer.getEmail() == null ? "" : aktualisierterBenutzer.getEmail());
+                        // Felder sofort aktualisieren
+                        // Falls ein Wert null ist, leeren String setzen damit kein Fehler entsteht
+                        firstNameField.setValue(aktualisierterBenutzer.getVorname() == null ? "" : aktualisierterBenutzer.getVorname());
+                        lastNameField.setValue(aktualisierterBenutzer.getNachname() == null ? "" : aktualisierterBenutzer.getNachname());
+                        emailField.setValue(aktualisierterBenutzer.getEmail() == null ? "" : aktualisierterBenutzer.getEmail());
 
-                    if (aktualisierterBenutzer.getGeburtstag() != null) {
-                        geburtstagField.setValue(aktualisierterBenutzer.getGeburtstag());
-                    }
 
-                    // Student-Felder aktualisieren
-                    if (istStudent) {
-                        Student student = vControl.ladeStudent(aktuellerBenutzer.getUserId());
-                        if (student != null) {
-                            universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
-                            // Semester ist ein int – 0 bedeutet nicht gesetzt, dann leerer String
-                            semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
-                            abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
-                            skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
+                        if (aktualisierterBenutzer.getGeburtstag() != null) {
+
+                            geburtstagField.setValue(aktualisierterBenutzer.getGeburtstag());
+                        }
+
+
+                        // Student-Felder aktualisieren
+                        if (istStudent) {
+                            Student student = vControl.ladeStudent(aktuellerBenutzer.getUserId());
+                            if (student != null) {
+                                universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
+                                // Semester ist ein int – 0 bedeutet nicht gesetzt, dann leerer String
+                                semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
+                                abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
+                                skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
+                            }
+                        }
+
+                        // Gründer-Felder aktualisieren
+                        if (istGruender) {
+                            Gruender gruender = vControl.ladeGruender(aktuellerBenutzer.getUserId());
+                            if (gruender != null) {
+                                unternehmensNameField.setValue(gruender.getUnternehmensname() == null ? "" : gruender.getUnternehmensname());
+                                standortField.setValue(gruender.getStandort() == null ? "" : gruender.getStandort());
+                            }
                         }
                     }
 
-                    // Gründer-Felder aktualisieren
-                    if (istGruender) {
-                        Gruender gruender = vControl.ladeGruender(aktuellerBenutzer.getUserId());
-                        if (gruender != null) {
-                            unternehmensNameField.setValue(gruender.getUnternehmensname() == null ? "" : gruender.getUnternehmensname());
-                            standortField.setValue(gruender.getStandort() == null ? "" : gruender.getStandort());
-                        }
-                    }
+                } catch (DatabaseUserException ex) {
+                    UI.getCurrent().navigate(LoginView.class);
                 }
 
             } else {

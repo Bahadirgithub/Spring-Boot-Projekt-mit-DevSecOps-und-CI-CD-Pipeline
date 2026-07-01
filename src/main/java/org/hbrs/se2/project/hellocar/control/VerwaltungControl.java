@@ -1,5 +1,8 @@
 package org.hbrs.se2.project.hellocar.control;
 
+import lombok.NonNull;
+import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
+import org.hbrs.se2.project.hellocar.control.exception.InvalidBirthdayException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.impl.BenutzerDTOImpl;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
@@ -8,7 +11,6 @@ import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
-import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import java.time.LocalDate;
 
 @Component
 public class VerwaltungControl {
+
     private final BenutzerRepository benutzerRepository;
     private final StudentRepository studentRepository;
     private final GruenderRepository gruenderRepository;
@@ -30,7 +33,6 @@ public class VerwaltungControl {
         this.studentRepository = studentRepository;
         this.gruenderRepository = gruenderRepository;
     }
-
 
     private boolean istLeer(String x) {
         return x == null || x.isBlank();
@@ -60,25 +62,21 @@ public class VerwaltungControl {
         return false;
     }
 
-
     /**
      * Lädt den aktuellen Benutzer frisch aus der DB und gibt ihn als DTO zurück.
      * Wird nach einem Update aufgerufen um die Session zu aktualisieren.
      */
-    public BenutzerDTO ladeBenutzer(int userId) {
-        Optional<Benutzer> benutzerTMP = benutzerRepository.findById(userId);
-        if (benutzerTMP.isEmpty()) return null;
-
-        Benutzer benutzer = benutzerTMP.get();
-        BenutzerDTOImpl dto = new BenutzerDTOImpl();
-        dto.setUserId(benutzer.getUserId());
-        dto.setVorname(benutzer.getVorname());
-        dto.setNachname(benutzer.getNachname());
-        dto.setGeburtstag(benutzer.getGeburtstag());
-        dto.setUsername(benutzer.getUsername());
-        dto.setEmail(benutzer.getEmail());
-        dto.setTelefonnummer(benutzer.getTelefonnummer());
-        return dto;
+    public BenutzerDTO ladeBenutzer(int userId) throws DatabaseUserException {
+        return this.benutzerRepository.findById(userId)
+                .map(benutzer -> new BenutzerDTOImpl(
+                        benutzer.getUserId(),
+                        benutzer.getUsername(),
+                        benutzer.getVorname(),
+                        benutzer.getNachname(),
+                        benutzer.getGeburtstag(),
+                        benutzer.getEmail(),
+                        benutzer.getTelefonnummer()
+            )).orElseThrow(DatabaseUserException::new);
     }
 
     /**
@@ -97,10 +95,8 @@ public class VerwaltungControl {
         return gruenderTMP.orElse(null);
     }
 
-
-
     @Transactional
-    public boolean updateStudent(BenutzerDTO aktuellerBenutzer,
+    public void updateStudent(@NonNull BenutzerDTO aktuellerBenutzer,
                                  String vorname,
                                  String nachname,
                                  LocalDate geburtstag,
@@ -109,24 +105,21 @@ public class VerwaltungControl {
                                  String universitaet,
                                  Integer semester,
                                  String abschluss,
-                                 String skills){
+                                 String skills) throws NullPointerException, DatabaseUserException, InvalidBirthdayException {
 
-        if (aktuellerBenutzer == null){
-            System.out.println("Kein Eingeloggter Benutzer");
-            return false;
-        }
-        Optional <Benutzer> benutzerTMP = benutzerRepository.findById(aktuellerBenutzer.getUserId());
-        Optional <Student> studentTMP = studentRepository.findById(aktuellerBenutzer.getUserId());
+        Benutzer benutzer = benutzerRepository.findById(aktuellerBenutzer.getUserId())
+                .orElseThrow(DatabaseUserException::new);
 
-        if (benutzerTMP.isEmpty() || studentTMP.isEmpty()) {
-            System.out.println("Benutzer oder Student wurde nicht gefunden.");
-            return false;
-        }
-        Benutzer benutzer = benutzerTMP.get();
-        Student student = studentTMP.get();
+        Student student = studentRepository.findById(aktuellerBenutzer.getUserId())
+                .orElseThrow(DatabaseUserException::new);
 
         vornameAendern(benutzer, vorname);
         nachnameAendern(benutzer, nachname);
+
+        if(!ValidateUserControl.isAdult(geburtstag)){
+            throw new InvalidBirthdayException("Sie müssen min. 18 Jahre alt sein.");
+        }
+
         geburtstagAendern(benutzer, geburtstag);
         emailAendern(benutzer, email);
         telefonnummerAendern(benutzer, telefonnummer);
@@ -139,7 +132,6 @@ public class VerwaltungControl {
 
         benutzerRepository.save(benutzer);
         studentRepository.save(student);
-        return true;
     }
 
     @Transactional
@@ -152,7 +144,7 @@ public class VerwaltungControl {
                                   String unternehmensname,
                                   String standort
 
-                                  ){
+                                  ) throws InvalidBirthdayException {
 
         if (aktuellerBenutzer == null){
             System.out.println("Kein Eingeloggter Benutzer");
@@ -170,6 +162,10 @@ public class VerwaltungControl {
 
         vornameAendern(benutzer, vorname);
         nachnameAendern(benutzer, nachname);
+
+        if(!ValidateUserControl.isAdult(geburtstag)){
+            throw new InvalidBirthdayException("Sie müssen min. 18 Jahre sein.");
+        }
         geburtstagAendern(benutzer, geburtstag);
         emailAendern(benutzer, email);
         telefonnummerAendern(benutzer, telefonnummer);
@@ -210,7 +206,7 @@ public class VerwaltungControl {
     public boolean passwortAendern(Benutzer benutzer, String x){
         if(istLeer(x))return true;
         //hier muss eigentlich noch ne E-Mail gesendet werden als confirmation.
-        if(x.length() < 8){return false;} // passwort muss länger als 8 Zeichen sein
+        if(!ValidateUserControl.validatePassword(x)){return false;} // passwort muss länger als 8 Zeichen sein
         benutzer.setPasswort(x);
         System.out.println("Das neue Passwort wurde eingegeben.");
         return true;
@@ -249,10 +245,11 @@ public class VerwaltungControl {
         System.out.println("Der Standort " + x + " wurde eingegeben.");
         return true;
     }
-    public boolean geburtstagAendern(Benutzer benutzer, LocalDate x){
+    public boolean geburtstagAendern(Benutzer benutzer, LocalDate x) throws InvalidBirthdayException {
         if(x == null) return true;
-        LocalDate vor18Jahren = LocalDate.now().minusYears(18);
-        if(x.isBefore(vor18Jahren) ){return false;}
+        if(!ValidateUserControl.isAdult(x)){
+            throw new InvalidBirthdayException("Sie müssen min. 18 Jahre alt sein.");
+        }
         benutzer.setGeburtstag(x);
         System.out.println("Das Geburtsdatum " + x + " wurde eingegeben.");
         return true;
