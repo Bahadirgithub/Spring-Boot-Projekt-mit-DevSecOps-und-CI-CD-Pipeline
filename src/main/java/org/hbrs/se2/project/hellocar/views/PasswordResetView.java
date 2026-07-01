@@ -1,5 +1,7 @@
 package org.hbrs.se2.project.hellocar.views;
 
+// TODO Refactoring weil Control Klasse fehlt und hashing der Passwörter
+
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
@@ -95,9 +97,9 @@ public class PasswordResetView extends VerticalLayout implements BeforeEnterObse
 
                 // Erfolgreich beendet -> Zurück zur Login-Maske schicken
                 UI.getCurrent().navigate(LoginView.class);
-            } catch (DatabaseUserException dbEx) {
+            } catch (DatabaseUserException ex) {
                 confirmPasswordField.setInvalid(true);
-                confirmPasswordField.setErrorMessage("Fehler: " + dbEx.getReason());
+                confirmPasswordField.setErrorMessage("Fehler: " + ex.getMessage());
             }
         });
 

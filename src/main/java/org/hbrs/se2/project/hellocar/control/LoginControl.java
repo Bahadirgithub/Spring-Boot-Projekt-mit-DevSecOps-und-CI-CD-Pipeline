@@ -1,10 +1,13 @@
 package org.hbrs.se2.project.hellocar.control;
 
+import com.vaadin.flow.component.UI;
 import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
+import org.hbrs.se2.project.hellocar.control.exception.PasswordInvalidException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.impl.BenutzerDTOImpl;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
+import org.hbrs.se2.project.hellocar.util.CryptoProvider;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Component;
 
@@ -15,69 +18,37 @@ public class LoginControl {
 
     private final BenutzerRepository benutzerRepository;
 
-    private BenutzerDTO benutzerDTO = null;
-
     public LoginControl(BenutzerRepository benutzerRepository) {
         this.benutzerRepository = benutzerRepository;
     }
 
-    public boolean authenticate(String username, String password) throws DatabaseUserException {
-        BenutzerDTO tmpBenutzer = this.getBenutzerWithJPA(username, password);
+    public BenutzerDTO authenticate(String username, String password) throws PasswordInvalidException, DatabaseUserException, DataAccessResourceFailureException {
+        Benutzer benutzer = benutzerRepository.findByUsername(username)
+                .orElseThrow(DatabaseUserException::new);
 
-        if (tmpBenutzer == null) {
-            return false;
+        if(!CryptoProvider.ValidatePassword(password, benutzer.getPasswort())) {
+            throw new PasswordInvalidException();
         }
 
-        this.benutzerDTO = tmpBenutzer;
-        return true;
-    }
-
-    public BenutzerDTO getCurrentUser() {
-        return this.benutzerDTO;
-    }
-
-    private BenutzerDTO getBenutzerWithJPA(String username, String password) throws DatabaseUserException {
-        try {
-            Optional<Benutzer> benutzer =
-                    benutzerRepository.findByUsernameAndPasswort(username, password);
-
-            if (benutzer.isEmpty()) {
-                return null;
-            }
-
-            return convertToDTO(benutzer.get());
-
-        } catch (DataAccessResourceFailureException e) {
-            throw new DatabaseUserException("Fehler bei der Verbindung zur Datenbank mit JPA.");
-        }
-    }
-
-    private BenutzerDTO convertToDTO(Benutzer benutzer) {
-        BenutzerDTOImpl dto = new BenutzerDTOImpl();
-
-        dto.setUserId(benutzer.getUserId());
-        dto.setVorname(benutzer.getVorname());
-        dto.setNachname(benutzer.getNachname());
-        dto.setGeburtstag(benutzer.getGeburtstag());
-        dto.setUsername(benutzer.getUsername());
-        dto.setEmail(benutzer.getEmail());
-        dto.setTelefonnummer(benutzer.getTelefonnummer());
-
-        return dto;
+        return new BenutzerDTOImpl(
+                benutzer.getUserId(),
+                benutzer.getUsername(),
+                benutzer.getVorname(),
+                benutzer.getNachname(),
+                benutzer.getGeburtstag(),
+                benutzer.getEmail(),
+                benutzer.getTelefonnummer()
+        );
     }
 
     public boolean checkResetCredentials(String username, String email) throws DatabaseUserException {
         try {
             // Suche den Benutzer anhand der Kombination im Repository
-            Benutzer benutzer = benutzerRepository.findBenutzerByUsernameAndEmail(username, email);
-
-            // Wenn kein Benutzer mit dieser Kombination existiert
-            if (benutzer == null) {
-                return false;
-            }
+            Benutzer benutzer = benutzerRepository.findBenutzerByUsernameAndEmail(username, email)
+                    .orElseThrow(DatabaseUserException::new);
 
             // Benutzer verifiziert! Wir merken uns die ID in der Vaadin-Session für den nächsten Schritt
-            com.vaadin.flow.component.UI.getCurrent().getSession().setAttribute("reset_user_id", benutzer.getUserId());
+            UI.getCurrent().getSession().setAttribute("reset_user_id", benutzer.getUserId());
             return true;
 
         } catch (DataAccessResourceFailureException e) {
@@ -88,7 +59,8 @@ public class LoginControl {
     public void updatePassword(String newPassword) throws DatabaseUserException {
         try {
             // Hole die vorgemerkte User-ID aus der Session
-            Integer userId = (Integer) com.vaadin.flow.component.UI.getCurrent().getSession().getAttribute("reset_user_id");
+            // TODO fix method
+            Integer userId = (Integer) UI.getCurrent().getSession().getAttribute("reset_user_id");
 
             // Sicherheitscheck: Falls keine ID vorhanden ist, wurde der Prozess nicht korrekt gestartet
             if (userId == null) {
@@ -96,13 +68,8 @@ public class LoginControl {
             }
 
             // Benutzer anhand der ID aus der Datenbank laden
-            Optional<Benutzer> optionalBenutzer = benutzerRepository.findById(userId);
-
-            if (optionalBenutzer.isEmpty()) {
-                throw new DatabaseUserException("Der zu aktualisierende Benutzer wurde nicht gefunden.");
-            }
-
-            Benutzer benutzer = optionalBenutzer.get();
+            Benutzer benutzer = benutzerRepository.findById(userId)
+                    .orElseThrow(DatabaseUserException::new);
 
             // Neues Passwort setzen (Falls ihr Passwörter hasht, hier das gehashte PW übergeben!)
             benutzer.setPasswort(newPassword);
@@ -111,7 +78,7 @@ public class LoginControl {
             benutzerRepository.save(benutzer);
 
             // WICHTIG: Die ID aus der Session löschen, damit der Vorgang abgeschlossen ist
-            com.vaadin.flow.component.UI.getCurrent().getSession().setAttribute("reset_user_id", null);
+            UI.getCurrent().getSession().setAttribute("reset_user_id", null);
 
         } catch (DataAccessResourceFailureException e) {
             throw new DatabaseUserException("Fehler beim Speichern des neuen Passworts in der Datenbank.");

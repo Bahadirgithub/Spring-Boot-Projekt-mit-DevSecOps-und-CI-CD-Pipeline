@@ -1,48 +1,52 @@
 package org.hbrs.se2.project.hellocar.views;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.datepicker.DatePicker;
+
+
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
+import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
+import org.hbrs.se2.project.hellocar.control.exception.InvalidBirthdayException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
-import org.hbrs.se2.project.hellocar.entities.Gruender;
-import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.util.Globals;
+import org.hbrs.se2.project.hellocar.entities.Student;
+import org.hbrs.se2.project.hellocar.entities.Gruender;
+import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.textfield.TextArea;
+
+
 
 /**
- * Durch "layout = AppView.class" behalten wir die Navigation und den Header.
- * Nur der Content-Bereich wird ausgetauscht.
+ * durch "layout = AppView.class" behalten wir die navigation und den header
+ * nur der Content bereich wird ausgetauscht
  */
 @Route(value = "verwaltung", layout = AppView.class)
 public class VerwaltungView extends VerticalLayout {
 
-    // Wichtigster Part! Das hier holt den aktuellen User aus der Vaadin-Sitzung, dann als Getter als DTO Type - Marius
+    //Wichtigster Part! Das hier holt den aktuellen User aus der Vaadin Sitzung, dann als Getter als DTO Type - Marius
     private BenutzerDTO getCurrentUser() {
         return (BenutzerDTO) UI.getCurrent()
                 .getSession()
                 .getAttribute(Globals.CURRENT_USER);
     }
 
-    private final VerwaltungControl vControl;
-    private final AuthorizationControl authControl;
+    private VerwaltungControl vControl;
+    private AuthorizationControl authControl;
 
     // Constructor Injection – Spring injiziert beide Controls automatisch
     public VerwaltungView(VerwaltungControl vControl, AuthorizationControl authControl) {
@@ -50,6 +54,7 @@ public class VerwaltungView extends VerticalLayout {
         this.authControl = authControl;
 
         BenutzerDTO currentUser = getCurrentUser();
+
 
         if (currentUser == null) {
             Notification.show("Bitte zuerst einloggen.");
@@ -68,6 +73,7 @@ public class VerwaltungView extends VerticalLayout {
         Avatar avatar = new Avatar(currentUser.getVorname() + " " + currentUser.getNachname());
         avatar.setWidth("80px");
         avatar.setHeight("80px");
+        // Farbe automatisch aus Benutzername ableiten – 7 vordefinierte Vaadin-Farben (Index 0-6)
         avatar.setColorIndex(Math.floorMod(currentUser.getUsername().hashCode(), 7));
         add(avatar);
 
@@ -100,14 +106,6 @@ public class VerwaltungView extends VerticalLayout {
         lastNameField.setValue(currentUser.getNachname() == null ? "" : currentUser.getNachname());
         emailField.setValue(currentUser.getEmail() == null ? "" : currentUser.getEmail());
 
-        if (currentUser.getTelefonnummer() != null && !currentUser.getTelefonnummer().isBlank()) {
-            try {
-                telefonnummerField.setValue(Double.valueOf(currentUser.getTelefonnummer()));
-            } catch (NumberFormatException ignored) {
-                // Falls alte Telefonnummern nicht rein numerisch sind, Feld leer lassen.
-            }
-        }
-
         if (currentUser.getGeburtstag() != null) {
             geburtstagField.setValue(currentUser.getGeburtstag());
         }
@@ -115,6 +113,7 @@ public class VerwaltungView extends VerticalLayout {
         // Sichtbarkeit direkt nach Typ setzen
         TextField universitaetField = new TextField("Universität");
         TextField semesterField = new TextField("Semester");
+        // Nur Zahlen erlauben
         semesterField.setPattern("[0-9]*");
         semesterField.setErrorMessage("Nur Zahlen erlaubt.");
         universitaetField.setVisible(istStudent);
@@ -122,9 +121,9 @@ public class VerwaltungView extends VerticalLayout {
 
         TextField abschlussField = new TextField("Abschluss");
 
-        // Skills als Mehrfachauswahl aus DB-Tabelle ahsogehts.skill
-        MultiSelectComboBox<String> skillsField = new MultiSelectComboBox<>("Skills");
-        skillsField.setItems(vControl.ladeAlleSkillNamen());
+        // Skills feld größer
+        TextArea skillsField = new TextArea("Skills");
+        skillsField.setHeight("120px");
 
         abschlussField.setVisible(istStudent);
         skillsField.setVisible(istStudent);
@@ -134,6 +133,7 @@ public class VerwaltungView extends VerticalLayout {
         TextField standortField = new TextField("Standort");
         unternehmensNameField.setVisible(istGruender);
         standortField.setVisible(istGruender);
+
 
         // Gründer-Felder ausfüllen
         if (istGruender) {
@@ -151,9 +151,7 @@ public class VerwaltungView extends VerticalLayout {
                 universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
                 semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
                 abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
-                skillsField.setValue(student.getSkills() == null
-                        ? Collections.emptySet()
-                        : new HashSet<>(student.getSkills()));
+                skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
             }
         }
 
@@ -172,73 +170,100 @@ public class VerwaltungView extends VerticalLayout {
             boolean erfolg = false;
 
             if (istStudent) {
-                erfolg = vControl.updateStudent(
-                        aktuellerBenutzer,
-                        firstNameField.getValue(),
-                        lastNameField.getValue(),
-                        geburtstagField.getValue(),
-                        emailField.getValue(),
-                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue().longValue()) : "",
-                        universitaetField.getValue(),
-                        semesterField.getValue() == null || semesterField.getValue().isBlank()
-                                ? null
-                                : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
-                        abschlussField.getValue(),
-                        new ArrayList<>(skillsField.getValue())
-                );
+                try {
+                    vControl.updateStudent(
+                            aktuellerBenutzer,
+                            firstNameField.getValue(),
+                            lastNameField.getValue(),
+                            geburtstagField.getValue(),
+                            emailField.getValue(),
+                            telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
+                            universitaetField.getValue(),
+                            semesterField.getValue() == null || semesterField.getValue().isBlank()
+                                    ? null
+                                    : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
+                            abschlussField.getValue(),
+                            skillsField.getValue()
+                    );
+
+                    // TODO Erfolgsvariable entfernen und auf Exceptions umstellen!
+                    erfolg = true;
+
+                } catch (NullPointerException ex) {
+                   // TODO Wird geworfen, wenn aktuellerBenutzer == null ist
+
+                } catch (DatabaseUserException ex) {
+                    // TODO Wird geworfen, wenn der Benutzer oder Student nicht in der Datenbank zu finden sind
+
+                } catch (InvalidBirthdayException ex) {
+                    geburtstagField.setErrorMessage("Sie müssen min. 18 Jahre alt sein.");
+                }
+
             } else if (istGruender) {
-                erfolg = vControl.updateGruender(
-                        aktuellerBenutzer,
-                        firstNameField.getValue(),
-                        lastNameField.getValue(),
-                        geburtstagField.getValue(),
-                        emailField.getValue(),
-                        telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue().longValue()) : "",
-                        unternehmensNameField.getValue(),
-                        standortField.getValue()
-                );
+                try {
+                    erfolg = vControl.updateGruender(
+                            aktuellerBenutzer,
+                            firstNameField.getValue(),
+                            lastNameField.getValue(),
+                            geburtstagField.getValue(),
+                            emailField.getValue(),
+                            telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
+                            unternehmensNameField.getValue(),
+                            standortField.getValue()
+                    );
+                } catch (InvalidBirthdayException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
 
             if (erfolg) {
                 Notification.show("Profil erfolgreich aktualisiert.");
 
-                // Benutzer neu aus der DB laden
-                BenutzerDTO aktualisierterBenutzer = vControl.ladeBenutzer(aktuellerBenutzer.getUserId());
+                try {
+                    // Benutzer neu aus der DB laden
+                    BenutzerDTO aktualisierterBenutzer = vControl.ladeBenutzer(aktuellerBenutzer.getUserId());
 
-                if (aktualisierterBenutzer != null) {
-                    // Session überschreiben damit beim nächsten View-Wechsel die neuen Daten geladen werden
-                    UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, aktualisierterBenutzer);
+                    if (aktualisierterBenutzer != null) {
+                        // Session überschreiben damit beim nächsten View-Wechsel die neuen Daten geladen werden
+                        UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, aktualisierterBenutzer);
 
-                    // Felder sofort aktualisieren
-                    firstNameField.setValue(aktualisierterBenutzer.getVorname() == null ? "" : aktualisierterBenutzer.getVorname());
-                    lastNameField.setValue(aktualisierterBenutzer.getNachname() == null ? "" : aktualisierterBenutzer.getNachname());
-                    emailField.setValue(aktualisierterBenutzer.getEmail() == null ? "" : aktualisierterBenutzer.getEmail());
+                        // Felder sofort aktualisieren
+                        // Falls ein Wert null ist, leeren String setzen damit kein Fehler entsteht
+                        firstNameField.setValue(aktualisierterBenutzer.getVorname() == null ? "" : aktualisierterBenutzer.getVorname());
+                        lastNameField.setValue(aktualisierterBenutzer.getNachname() == null ? "" : aktualisierterBenutzer.getNachname());
+                        emailField.setValue(aktualisierterBenutzer.getEmail() == null ? "" : aktualisierterBenutzer.getEmail());
 
-                    if (aktualisierterBenutzer.getGeburtstag() != null) {
-                        geburtstagField.setValue(aktualisierterBenutzer.getGeburtstag());
-                    }
 
-                    // Student-Felder aktualisieren
-                    if (istStudent) {
-                        Student student = vControl.ladeStudent(aktuellerBenutzer.getUserId());
-                        if (student != null) {
-                            universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
-                            semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
-                            abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
-                            skillsField.setValue(student.getSkills() == null
-                                    ? Collections.emptySet()
-                                    : new HashSet<>(student.getSkills()));
+                        if (aktualisierterBenutzer.getGeburtstag() != null) {
+
+                            geburtstagField.setValue(aktualisierterBenutzer.getGeburtstag());
+                        }
+
+
+                        // Student-Felder aktualisieren
+                        if (istStudent) {
+                            Student student = vControl.ladeStudent(aktuellerBenutzer.getUserId());
+                            if (student != null) {
+                                universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
+                                // Semester ist ein int – 0 bedeutet nicht gesetzt, dann leerer String
+                                semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
+                                abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
+                                skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
+                            }
+                        }
+
+                        // Gründer-Felder aktualisieren
+                        if (istGruender) {
+                            Gruender gruender = vControl.ladeGruender(aktuellerBenutzer.getUserId());
+                            if (gruender != null) {
+                                unternehmensNameField.setValue(gruender.getUnternehmensname() == null ? "" : gruender.getUnternehmensname());
+                                standortField.setValue(gruender.getStandort() == null ? "" : gruender.getStandort());
+                            }
                         }
                     }
 
-                    // Gründer-Felder aktualisieren
-                    if (istGruender) {
-                        Gruender gruender = vControl.ladeGruender(aktuellerBenutzer.getUserId());
-                        if (gruender != null) {
-                            unternehmensNameField.setValue(gruender.getUnternehmensname() == null ? "" : gruender.getUnternehmensname());
-                            standortField.setValue(gruender.getStandort() == null ? "" : gruender.getStandort());
-                        }
-                    }
+                } catch (DatabaseUserException ex) {
+                    UI.getCurrent().navigate(LoginView.class);
                 }
 
             } else {
@@ -274,8 +299,10 @@ public class VerwaltungView extends VerticalLayout {
         // Button öffnet den Dialog
         deleteButton.addClickListener(e -> loeschenDialog.open());
 
+
+
         // Felder in linke Spalte
-        linksLayout.add(firstNameField, lastNameField, geburtstagField, emailField, telefonnummerField);
+        linksLayout.add(firstNameField, lastNameField, geburtstagField, emailField);
 
         // Felder in rechte Spalte
         rechtsLayout.add(universitaetField, semesterField, abschlussField, skillsField,
@@ -287,7 +314,7 @@ public class VerwaltungView extends VerticalLayout {
         trennlinie.getStyle().set("height", "auto");
         trennlinie.getStyle().set("align-self", "auto");
 
-        // Spalten zusammensetzen
+        //Spalten zusammensetzen
         spaltenLayout.add(linksLayout, trennlinie, rechtsLayout);
 
         spaltenLayout.setFlexGrow(1, linksLayout);
