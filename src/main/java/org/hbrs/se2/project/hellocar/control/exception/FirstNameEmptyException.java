@@ -1,6 +1,6 @@
 package org.hbrs.se2.project.hellocar.control.exception;
 
-public class FirstNameEmptyException extends RuntimeException {
+public class FirstNameEmptyException extends Exception {
     public FirstNameEmptyException(String message) {
         super(message);
     }

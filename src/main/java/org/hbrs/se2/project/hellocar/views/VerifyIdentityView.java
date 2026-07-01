@@ -58,9 +58,9 @@ public class VerifyIdentityView extends VerticalLayout {
                     emailField.setInvalid(true);
                     emailField.setErrorMessage("Kombination aus Benutzername und E-Mail ist falsch.");
                 }
-            } catch (DatabaseUserException dbEx) {
+            } catch (DatabaseUserException ex) {
                 emailField.setInvalid(true);
-                emailField.setErrorMessage("Datenbankfehler: " + dbEx.getReason());
+                emailField.setErrorMessage("Datenbankfehler: " + ex.getMessage());
             }
         });
 

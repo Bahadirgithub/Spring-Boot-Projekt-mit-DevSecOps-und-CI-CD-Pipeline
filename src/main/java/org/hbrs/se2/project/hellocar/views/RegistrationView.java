@@ -188,6 +188,11 @@ public class RegistrationView extends VerticalLayout {
                     universitaetField.setInvalid(true);
                 }
 
+                catch(InvalidBirthdayException e){
+                    birthdayField.setErrorMessage("Sie müssen mindestens 18 Jahre alt sein.");
+                    birthdayField.setInvalid(true);
+                }
+
                 catch (Exception ex) {
                     Notification.show(ex.getMessage());
                 }
