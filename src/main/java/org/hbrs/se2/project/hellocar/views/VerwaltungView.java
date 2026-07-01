@@ -16,8 +16,6 @@ import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
-import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
-import org.hbrs.se2.project.hellocar.control.exception.InvalidBirthdayException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import org.hbrs.se2.project.hellocar.entities.Student;
@@ -155,6 +153,8 @@ public class VerwaltungView extends VerticalLayout {
             }
         }
 
+
+
         // Update-Button mit Logik
         Button updateButton = new Button("Aktualisieren");
         updateButton.addClickListener(e -> {
@@ -212,20 +212,19 @@ public class VerwaltungView extends VerticalLayout {
                             standortField.getValue()
                     );
                 } catch (InvalidBirthdayException ex) {
-                    throw new RuntimeException(ex);
+                   // TODO Aylin
                 }
             }
 
             if (erfolg) {
                 Notification.show("Profil erfolgreich aktualisiert.");
 
-                try {
-                    // Benutzer neu aus der DB laden
-                    BenutzerDTO aktualisierterBenutzer = vControl.ladeBenutzer(aktuellerBenutzer.getUserId());
+                // Benutzer neu aus der DB laden
+                BenutzerDTO aktualisierterBenutzer = vControl.ladeBenutzer(aktuellerBenutzer.getUserId());
 
-                    if (aktualisierterBenutzer != null) {
-                        // Session überschreiben damit beim nächsten View-Wechsel die neuen Daten geladen werden
-                        UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, aktualisierterBenutzer);
+                if (aktualisierterBenutzer != null) {
+                    // Session überschreiben damit beim nächsten View-Wechsel die neuen Daten geladen werden
+                    UI.getCurrent().getSession().setAttribute(Globals.CURRENT_USER, aktualisierterBenutzer);
 
                         // Felder sofort aktualisieren
                         // Falls ein Wert null ist, leeren String setzen damit kein Fehler entsteht
@@ -233,37 +232,33 @@ public class VerwaltungView extends VerticalLayout {
                         lastNameField.setValue(aktualisierterBenutzer.getNachname() == null ? "" : aktualisierterBenutzer.getNachname());
                         emailField.setValue(aktualisierterBenutzer.getEmail() == null ? "" : aktualisierterBenutzer.getEmail());
 
-
-                        if (aktualisierterBenutzer.getGeburtstag() != null) {
-
-                            geburtstagField.setValue(aktualisierterBenutzer.getGeburtstag());
-                        }
+                    if (aktualisierterBenutzer.getGeburtstag() != null) {
+                        geburtstagField.setValue(aktualisierterBenutzer.getGeburtstag());
+                    }
 
 
-                        // Student-Felder aktualisieren
-                        if (istStudent) {
-                            Student student = vControl.ladeStudent(aktuellerBenutzer.getUserId());
-                            if (student != null) {
-                                universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
-                                // Semester ist ein int – 0 bedeutet nicht gesetzt, dann leerer String
-                                semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
-                                abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
-                                skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
-                            }
-                        }
 
-                        // Gründer-Felder aktualisieren
-                        if (istGruender) {
-                            Gruender gruender = vControl.ladeGruender(aktuellerBenutzer.getUserId());
-                            if (gruender != null) {
-                                unternehmensNameField.setValue(gruender.getUnternehmensname() == null ? "" : gruender.getUnternehmensname());
-                                standortField.setValue(gruender.getStandort() == null ? "" : gruender.getStandort());
-                            }
+                    // Student-Felder aktualisieren
+                    if (istStudent) {
+                        Student student = vControl.ladeStudent(aktuellerBenutzer.getUserId());
+                        if (student != null) {
+                            universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
+                            semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
+                            abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
+                            skillsField.setValue(student.getSkills() == null
+                                    ? Collections.emptySet()
+                                    : new HashSet<>(student.getSkills()));
                         }
                     }
 
-                } catch (DatabaseUserException ex) {
-                    UI.getCurrent().navigate(LoginView.class);
+                    // Gründer-Felder aktualisieren
+                    if (istGruender) {
+                        Gruender gruender = vControl.ladeGruender(aktuellerBenutzer.getUserId());
+                        if (gruender != null) {
+                            unternehmensNameField.setValue(gruender.getUnternehmensname() == null ? "" : gruender.getUnternehmensname());
+                            standortField.setValue(gruender.getStandort() == null ? "" : gruender.getStandort());
+                        }
+                    }
                 }
 
             } else {

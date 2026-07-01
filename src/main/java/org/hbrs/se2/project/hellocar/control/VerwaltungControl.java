@@ -3,35 +3,52 @@ package org.hbrs.se2.project.hellocar.control;
 import lombok.NonNull;
 import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
 import org.hbrs.se2.project.hellocar.control.exception.InvalidBirthdayException;
+import org.hbrs.se2.project.hellocar.control.exception.InvalidEmailException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.impl.BenutzerDTOImpl;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.entities.Gruender;
+import org.hbrs.se2.project.hellocar.entities.Skill;
 import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
+import org.hbrs.se2.project.hellocar.repository.SkillRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
+import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.time.LocalDate;
-
-// Wir greifen per Views auf den aktuellen User zu mit Vadiin Session! Und hier übergeben wir diesen User nur - Marius
+// TODO angucken
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+// Wir greifen per Views auf den aktuellen User zu mit Vaadin Session! Und hier übergeben wir diesen User nur - Marius
 
 @Component
 public class VerwaltungControl {
-
     private final BenutzerRepository benutzerRepository;
     private final StudentRepository studentRepository;
     private final GruenderRepository gruenderRepository;
+    private final SkillRepository skillRepository;
 
-    public VerwaltungControl(BenutzerRepository benutzerRepository, StudentRepository studentRepository,
-                             GruenderRepository gruenderRepository) {
+    public VerwaltungControl(BenutzerRepository benutzerRepository,
+                             StudentRepository studentRepository,
+                             GruenderRepository gruenderRepository,
+                             SkillRepository skillRepository) {
         this.benutzerRepository = benutzerRepository;
         this.studentRepository = studentRepository;
         this.gruenderRepository = gruenderRepository;
+        this.skillRepository = skillRepository;
+    }
+
+    public List<String> ladeAlleSkillNamen() {
+        return skillRepository.findAllByOrderByKategorieAscNameAsc()
+                .stream()
+                .map(Skill::getName)
+                .toList();
     }
 
     private boolean istLeer(String x) {
@@ -39,9 +56,9 @@ public class VerwaltungControl {
     }
 
     @Transactional
-    public boolean loeschen(BenutzerDTO currentUser){
+    public void loeschen(BenutzerDTO currentUser){
         if (currentUser == null) {
-            return false;
+            return;
         }
 
         int userId = currentUser.getUserId();
@@ -56,27 +73,27 @@ public class VerwaltungControl {
 
         if (benutzerRepository.existsById(userId)) {
             benutzerRepository.deleteById(userId);
-            return true;
         }
-
-        return false;
     }
 
     /**
      * Lädt den aktuellen Benutzer frisch aus der DB und gibt ihn als DTO zurück.
      * Wird nach einem Update aufgerufen um die Session zu aktualisieren.
      */
-    public BenutzerDTO ladeBenutzer(int userId) throws DatabaseUserException {
-        return this.benutzerRepository.findById(userId)
-                .map(benutzer -> new BenutzerDTOImpl(
-                        benutzer.getUserId(),
-                        benutzer.getUsername(),
-                        benutzer.getVorname(),
-                        benutzer.getNachname(),
-                        benutzer.getGeburtstag(),
-                        benutzer.getEmail(),
-                        benutzer.getTelefonnummer()
-            )).orElseThrow(DatabaseUserException::new);
+    public BenutzerDTO ladeBenutzer(int userId) {
+        Optional<Benutzer> benutzerTMP = benutzerRepository.findById(userId);
+        if (benutzerTMP.isEmpty()) return null;
+
+        Benutzer benutzer = benutzerTMP.get();
+        BenutzerDTOImpl dto = new BenutzerDTOImpl();
+        dto.setUserId(benutzer.getUserId());
+        dto.setVorname(benutzer.getVorname());
+        dto.setNachname(benutzer.getNachname());
+        dto.setGeburtstag(benutzer.getGeburtstag());
+        dto.setUsername(benutzer.getUsername());
+        dto.setEmail(benutzer.getEmail());
+        dto.setTelefonnummer(benutzer.getTelefonnummer());
+        return dto;
     }
 
     /**
@@ -95,6 +112,8 @@ public class VerwaltungControl {
         return gruenderTMP.orElse(null);
     }
 
+
+
     @Transactional
     public void updateStudent(@NonNull BenutzerDTO aktuellerBenutzer,
                                  String vorname,
@@ -105,7 +124,8 @@ public class VerwaltungControl {
                                  String universitaet,
                                  Integer semester,
                                  String abschluss,
-                                 String skills) throws NullPointerException, DatabaseUserException, InvalidBirthdayException {
+                                 String skills) throws NullPointerException, DatabaseUserException, InvalidBirthdayException,InvalidEmailException {
+
 
         Benutzer benutzer = benutzerRepository.findById(aktuellerBenutzer.getUserId())
                 .orElseThrow(DatabaseUserException::new);
@@ -132,6 +152,7 @@ public class VerwaltungControl {
 
         benutzerRepository.save(benutzer);
         studentRepository.save(student);
+        return true;
     }
 
     @Transactional
@@ -144,7 +165,7 @@ public class VerwaltungControl {
                                   String unternehmensname,
                                   String standort
 
-                                  ) throws InvalidBirthdayException {
+                                  ) throws InvalidBirthdayException,InvalidEmailException {
 
         if (aktuellerBenutzer == null){
             System.out.println("Kein Eingeloggter Benutzer");
