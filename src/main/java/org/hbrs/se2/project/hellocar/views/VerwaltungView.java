@@ -16,6 +16,9 @@ import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 import org.hbrs.se2.project.hellocar.control.VerwaltungControl;
+import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
+import org.hbrs.se2.project.hellocar.control.exception.InvalidBirthdayException;
+import org.hbrs.se2.project.hellocar.control.exception.InvalidEmailException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.util.Globals;
 import org.hbrs.se2.project.hellocar.entities.Student;
@@ -27,6 +30,7 @@ import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.textfield.TextArea;
 
+import java.util.HashSet;
 
 
 /**
@@ -149,7 +153,7 @@ public class VerwaltungView extends VerticalLayout {
                 universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
                 semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
                 abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
-                skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
+               // skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
             }
         }
 
@@ -195,7 +199,7 @@ public class VerwaltungView extends VerticalLayout {
                 } catch (DatabaseUserException ex) {
                     // TODO Wird geworfen, wenn der Benutzer oder Student nicht in der Datenbank zu finden sind
 
-                } catch (InvalidBirthdayException ex) {
+                } catch (InvalidBirthdayException | InvalidEmailException ex) {
                     geburtstagField.setErrorMessage("Sie müssen min. 18 Jahre alt sein.");
                 }
 
@@ -211,7 +215,7 @@ public class VerwaltungView extends VerticalLayout {
                             unternehmensNameField.getValue(),
                             standortField.getValue()
                     );
-                } catch (InvalidBirthdayException ex) {
+                } catch (InvalidBirthdayException | InvalidEmailException ex) {
                    // TODO Aylin
                 }
             }
@@ -245,9 +249,9 @@ public class VerwaltungView extends VerticalLayout {
                             universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
                             semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
                             abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
-                            skillsField.setValue(student.getSkills() == null
+                           /* skillsField.setValue(student.getSkills() == null
                                     ? Collections.emptySet()
-                                    : new HashSet<>(student.getSkills()));
+                                    : new HashSet<>(student.getSkills()));*/
                         }
                     }
 
