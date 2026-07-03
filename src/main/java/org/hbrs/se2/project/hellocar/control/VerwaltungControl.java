@@ -14,7 +14,6 @@ import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
 import org.hbrs.se2.project.hellocar.repository.SkillRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
-import org.hbrs.se2.project.hellocar.control.ValidateUserControl;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,9 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.time.LocalDate;
 // TODO angucken
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 // Wir greifen per Views auf den aktuellen User zu mit Vaadin Session! Und hier übergeben wir diesen User nur - Marius
 
 @Component
@@ -56,9 +53,9 @@ public class VerwaltungControl {
     }
 
     @Transactional
-    public void loeschen(BenutzerDTO currentUser){
+    public boolean loeschen(BenutzerDTO currentUser){
         if (currentUser == null) {
-            return;
+            return false;
         }
 
         int userId = currentUser.getUserId();
@@ -74,6 +71,7 @@ public class VerwaltungControl {
         if (benutzerRepository.existsById(userId)) {
             benutzerRepository.deleteById(userId);
         }
+        return false;
     }
 
     /**
@@ -148,11 +146,11 @@ public class VerwaltungControl {
         universitaetAendern(student, universitaet);
         semesterAendern(student, semester);
         abschlussAendern(student, abschluss);
-        skillsAendern(student, skills);
+        //skillsAendern(student, skills);
 
         benutzerRepository.save(benutzer);
         studentRepository.save(student);
-        return true;
+
     }
 
     @Transactional
@@ -283,10 +281,10 @@ public class VerwaltungControl {
         return true;
     }
 
-    public boolean skillsAendern(Student student, String x){
+   /* public boolean skillsAendern(Student student, String x){
         if(istLeer(x)) return true;
         student.setSkills(x);
         System.out.println("Die Skills " + x + " wurden eingegeben.");
         return true;
-    }
+    }*/
 }

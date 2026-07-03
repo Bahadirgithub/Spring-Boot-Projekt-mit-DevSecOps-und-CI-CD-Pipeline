@@ -151,7 +151,7 @@ public class LoginControlPasswordResetTest {
 
         // Zusätzliche Prüfung: Exception-Meldung sollte aussagekräftig sein
         // DatabaseUserException speichert Nachricht in getReason(), daher dort prüfen
-        assertTrue(exception.getReason().contains("Passwort-Zurücksetzungsprozess"),
+        assertTrue(exception.getMessage().contains("Passwort-Zurücksetzungsprozess"),
                 "Exception-Meldung sollte auf fehlenden Prozess hinweisen.");
     }
 }
