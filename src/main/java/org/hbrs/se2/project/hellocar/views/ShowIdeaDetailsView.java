@@ -19,6 +19,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.BewertungControl;
 import org.hbrs.se2.project.hellocar.control.ManageIdeaControl;
+import org.hbrs.se2.project.hellocar.control.BewerbungControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.GruendungsideeDTO;
 import org.hbrs.se2.project.hellocar.entities.Bewertung;
@@ -48,6 +49,7 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
     private final BenutzerRepository benutzerRepository;
     private final BewertungControl bewertungControl;
     private final AuthorizationControl authorizationControl;
+    private final BewerbungControl bewerbungControl;
 
     // Felder wie in EnterIdeasView
     private TextField unternehmensname = new TextField("Unternehmensname");
@@ -61,13 +63,17 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
 
     private VerticalLayout reviewsContainer = new VerticalLayout();
 
-    public ShowIdeaDetailsView(ManageIdeaControl ideaService, BewertungRepository bewertungRepository, StudentRepository studentRepository, BenutzerRepository benutzerRepository, BewertungControl bewertungControl, AuthorizationControl authorizationControl) {
+    public ShowIdeaDetailsView(ManageIdeaControl ideaService, BewertungRepository bewertungRepository,
+                               StudentRepository studentRepository, BenutzerRepository benutzerRepository,
+                               BewertungControl bewertungControl, AuthorizationControl authorizationControl,
+                               BewerbungControl bewerbungControl) {
         this.ideaService = ideaService;
         this.bewertungRepository = bewertungRepository;
         this.studentRepository = studentRepository;
         this.benutzerRepository = benutzerRepository;
         this.bewertungControl = bewertungControl;
         this.authorizationControl = authorizationControl;
+        this.bewerbungControl = bewerbungControl;
         addClassName("show-idea-details-view");
 
         BenutzerDTO currentUser = (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
@@ -82,6 +88,10 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
             Button applyButton = new Button("Jetzt bewerben");
             applyButton.setWidthFull();
             applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_LARGE);
+            applyButton.addClickListener(e -> {
+                BewerbungsPopup popup = new BewerbungsPopup(bewerbungControl, currentUser, currentIdeaId);
+                popup.open();
+            });
             add(applyButton);
         }
 
