@@ -18,8 +18,14 @@ import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 
 /**
  * Pop-up-Fenster für die Bewerbung eines Studenten auf eine Gründungsidee.
- * Der eigentliche Speicherort der hochgeladenen Dateien ist noch offen (TODO),
- * aktuell wird nur der Dateiname zwischengespeichert.
+ *
+ * WICHTIG: Die Upload-Felder (anschreibenBuffer/lebenslaufBuffer) sind aktuell
+ * NICHT an das Speichern angebunden. Sie sind rein visuell vorbereitet, damit
+ * das UI schon so aussieht wie später evtl. "gewünscht". Der komplette Datei-Speicher-
+ * prozess (Zielordner auf dem Server, das Schreiben der Datei aus dem
+ * Buffer und den Pfad in die DB übernehmen) ist noch offen, das müssen wir noch klären.
+ * Bis dahin werden beim Speichern einer Bewerbung bewusst nur "null"-Werte für alle vier Datei-Felder
+ * übergeben.
  */
 public class BewerbungsPopup extends Dialog {
 
@@ -34,11 +40,13 @@ public class BewerbungsPopup extends Dialog {
         inhalt.setPadding(false);
         inhalt.setSpacing(true);
 
-        // TODO: Zielordner für die tatsächliche Ablage der Dateien ist noch offen.
+        // Hinweis: Diese Upload-Komponente ist nur UI-Vorschau, siehe Klassenkommentar oben.
+        // anschreibenBuffer wird aktuell NICHT ausgelesen oder gespeichert.
         Upload anschreibenUpload = new Upload(anschreibenBuffer);
         anschreibenUpload.setAcceptedFileTypes("application/pdf", ".pdf");
         anschreibenUpload.setMaxFiles(1);
 
+        // Hinweis: lebenslaufBuffer wird ebenfalls aktuell NICHT ausgelesen oder gespeichert.
         Upload lebenslaufUpload = new Upload(lebenslaufBuffer);
         lebenslaufUpload.setAcceptedFileTypes("application/pdf", ".pdf");
         lebenslaufUpload.setMaxFiles(1);
@@ -53,26 +61,21 @@ public class BewerbungsPopup extends Dialog {
         Button absendenButton = new Button("Bewerbung absenden");
         absendenButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         absendenButton.addClickListener(e -> {
-            try {
-                // TODO: Dateipfad noch nicht final - aktuell nur Dateiname als Platzhalter
-                String anschreibenDateiname = anschreibenBuffer.getFileName();
-                String lebenslaufDateiname = lebenslaufBuffer.getFileName();
+            /* Datei-Uploads werden bewusst noch nicht ausgewertet/gespeichert
+            // (siehe Klassenkommentar)
+            bewerbungControl.bewerben(
+                    currentUser.getUserId(),
+                    ideeId,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+             */
 
-                bewerbungControl.bewerben(
-                        currentUser.getUserId(),
-                        ideeId,
-                        anschreibenDateiname,
-                        null, // Dateipfad TODO
-                        lebenslaufDateiname,
-                        null  // Dateipfad TODO
-                );
+            Notification.show("Bewerbung senden ist noch nicht vollständig implementiert.");
+            close();
 
-                Notification.show("Bewerbung erfolgreich eingereicht.");
-                close();
-
-            } catch (BewerbungBereitsVorhandenException ex) {
-                Notification.show(ex.getMessage());
-            }
         });
 
         HorizontalLayout buttonLayout = new HorizontalLayout(absendenButton, abbrechenButton);
