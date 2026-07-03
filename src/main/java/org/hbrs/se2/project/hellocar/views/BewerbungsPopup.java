@@ -34,9 +34,6 @@ public class BewerbungsPopup extends Dialog {
         inhalt.setPadding(false);
         inhalt.setSpacing(true);
 
-        TextArea anschreibenText = new TextArea("Anschreiben (optional, als Hinweistext)");
-        anschreibenText.setWidthFull();
-
         // TODO: Zielordner für die tatsächliche Ablage der Dateien ist noch offen.
         Upload anschreibenUpload = new Upload(anschreibenBuffer);
         anschreibenUpload.setAcceptedFileTypes("application/pdf", ".pdf");
