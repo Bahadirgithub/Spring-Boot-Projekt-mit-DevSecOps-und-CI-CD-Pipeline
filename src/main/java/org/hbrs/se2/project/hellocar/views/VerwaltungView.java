@@ -89,11 +89,15 @@ public class VerwaltungView extends VerticalLayout {
         // Linke Spalte – Benutzereinstellungen
         VerticalLayout linksLayout = new VerticalLayout();
         linksLayout.setSpacing(false);
+        linksLayout.setWidth("350px");
+        linksLayout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.STRETCH);
         linksLayout.getStyle().set("gap", "4px");
 
         // Rechte Spalte – Student oder Gründer spezifisch
         VerticalLayout rechtsLayout = new VerticalLayout();
         rechtsLayout.setSpacing(false);
+        rechtsLayout.setWidth("350px");
+        rechtsLayout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.STRETCH);
         rechtsLayout.getStyle().set("gap", "4px");
 
         // Eingabefelder
