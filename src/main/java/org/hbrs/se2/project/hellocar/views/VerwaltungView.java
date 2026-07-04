@@ -89,11 +89,15 @@ public class VerwaltungView extends VerticalLayout {
         // Linke Spalte – Benutzereinstellungen
         VerticalLayout linksLayout = new VerticalLayout();
         linksLayout.setSpacing(false);
+        linksLayout.setWidth("350px");
+        linksLayout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.STRETCH);
         linksLayout.getStyle().set("gap", "4px");
 
         // Rechte Spalte – Student oder Gründer spezifisch
         VerticalLayout rechtsLayout = new VerticalLayout();
         rechtsLayout.setSpacing(false);
+        rechtsLayout.setWidth("350px");
+        rechtsLayout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.STRETCH);
         rechtsLayout.getStyle().set("gap", "4px");
 
         // Eingabefelder
@@ -124,8 +128,10 @@ public class VerwaltungView extends VerticalLayout {
         TextField abschlussField = new TextField("Abschluss");
 
         // Skills feld größer
-        TextArea skillsField = new TextArea("Skills");
-        skillsField.setHeight("120px");
+        // Skills als Mehrfachauswahl, befüllt aus der DB (nicht mehr aus der alten statischen Liste)
+        com.vaadin.flow.component.combobox.MultiSelectComboBox<String> skillsField =
+                new com.vaadin.flow.component.combobox.MultiSelectComboBox<>("Skills");
+        skillsField.setItems(vControl.ladeAlleSkillNamen());
 
         abschlussField.setVisible(istStudent);
         skillsField.setVisible(istStudent);
@@ -153,8 +159,9 @@ public class VerwaltungView extends VerticalLayout {
                 universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
                 semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
                 abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
-               // skillsField.setValue(student.getSkills() == null ? "" : student.getSkills());
-            }
+                skillsField.setValue(student.getSkills() == null
+                        ? java.util.Collections.emptySet()
+                        : new HashSet<>(student.getSkills()));            }
         }
 
 
@@ -187,8 +194,7 @@ public class VerwaltungView extends VerticalLayout {
                                     ? null
                                     : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
                             abschlussField.getValue(),
-                            skillsField.getValue()
-                    );
+                            new java.util.ArrayList<>(skillsField.getValue())                    );
 
                     // TODO Erfolgsvariable entfernen und auf Exceptions umstellen!
                     erfolg = true;
@@ -249,9 +255,9 @@ public class VerwaltungView extends VerticalLayout {
                             universitaetField.setValue(student.getUniversitaet() == null ? "" : student.getUniversitaet());
                             semesterField.setValue(student.getSemester() == 0 ? "" : String.valueOf(student.getSemester()));
                             abschlussField.setValue(student.getAbschluss() == null ? "" : student.getAbschluss());
-                           /* skillsField.setValue(student.getSkills() == null
-                                    ? Collections.emptySet()
-                                    : new HashSet<>(student.getSkills()));*/
+                            skillsField.setValue(student.getSkills() == null
+                                    ? java.util.Collections.emptySet()
+                                    : new HashSet<>(student.getSkills()));
                         }
                     }
 

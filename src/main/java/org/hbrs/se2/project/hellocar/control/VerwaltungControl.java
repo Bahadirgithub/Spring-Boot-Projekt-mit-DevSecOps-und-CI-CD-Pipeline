@@ -20,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.HashSet;
+
 // TODO angucken
 import java.util.List;
 // Wir greifen per Views auf den aktuellen User zu mit Vaadin Session! Und hier übergeben wir diesen User nur - Marius
@@ -97,8 +100,10 @@ public class VerwaltungControl {
     /**
      * Lädt den Student neu aus der DB
      */
+    @Transactional
     public Student ladeStudent(int userId) {
         Optional<Student> studentTMP = studentRepository.findById(userId);
+        studentTMP.ifPresent(s -> s.getSkillEntities().size()); // erzwingt das Laden von skillEntities innerhalb der Transaktion
         return studentTMP.orElse(null);
     }
 
@@ -122,7 +127,7 @@ public class VerwaltungControl {
                                  String universitaet,
                                  Integer semester,
                                  String abschluss,
-                                 String skills) throws NullPointerException, DatabaseUserException, InvalidBirthdayException,InvalidEmailException {
+                                 List<String> skillNamen) throws NullPointerException, DatabaseUserException, InvalidBirthdayException,InvalidEmailException {
 
 
         Benutzer benutzer = benutzerRepository.findById(aktuellerBenutzer.getUserId())
@@ -146,7 +151,7 @@ public class VerwaltungControl {
         universitaetAendern(student, universitaet);
         semesterAendern(student, semester);
         abschlussAendern(student, abschluss);
-        //skillsAendern(student, skills);
+        skillsAendern(student, skillNamen);
 
         benutzerRepository.save(benutzer);
         studentRepository.save(student);
@@ -281,10 +286,13 @@ public class VerwaltungControl {
         return true;
     }
 
-   /* public boolean skillsAendern(Student student, String x){
-        if(istLeer(x)) return true;
-        student.setSkills(x);
-        System.out.println("Die Skills " + x + " wurden eingegeben.");
+    public boolean skillsAendern(Student student, List<String> skillNamen){
+        if(skillNamen == null){
+            return true;
+        }
+        Set<Skill> aufgeloesteSkills = new HashSet<>(skillRepository.findByNameIn(skillNamen));
+        student.setSkillEntities(aufgeloesteSkills);
+        System.out.println("Die Skills " + skillNamen + " wurden eingegeben.");
         return true;
-    }*/
+    }
 }
