@@ -13,6 +13,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.hbrs.se2.project.hellocar.control.LoginControl;
+import org.hbrs.se2.project.hellocar.control.PasswordResetControl;
 import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
 
 @Route("reset-password")
@@ -20,9 +21,11 @@ import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
 public class PasswordResetView extends VerticalLayout implements BeforeEnterObserver {
 
     private final LoginControl loginControl;
+    private final PasswordResetControl passwordResetControl;
 
-    public PasswordResetView(LoginControl loginControl) {
+    public PasswordResetView(LoginControl loginControl, PasswordResetControl passwordResetControl) {
         this.loginControl = loginControl;
+        this.passwordResetControl = passwordResetControl;
 
         setSizeFull();
         setJustifyContentMode(JustifyContentMode.CENTER);
@@ -60,43 +63,25 @@ public class PasswordResetView extends VerticalLayout implements BeforeEnterObse
 
         // Logik beim Klick auf Speichern
         saveButton.addClickListener(e -> {
-            String newPw = passwordField.getValue();
-            String confirmPw = confirmPasswordField.getValue();
-
-            passwordField.setInvalid(false);
-            confirmPasswordField.setInvalid(false);
-
-            // 1. Validierung: Darf nicht leer sein
-            if (newPw.isEmpty()) {
-                passwordField.setInvalid(true);
-                passwordField.setErrorMessage("Das Passwort darf nicht leer sein.");
-                return;
-            }
-
-            // 2. Validierung: Mindestlänge manuell erzwingen
-            if (newPw.length() < 8) {
-                passwordField.setInvalid(true);
-                passwordField.setErrorMessage("Das Passwort muss mindestens 8 Zeichen lang sein.");
-                return;
-            }
-
-            // 3. Validierung: Stimmen die Passwörter überein?
-            if (!newPw.equals(confirmPw)) {
-                confirmPasswordField.setInvalid(true);
-                confirmPasswordField.setErrorMessage("Die Passwörter stimmen nicht überein!");
-                return;
-            }
-
-            // Wenn alle Prüfungen erfolgreich bestanden wurden:
             try {
-                // Passwort über das Control in der DB aktualisieren
-                loginControl.updatePassword(newPw);
+                // 1. Logik auslagern: Validierung
+                passwordResetControl.validatePasswords(passwordField.getValue(), confirmPasswordField.getValue());
 
-                // Erfolgsmeldung anzeigen
+                // 2. Logik auslagern: Update
+                passwordResetControl.updatePassword(passwordField.getValue());
+
                 Notification.show("Passwort erfolgreich geändert!", 3000, Notification.Position.TOP_CENTER);
-
-                // Erfolgreich beendet -> Zurück zur Login-Maske schicken
                 UI.getCurrent().navigate(LoginView.class);
+
+            } catch (IllegalArgumentException ex) {
+                // Wenn die Validierung schlägt fehl, zeige die Nachricht in der UI
+                if (ex.getMessage().contains("überein")) {
+                    confirmPasswordField.setInvalid(true);
+                    confirmPasswordField.setErrorMessage(ex.getMessage());
+                } else {
+                    passwordField.setInvalid(true);
+                    passwordField.setErrorMessage(ex.getMessage());
+                }
             } catch (DatabaseUserException ex) {
                 confirmPasswordField.setInvalid(true);
                 confirmPasswordField.setErrorMessage("Fehler: " + ex.getMessage());
