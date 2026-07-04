@@ -72,7 +72,8 @@ public class LoginControl {
                     .orElseThrow(DatabaseUserException::new);
 
             // Neues Passwort setzen (Falls ihr Passwörter hasht, hier das gehashte PW übergeben!)
-            benutzer.setPasswort(newPassword);
+            String hashedPw = CryptoProvider.CreatePassword(newPassword);
+            benutzer.setPasswort(hashedPw);
 
             // Änderungen in der Datenbank speichern
             benutzerRepository.save(benutzer);
