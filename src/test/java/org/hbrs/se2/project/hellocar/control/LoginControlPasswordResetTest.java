@@ -40,9 +40,13 @@ public class LoginControlPasswordResetTest {
     @Autowired
     private BenutzerRepository benutzerRepository;
 
+    @Autowired
+    private PasswordResetControl passwordResetControl;
+
     // Mock für Vaadin UI und Session zur Prüfung von Session-Attributen
     private UI mockUI;
     private VaadinSession mockSession;
+
 
     @BeforeEach
     void setup() {
@@ -118,7 +122,7 @@ public class LoginControlPasswordResetTest {
         when(mockSession.getAttribute("reset_user_id")).thenReturn(benutzer.getUserId());
 
         // Eigentlicher Test: updatePassword aufrufen
-        assertDoesNotThrow(() -> loginControl.updatePassword("NuesesPasswort123"));
+        assertDoesNotThrow(() -> passwordResetControl.updatePassword("NuesesPasswort123"));
 
         // Nachprüfung: Benutzer aus der DB neu laden und prüfen, ob Passwort geändert wurde
         Benutzer aktualiserterBenutzer = benutzerRepository.findById(benutzer.getUserId()).orElse(null);
@@ -145,7 +149,7 @@ public class LoginControlPasswordResetTest {
         // Eigentlicher Test: updatePassword aufrufen sollte DatabaseUserException werfen
         DatabaseUserException exception = assertThrows(
                 DatabaseUserException.class,
-                () -> loginControl.updatePassword("NeuesPasswort"),
+                () -> passwordResetControl.updatePassword("NeuesPasswort"),
                 "updatePassword sollte DatabaseUserException werfen, wenn keine Session-ID vorhanden ist."
         );
 
