@@ -19,6 +19,14 @@ public class PasswordResetControl {
         this.benutzerRepository = benutzerRepository;
     }
 
+    protected Object getSessionAttribute(String name) {
+        return UI.getCurrent().getSession().getAttribute(name);
+    }
+
+    protected void setSessionAttribute(String name, Object value) {
+        UI.getCurrent().getSession().setAttribute(name, value);
+    }
+
     // Wir werfen hier eigene Exceptions für die Validierung
     public void validatePasswords(String newPw, String confirmPw) throws IllegalArgumentException {
         if (newPw == null || newPw.isEmpty()) {
@@ -35,8 +43,7 @@ public class PasswordResetControl {
     public void updatePassword(String newPassword) throws DatabaseUserException {
         try {
             // Hole die vorgemerkte User-ID aus der Session
-            // TODO fix method
-            Integer userId = (Integer) UI.getCurrent().getSession().getAttribute("reset_user_id");
+            Integer userId = (Integer) getSessionAttribute("reset_user_id");
 
             // Sicherheitscheck: Falls keine ID vorhanden ist, wurde der Prozess nicht korrekt gestartet
             if (userId == null) {
