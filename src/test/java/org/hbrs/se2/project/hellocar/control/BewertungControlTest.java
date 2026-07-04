@@ -2,10 +2,13 @@ package org.hbrs.se2.project.hellocar.control;
 
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.impl.BenutzerDTOImpl;
+import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.entities.Bewertung;
 import org.hbrs.se2.project.hellocar.control.exception.BewertungNotLoggedInException;
 import org.hbrs.se2.project.hellocar.control.exception.BewertungInvalidException;
 import org.hbrs.se2.project.hellocar.control.exception.BewertungNurStudentException;
+import org.hbrs.se2.project.hellocar.entities.Student;
+import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,22 +31,33 @@ class BewertungControlTest {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+    private BenutzerRepository benutzerRepository;
+
     private BenutzerDTO studentUser;
     private BenutzerDTO gruenderUser;
 
     @BeforeEach
     void setUp() {
-        // Student User (muss in DB als Student existieren!)
-        studentUser = new BenutzerDTOImpl();
-        ((BenutzerDTOImpl) studentUser).setUserId(100);
-        ((BenutzerDTOImpl) studentUser).setVorname("Max");
-        ((BenutzerDTOImpl) studentUser).setUsername("maxstudent");
+        Benutzer b = new Benutzer();
+        b.setUserId(100);
+        b.setUsername("maxstudent");
+        benutzerRepository.save(b);
 
-        // Gründer User (darf NICHT als Student registriert sein!)
-        gruenderUser = new BenutzerDTOImpl();
-        ((BenutzerDTOImpl) gruenderUser).setUserId(200);
-        ((BenutzerDTOImpl) gruenderUser).setVorname("Lisa");
-        ((BenutzerDTOImpl) gruenderUser).setUsername("lisagruender");
+        Student s = new Student();
+        s.setUserId(100); // Muss dieselbe ID wie der Benutzer haben
+        s.setUniversitaet("HBRS");
+        s.setStudentId("12345");
+        s.setSemester(1);
+        studentRepository.save(s);
+
+        BenutzerDTOImpl sUser = new BenutzerDTOImpl();
+        sUser.setUserId(100);
+        this.studentUser = sUser;
+
+        BenutzerDTOImpl gUser = new BenutzerDTOImpl();
+        gUser.setUserId(200);
+        this.gruenderUser = gUser;
     }
 
     /**
