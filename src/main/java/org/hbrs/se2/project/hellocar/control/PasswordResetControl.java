@@ -62,7 +62,7 @@ public class PasswordResetControl {
             benutzerRepository.save(benutzer);
 
             // WICHTIG: Die ID aus der Session löschen, damit der Vorgang abgeschlossen ist
-            UI.getCurrent().getSession().setAttribute("reset_user_id", null);
+            setSessionAttribute("reset_user_id", null);
 
         } catch (DataAccessResourceFailureException e) {
             throw new DatabaseUserException("Fehler beim Speichern des neuen Passworts in der Datenbank.");
