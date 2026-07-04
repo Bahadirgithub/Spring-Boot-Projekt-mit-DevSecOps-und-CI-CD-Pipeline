@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 @Transactional
-public class LoginControlPasswordResetTest {
+public class PasswordResetControlTest {
 
     @Autowired
     private LoginControl loginControl;
