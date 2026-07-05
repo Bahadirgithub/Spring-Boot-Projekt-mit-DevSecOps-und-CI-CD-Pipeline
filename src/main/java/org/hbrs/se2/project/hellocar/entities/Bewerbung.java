@@ -21,6 +21,7 @@ public class Bewerbung {
     private String lebenslaufDateipfad;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "bewerbung_id")
     public int getBewerbungId() {
         return bewerbungId;
