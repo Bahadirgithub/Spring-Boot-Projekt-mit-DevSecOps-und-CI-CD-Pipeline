@@ -188,6 +188,9 @@ class BenutzerRepositoryTest {
     @Test
     void testAnzahlBenutzerZaehlen() {
         // Arrange
+        // Anzahl der vorhandenen Benutzer merken
+        long anzahlVorher = benutzerRepository.count();
+
         benutzerRepository.save(testBenutzer);
         benutzerRepository.save(
                 BenutzerBuilder.aBenutzer()
@@ -200,7 +203,7 @@ class BenutzerRepositoryTest {
         long anzahl = benutzerRepository.count();
 
         // Assert
-        assertThat(anzahl).isEqualTo(2);
+        assertThat(anzahl).isEqualTo(anzahlVorher + 2);
     }
 
     /**
