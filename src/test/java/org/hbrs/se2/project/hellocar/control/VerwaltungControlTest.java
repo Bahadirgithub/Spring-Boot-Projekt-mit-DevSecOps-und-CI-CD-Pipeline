@@ -74,66 +74,51 @@ public class VerwaltungControlTest {
 
     @Test
     void testLoeschen_StudentUndBenutzer_Success() {
-        // Szenario: Ein Benutzer, der auch ein Student ist, wird gelöscht.
+        // Testdaten vorbereiten: Benutzer ID definieren und Datenbank-Antworten simulieren
+        int expectedId = 1;
+        when(mockBenutzerDTO.getUserId()).thenReturn(expectedId);
+        when(studentRepository.existsById(expectedId)).thenReturn(true);
+        when(benutzerRepository.existsById(expectedId)).thenReturn(true);
 
-        // Annahme: Der Benutzer existiert als Student und als allgemeiner Benutzer
-        when(studentRepository.existsById(1)).thenReturn(true);
-        when(benutzerRepository.existsById(1)).thenReturn(true);
+        // Methode ausführen
+        verwaltungControl.loeschen(mockBenutzerDTO);
 
-        /**
-         * Bitte den Test neu erstellen. Es wird kein Boolean mehr zurück gegeben
-         * und war von Anfang keine gute weise es zu testen.
-         */
-
-        // Aufruf der zu testenden Methode
-        //boolean result = verwaltungControl.loeschen(mockBenutzerDTO);
-
-        // Überprüfung: Die Methode sollte erfolgreich sein
-        //assertTrue(result);
-
-        // Überprüfung: Die deleteById-Methode muss für beide Repositories aufgerufen worden sein
-        verify(studentRepository, times(1)).deleteById(1);
-        verify(benutzerRepository, times(1)).deleteById(1);
-        // Überprüfung: Da er kein Gründer ist, darf hier nichts gelöscht werden
-        verify(gruenderRepository, never()).deleteById(1);
+        // Prüfen, ob die richtigen Repositories aufgerufen wurden
+        verify(studentRepository, times(1)).deleteById(expectedId);
+        verify(benutzerRepository, times(1)).deleteById(expectedId);
+        verify(gruenderRepository, never()).deleteById(anyInt());
     }
 
     @Test
     void testLoeschen_GruenderUndBenutzer_Success() {
-        // Szenario: Ein Benutzer, der auch ein Gründer ist, wird gelöscht.
+        // Vorbereitung: ID und Datenbank-Antworten simulieren
+        int id = 1;
+        when(mockBenutzerDTO.getUserId()).thenReturn(id);
+        when(gruenderRepository.existsById(id)).thenReturn(true);
+        when(benutzerRepository.existsById(id)).thenReturn(true);
 
-        when(gruenderRepository.existsById(1)).thenReturn(true);
-        when(benutzerRepository.existsById(1)).thenReturn(true);
+        // Aktion: Löschen ausführen
+        verwaltungControl.loeschen(mockBenutzerDTO);
 
-        //boolean result = verwaltungControl.loeschen(mockBenutzerDTO);
-        /**
-         * erneut neu erstellen
-         */
-        //assertTrue(result);
-        verify(gruenderRepository, times(1)).deleteById(1);
-        verify(benutzerRepository, times(1)).deleteById(1);
-        verify(studentRepository, never()).deleteById(1);
+        // Überprüfung: Korrekte Repositories wurden aufgerufen
+        verify(gruenderRepository, times(1)).deleteById(id);
+        verify(benutzerRepository, times(1)).deleteById(id);
+        verify(studentRepository, never()).deleteById(anyInt());
     }
 
     @Test
     void testLoeschen_BenutzerNichtGefunden_ReturnsFalse() {
-        // Szenario: Versuch, einen Benutzer zu löschen, den es nicht gibt.
+        // Vorbereitung: ID festlegen und alle Repositories melden "nicht gefunden"
+        int id = 1;
+        when(mockBenutzerDTO.getUserId()).thenReturn(id);
+        when(studentRepository.existsById(id)).thenReturn(false);
+        when(gruenderRepository.existsById(id)).thenReturn(false);
+        when(benutzerRepository.existsById(id)).thenReturn(false);
 
-        // Annahme: Der Benutzer existiert in keinem der Repositories
-        when(studentRepository.existsById(1)).thenReturn(false);
-        when(gruenderRepository.existsById(1)).thenReturn(false);
-        when(benutzerRepository.existsById(1)).thenReturn(false);
+        // Aktion: Löschen ausführen
+        verwaltungControl.loeschen(mockBenutzerDTO);
 
-        //boolean result = verwaltungControl.loeschen(mockBenutzerDTO);
-
-        /**
-         * erneut neu erstellen
-         */
-
-        // Überprüfung: Die Methode sollte fehlschlagen (false zurückgeben)
-        //assertFalse(result);
-
-        // Überprüfung: Es darf keine Löschoperation aufgerufen worden sein
+        // Überprüfung: Es darf in keinem Repository gelöscht worden sein
         verify(studentRepository, never()).deleteById(anyInt());
         verify(gruenderRepository, never()).deleteById(anyInt());
         verify(benutzerRepository, never()).deleteById(anyInt());
@@ -141,16 +126,16 @@ public class VerwaltungControlTest {
 
     @Test
     void testLoeschen_CurrentUserIsNull_ReturnsFalse() {
-        // Szenario: Die Methode wird mit 'null' aufgerufen.
-        // Dies testet die Robustheit der Methode gegen unerwartete Eingaben.
-        //boolean result = verwaltungControl.loeschen(null);
+        // Aktion: Aufruf mit null
+        boolean result = verwaltungControl.loeschen(null);
 
-        /**
-         * erneut neu erstellen
-         */
+        // Überprüfung: Methode muss false zurückgeben und nichts löschen
+        assertFalse(result);
 
-        // Überprüfung: Die Methode muss sicher fehlschlagen
-        //assertFalse(result);
+        // Sicherstellen, dass keine Datenbank-Interaktionen stattgefunden haben
+        verifyNoInteractions(studentRepository);
+        verifyNoInteractions(gruenderRepository);
+        verifyNoInteractions(benutzerRepository);
     }
 
 
@@ -160,34 +145,28 @@ public class VerwaltungControlTest {
 
     @Test
     void testLadeBenutzer_BenutzerGefunden_ReturnsDTO() {
-        // Szenario: Ein existierender Benutzer wird geladen.
+        // Vorbereitung: ID und Antwort des Repositories definieren
+        int id = 1;
+        when(benutzerRepository.findById(id)).thenReturn(Optional.of(mockBenutzer));
 
-        // Annahme: Das Repository findet den Benutzer und gibt ihn zurück
-        when(benutzerRepository.findById(1)).thenReturn(Optional.of(mockBenutzer));
+        // Aktion: Methode aufrufen
+        BenutzerDTO resultDTO = verwaltungControl.ladeBenutzer(id);
 
-        // TODO Test abändern!
-        // Aufruf der Methode
-        //BenutzerDTO resultDTO = verwaltungControl.ladeBenutzer(1);
-
-        // Überprüfung: Das zurückgegebene DTO darf nicht null sein
-        //assertNotNull(resultDTO);
-        // Überprüfung: Die Daten im DTO müssen mit der Entität übereinstimmen
-        //assertEquals("Max", resultDTO.getVorname());
-        //assertEquals("Mustermann", resultDTO.getNachname());
+        // Überprüfung: Ergebnis validieren
+        assertNotNull(resultDTO, "Das zurückgegebene DTO sollte nicht null sein");
+        assertEquals("Max", resultDTO.getVorname(), "Vorname sollte Max sein");
+        assertEquals("Mustermann", resultDTO.getNachname(), "Nachname sollte Mustermann sein");
     }
 
     @Test
     void testLadeBenutzer_BenutzerNichtGefunden_ReturnsNull() {
-        // Szenario: Versuch, einen nicht existierenden Benutzer zu laden.
-
-        // Annahme: Das Repository findet keinen Benutzer
+        // Vorbereitung: Repository gibt ein leeres Optional zurück
         when(benutzerRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        // TODO Test abändern!
-        // Aufruf der Methode
-        //BenutzerDTO resultDTO = verwaltungControl.ladeBenutzer(99);
+        // Aktion: Methode mit einer beliebigen ID aufrufen
+        BenutzerDTO resultDTO = verwaltungControl.ladeBenutzer(99);
 
-        // Überprüfung: Die Methode muss null zurückgeben
-        //xassertNull(resultDTO);
+        // Überprüfung: Ergebnis muss null sein
+        assertNull(resultDTO, "Das DTO sollte null sein, wenn kein Benutzer gefunden wurde");
     }
 }

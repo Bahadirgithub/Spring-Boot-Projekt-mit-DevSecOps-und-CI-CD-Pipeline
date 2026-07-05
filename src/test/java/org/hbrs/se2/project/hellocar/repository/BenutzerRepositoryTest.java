@@ -6,6 +6,7 @@ import org.hbrs.se2.project.hellocar.builder.BenutzerBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -16,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 class BenutzerRepositoryTest {
 
@@ -186,6 +188,9 @@ class BenutzerRepositoryTest {
     @Test
     void testAnzahlBenutzerZaehlen() {
         // Arrange
+        // Anzahl der vorhandenen Benutzer merken
+        long anzahlVorher = benutzerRepository.count();
+
         benutzerRepository.save(testBenutzer);
         benutzerRepository.save(
                 BenutzerBuilder.aBenutzer()
@@ -198,7 +203,7 @@ class BenutzerRepositoryTest {
         long anzahl = benutzerRepository.count();
 
         // Assert
-        assertThat(anzahl).isEqualTo(2);
+        assertThat(anzahl).isEqualTo(anzahlVorher + 2);
     }
 
     /**

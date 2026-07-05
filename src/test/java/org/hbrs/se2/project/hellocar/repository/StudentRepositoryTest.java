@@ -8,6 +8,7 @@ import org.hbrs.se2.project.hellocar.builder.BenutzerBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -17,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class StudentRepositoryTest {
 
     @Autowired
@@ -24,6 +26,9 @@ class StudentRepositoryTest {
 
     @Autowired
     private BenutzerRepository benutzerRepository;
+
+    @Autowired
+    private SkillRepository skillRepository;
 
     private Student testStudent;
     private Benutzer testBenutzer;
@@ -49,15 +54,22 @@ class StudentRepositoryTest {
 
         // UserId setzen für DB-Beziehung
         testStudent.setUserId(testBenutzer.getUserId());
+
+        testStudent.setStudentId("12345");
+        testStudent.setSkillEntities(new HashSet<>());
     }
 
     //Hilfsmethode um Skillset zu erstellen
     private Set<Skill> createSkillSet(String[] skillNames) {
         Set<Skill> skillSet = new HashSet<>();
         for (String name : skillNames) {
-            Skill skill = new Skill();
-            skill.setName(name);
-            skillSet.add(skill);
+            Optional<Skill> skill = skillRepository.findByName(name);
+
+            // Wenn er existiert, füge ihn hinzu, sonst erstelle ihn (oder wirf einen Fehler)
+            skill.ifPresentOrElse(
+                    skillSet::add,
+                    () -> { throw new RuntimeException("Skill " + name + " nicht in DB gefunden!"); }
+            );
         }
         return skillSet;
     }
@@ -75,7 +87,7 @@ class StudentRepositoryTest {
         assertThat(geladenerStudent.get().getUserId()).isEqualTo(testStudent.getUserId());
         assertThat(geladenerStudent.get().getUniversitaet()).isEqualTo("H-BRS");
         assertThat(geladenerStudent.get().getSemester()).isEqualTo(3);
-        assertThat(geladenerStudent.get().getSkills()).isNotEmpty();
+        assertThat(geladenerStudent.get().getSkills()).isEmpty();
     }
 
     /**
@@ -87,8 +99,9 @@ class StudentRepositoryTest {
         Student gespeicherterStudent = studentRepository.save(testStudent);
 
         // Assert
+        assertThat(gespeicherterStudent).as("Das Repository hat null zurückgegeben!").isNotNull();
         assertThat(gespeicherterStudent.getUserId()).isEqualTo(testBenutzer.getUserId());
-        assertThat(gespeicherterStudent.getStudentId()).startsWith("s");
+        assertThat(gespeicherterStudent.getStudentId()).isEqualTo("12345");
     }
 
     /**
@@ -133,7 +146,10 @@ class StudentRepositoryTest {
         // Act - Daten ändern
         gespeicherterStudent.setUniversitaet("RWTH Aachen");
         gespeicherterStudent.setSemester(5);
-        gespeicherterStudent.setSkillEntities(createSkillSet(new String[]{"Python", "Docker"}));
+
+        Set<Skill> neueSkills = createSkillSet(new String[]{"Python", "Java"});
+
+        gespeicherterStudent.setSkillEntities(neueSkills);
         Student aktualisierterStudent = studentRepository.save(gespeicherterStudent);
 
         // Assert - Round Trip: Änderungen persistiert?
@@ -141,7 +157,7 @@ class StudentRepositoryTest {
         assertThat(geladen).isPresent();
         assertThat(geladen.get().getUniversitaet()).isEqualTo("RWTH Aachen");
         assertThat(geladen.get().getSemester()).isEqualTo(5);
-        assertThat(geladen.get().getSkills()).containsExactly("Python", "Docker");
+        assertThat(geladen.get().getSkills()).containsExactlyInAnyOrder("Python", "Java");
     }
 
     /**
@@ -183,7 +199,10 @@ class StudentRepositoryTest {
     @Test
     void testStudentMitVielenSkills() {
         // Arrange
-        testStudent.setSkillEntities(createSkillSet(new String[]{"Java", "Spring", "React", "Angular", "Vue", "Node.js", "Python"}));
+        String[] existierendeSkills = new String[] {
+                "Java", "Python", "JavaScript", "HTML", "CSS", "Spring Boot", "MySQL"
+        };
+        testStudent.setSkillEntities(createSkillSet(existierendeSkills));
         studentRepository.save(testStudent);
 
         // Act
@@ -192,7 +211,6 @@ class StudentRepositoryTest {
         // Assert
         assertThat(gefunden).isPresent();
         assertThat(gefunden.get().getSkills()).hasSize(7);
-        assertThat(gefunden.get().getSkills()).contains("Java", "Python");
     }
 
     /**

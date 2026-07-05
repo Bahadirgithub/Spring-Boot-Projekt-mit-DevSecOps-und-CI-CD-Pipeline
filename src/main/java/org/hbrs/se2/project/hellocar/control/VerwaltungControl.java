@@ -63,6 +63,11 @@ public class VerwaltungControl {
 
         int userId = currentUser.getUserId();
 
+        // Prüfen, ob der Benutzer überhaupt existiert
+        if (!benutzerRepository.existsById(userId)) {
+            return false;
+        }
+
         if (studentRepository.existsById(userId)) {
             studentRepository.deleteById(userId);
         }
@@ -71,10 +76,9 @@ public class VerwaltungControl {
             gruenderRepository.deleteById(userId);
         }
 
-        if (benutzerRepository.existsById(userId)) {
-            benutzerRepository.deleteById(userId);
-        }
-        return false;
+        // Den Hauptbenutzer zum Schluss löschen
+        benutzerRepository.deleteById(userId);
+        return true;
     }
 
     /**

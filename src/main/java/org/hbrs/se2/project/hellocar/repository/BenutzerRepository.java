@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
-@Component
 /**
  * JPA-Repository für die Abfrage von registrierten User. Die Bezeichnung einer Methode
  * bestimmt dabei die Selektionsbedingung (den WHERE-Teil). Der Rückgabewert einer
