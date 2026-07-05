@@ -111,16 +111,13 @@ public class VerwaltungControlTest {
         // Vorbereitung: ID festlegen und alle Repositories melden "nicht gefunden"
         int id = 1;
         when(mockBenutzerDTO.getUserId()).thenReturn(id);
-        when(studentRepository.existsById(id)).thenReturn(false);
-        when(gruenderRepository.existsById(id)).thenReturn(false);
         when(benutzerRepository.existsById(id)).thenReturn(false);
 
-        // Aktion: Löschen ausführen
-        verwaltungControl.loeschen(mockBenutzerDTO);
+        // Aktion
+        boolean result = verwaltungControl.loeschen(mockBenutzerDTO);
 
-        // Überprüfung: Es darf in keinem Repository gelöscht worden sein
-        verify(studentRepository, never()).deleteById(anyInt());
-        verify(gruenderRepository, never()).deleteById(anyInt());
+        // Überprüfung
+        assertFalse(result); // Methode sollte false zurückgeben
         verify(benutzerRepository, never()).deleteById(anyInt());
     }
 
