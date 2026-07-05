@@ -65,7 +65,7 @@ class GruendungsideeTest {
         idee.setGesuchteSkills(null);
 
         // Assert
-        assertThat(idee.getGesuchteSkills()).isNull();
+        assertThat(idee.getGesuchteSkills()).isEmpty();
     }
 
     @Test
