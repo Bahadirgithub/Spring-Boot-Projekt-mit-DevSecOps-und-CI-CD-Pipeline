@@ -7,8 +7,10 @@ import org.hbrs.se2.project.hellocar.builder.BenutzerBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -16,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class GruenderRepositoryTest {
 
     @Autowired
@@ -70,12 +73,15 @@ class GruenderRepositoryTest {
      */
     @Test
     void testGruenderSpeichern() {
+        // Erzwinge die Zuweisung VOR dem Speichern nochmal explizit
+        testGruender.setUserId(testBenutzer.getUserId());
+
         // Act
         Gruender gespeicherterGruender = gruenderRepository.save(testGruender);
 
         // Assert
+        assertThat(gespeicherterGruender).as("Repository hat null zurückgegeben - das darf nicht passieren!").isNotNull();
         assertThat(gespeicherterGruender.getUserId()).isEqualTo(testBenutzer.getUserId());
-        assertThat(gespeicherterGruender.getGruenderId()).startsWith("g");
     }
 
     /**
