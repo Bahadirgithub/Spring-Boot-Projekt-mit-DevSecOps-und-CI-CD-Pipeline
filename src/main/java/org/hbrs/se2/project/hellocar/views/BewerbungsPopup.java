@@ -1,7 +1,5 @@
 package org.hbrs.se2.project.hellocar.views;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -9,7 +7,6 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import org.hbrs.se2.project.hellocar.control.BewerbungControl;
@@ -18,14 +15,6 @@ import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 
 /**
  * Pop-up-Fenster für die Bewerbung eines Studenten auf eine Gründungsidee.
- *
- * WICHTIG: Die Upload-Felder (anschreibenBuffer/lebenslaufBuffer) sind aktuell
- * NICHT an das Speichern angebunden. Sie sind rein visuell vorbereitet, damit
- * das UI schon so aussieht wie später evtl. "gewünscht". Der komplette Datei-Speicher-
- * prozess (Zielordner auf dem Server, das Schreiben der Datei aus dem
- * Buffer und den Pfad in die DB übernehmen) ist noch offen, das müssen wir noch klären.
- * Bis dahin werden beim Speichern einer Bewerbung bewusst nur "null"-Werte für alle vier Datei-Felder
- * übergeben.
  */
 public class BewerbungsPopup extends Dialog {
 
@@ -40,16 +29,19 @@ public class BewerbungsPopup extends Dialog {
         inhalt.setPadding(false);
         inhalt.setSpacing(true);
 
-        // Hinweis: Diese Upload-Komponente ist nur UI-Vorschau, siehe Klassenkommentar oben.
-        // anschreibenBuffer wird aktuell NICHT ausgelesen oder gespeichert.
+        // Upload für das Anschreiben als PDF.
         Upload anschreibenUpload = new Upload(anschreibenBuffer);
         anschreibenUpload.setAcceptedFileTypes("application/pdf", ".pdf");
         anschreibenUpload.setMaxFiles(1);
+        anschreibenUpload.addSucceededListener(event -> Notification.show("Anschreiben wurde hochgeladen."));
+        anschreibenUpload.addFileRejectedListener(event -> Notification.show("Bitte nur PDF-Dateien hochladen."));
 
-        // Hinweis: lebenslaufBuffer wird ebenfalls aktuell NICHT ausgelesen oder gespeichert.
+        // Upload für den Lebenslauf als PDF.
         Upload lebenslaufUpload = new Upload(lebenslaufBuffer);
         lebenslaufUpload.setAcceptedFileTypes("application/pdf", ".pdf");
         lebenslaufUpload.setMaxFiles(1);
+        lebenslaufUpload.addSucceededListener(event -> Notification.show("Lebenslauf wurde hochgeladen."));
+        lebenslaufUpload.addFileRejectedListener(event -> Notification.show("Bitte nur PDF-Dateien hochladen."));
 
         inhalt.add(
                 new H3("Anschreiben (PDF)"), anschreibenUpload,
@@ -61,26 +53,46 @@ public class BewerbungsPopup extends Dialog {
         Button absendenButton = new Button("Bewerbung absenden");
         absendenButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         absendenButton.addClickListener(e -> {
-            /* Datei-Uploads werden bewusst noch nicht ausgewertet/gespeichert
-            // (siehe Klassenkommentar)
-            bewerbungControl.bewerben(
-                    currentUser.getUserId(),
-                    ideeId,
-                    null,
-                    null,
-                    null,
-                    null
-            );
-             */
+            String anschreibenDateiname = anschreibenBuffer.getFileName();
+            String lebenslaufDateiname = lebenslaufBuffer.getFileName();
 
-            Notification.show("Bewerbung senden ist noch nicht vollständig implementiert.");
-            close();
+            if (dateiFehlt(anschreibenDateiname) || dateiFehlt(lebenslaufDateiname)) {
+                Notification.show("Bitte Anschreiben und Lebenslauf als PDF hochladen.");
+                return;
+            }
 
+            try {
+                bewerbungControl.bewerbenMitDateien(
+                        currentUser.getUserId(),
+                        ideeId,
+                        anschreibenBuffer.getFileName(),
+                        anschreibenBuffer.getInputStream(),
+                        lebenslaufBuffer.getFileName(),
+                        lebenslaufBuffer.getInputStream()
+                );
+
+                Notification.show("Bewerbung wurde erfolgreich gespeichert.");
+                close();
+
+            } catch (BewerbungBereitsVorhandenException ex) {
+                Notification.show(ex.getMessage());
+
+            } catch (IllegalArgumentException ex) {
+                Notification.show(ex.getMessage());
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                Notification.show("Bewerbung konnte nicht gespeichert werden: " + ex.getMessage());
+            }
         });
 
         HorizontalLayout buttonLayout = new HorizontalLayout(absendenButton, abbrechenButton);
 
         add(inhalt);
         getFooter().add(buttonLayout);
+    }
+
+    private boolean dateiFehlt(String dateiname) {
+        return dateiname == null || dateiname.isBlank();
     }
 }

@@ -74,7 +74,6 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
 
     /**
      * Erzeugung der horizontalen Leiste (Header).
-     * @return
      */
     private Component   createHeaderContent() {
         // Ein paar Grund-Einstellungen. Alles wird in ein horizontales Layout gesteckt.
@@ -168,6 +167,12 @@ public class AppView extends AppLayout implements BeforeEnterObserver {
         Tab[] tabs = new Tab[]{ createTab("Gründungsideen anschauen", ShowIdeasView.class) };
 
         // ToDo für die Teams: Weitere Tabs aus ihrem Projekt hier einfügen!
+
+        // Gründer sehen zusätzlich ihre eigenen Ideen und die eingegangenen Bewerbungen.
+        BenutzerDTO currentUser = getCurrentUser();
+        if (currentUser != null && authorizationControl.canAccessEnterCar(currentUser)) {
+            tabs = Utils.append(tabs, createTab("Meine Gründungsideen", MeineGruendungsideenView.class));
+        }
 
         // Menüeintrag Profilverwaltung – für alle eingeloggten Benutzer sichtbar
         tabs = Utils.append(tabs, createTab("Profil verwalten", VerwaltungView.class));
