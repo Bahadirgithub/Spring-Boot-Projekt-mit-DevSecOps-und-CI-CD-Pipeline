@@ -1,10 +1,15 @@
 package org.hbrs.se2.project.hellocar.control;
 
 import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
+import org.hbrs.se2.project.hellocar.control.exception.InvalidBirthdayException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
+import org.hbrs.se2.project.hellocar.entities.Gruender;
+import org.hbrs.se2.project.hellocar.entities.Skill;
+import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
+import org.hbrs.se2.project.hellocar.repository.SkillRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -38,6 +46,9 @@ public class VerwaltungControlTest {
     // Mock für das GruenderRepository
     @Mock
     private GruenderRepository gruenderRepository;
+
+    @Mock
+    private SkillRepository skillRepository;
 
     // Injiziert die gemockten Repositories in die zu testende VerwaltungControl-Klasse
     @InjectMocks
@@ -165,5 +176,128 @@ public class VerwaltungControlTest {
 
         // Überprüfung: Ergebnis muss null sein
         assertNull(resultDTO, "Das DTO sollte null sein, wenn kein Benutzer gefunden wurde");
+    }
+
+    @Test
+    void testLadeAlleSkillNamen_returnsNames() {
+        Skill s1 = new Skill(); s1.setName("A"); s1.setKategorie("K1");
+        Skill s2 = new Skill(); s2.setName("B"); s2.setKategorie("K1");
+        when(skillRepository.findAllByOrderByKategorieAscNameAsc()).thenReturn(List.of(s1, s2));
+
+        List<String> names = verwaltungControl.ladeAlleSkillNamen();
+
+        assertEquals(2, names.size());
+        assertEquals(List.of("A","B"), names);
+        verify(skillRepository, times(1)).findAllByOrderByKategorieAscNameAsc();
+    }
+
+    @Test
+    void testLadeStudent_found_returnsStudentWithSkills() {
+        Student st = new Student();
+        st.setUserId(1);
+        Skill sk = new Skill(); sk.setName("Java");
+        st.setSkillEntities(Set.of(sk));
+        when(studentRepository.findById(1)).thenReturn(Optional.of(st));
+
+        Student result = verwaltungControl.ladeStudent(1);
+
+        assertNotNull(result);
+        assertEquals(1, result.getUserId());
+        assertFalse(result.getSkillEntities().isEmpty());
+        verify(studentRepository).findById(1);
+    }
+
+    @Test
+    void testLadeStudent_notFound_returnsNull() {
+        when(studentRepository.findById(99)).thenReturn(Optional.empty());
+        assertNull(verwaltungControl.ladeStudent(99));
+    }
+
+    @Test
+    void testLadeGruender_found_returnsGruender() {
+        Gruender g = new Gruender(); g.setUserId(5);
+        when(gruenderRepository.findById(5)).thenReturn(Optional.of(g));
+        assertNotNull(verwaltungControl.ladeGruender(5));
+    }
+
+    @Test
+    void testLadeGruender_notFound_returnsNull() {
+        when(gruenderRepository.findById(42)).thenReturn(Optional.empty());
+        assertNull(verwaltungControl.ladeGruender(42));
+    }
+
+    @Test
+    void testVornameAendern_nonEmpty_setsVorname() {
+        Benutzer b = new Benutzer();
+        assertTrue(verwaltungControl.vornameAendern(b, "Anna"));
+        assertEquals("Anna", b.getVorname());
+    }
+
+    @Test
+    void testVornameAendern_empty_noChange() {
+        Benutzer b = new Benutzer();
+        b.setVorname("Old");
+        assertTrue(verwaltungControl.vornameAendern(b, ""));
+        assertEquals("Old", b.getVorname());
+    }
+
+    @Test
+    void testEmailAendern_invalid_returnsFalse() {
+        Benutzer b = new Benutzer();
+        assertFalse(verwaltungControl.emailAendern(b, "not-an-email"));
+        assertNull(b.getEmail());
+    }
+
+    @Test
+    void testEmailAendern_valid_setsEmail() {
+        Benutzer b = new Benutzer();
+        assertTrue(verwaltungControl.emailAendern(b, "foo@example.com"));
+        assertEquals("foo@example.com", b.getEmail());
+    }
+
+    @Test
+    void testPasswortAendern_invalid_returnsFalse() {
+        Benutzer b = new Benutzer();
+        assertFalse(verwaltungControl.passwortAendern(b, "short"));
+    }
+
+    @Test
+    void testPasswortAendern_valid_setsPassword() {
+        Benutzer b = new Benutzer();
+        String good = "Abcdef1!"; // meets ValidateUserControl pattern
+        assertTrue(verwaltungControl.passwortAendern(b, good));
+        assertEquals(good, b.getPasswort());
+    }
+
+    @Test
+    void testGeburtstagAendern_under18_throws() {
+        Benutzer b = new Benutzer();
+        LocalDate under18 = LocalDate.now().minusYears(17);
+        assertThrows(InvalidBirthdayException.class, () -> verwaltungControl.geburtstagAendern(b, under18));
+    }
+
+    @Test
+    void testGeburtstagAendern_valid_setsDate() throws InvalidBirthdayException {
+        Benutzer b = new Benutzer();
+        LocalDate adult = LocalDate.now().minusYears(25);
+        assertTrue(verwaltungControl.geburtstagAendern(b, adult));
+        assertEquals(adult, b.getGeburtstag());
+    }
+
+    @Test
+    void testSkillsAendern_null_returnsTrue() {
+        Student s = new Student();
+        assertTrue(verwaltungControl.skillsAendern(s, null));
+    }
+
+    @Test
+    void testSkillsAendern_resolvesAndSetsSkills() {
+        Student s = new Student();
+        Skill sk = new Skill(); sk.setName("Java");
+        when(skillRepository.findByNameIn(List.of("Java"))).thenReturn(List.of(sk));
+
+        assertTrue(verwaltungControl.skillsAendern(s, List.of("Java")));
+        assertEquals(1, s.getSkillEntities().size());
+        assertTrue(s.getSkillEntities().stream().anyMatch(x -> "Java".equals(x.getName())));
     }
 }

@@ -16,3 +16,66 @@
 .show-idea-details-view vaadin-vertical-layout {
     width: 100%;
 }
+
+/* Divider lines (Hr) */
+.show-idea-details-view hr.divider {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: none;
+    height: 2px;
+    background-color: black;
+}
+
+/* Section titles (z.B. "Bewertungen", "Bewertung schreiben") */
+.show-idea-details-view .section-title {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* Container-Margins für Bewertungen / Formular */
+.show-idea-details-view .reviews-container,
+.show-idea-details-view .review-form-container {
+    margin-left: -17px;
+    margin-right: -17px;
+}
+
+/* Stern-Rating (klickbare Sterne) */
+.show-idea-details-view .star {
+    cursor: pointer;
+    font-size: 2em;
+    color: lightgray;
+    user-select: none;
+    line-height: 1;
+    padding: 0 2px;
+}
+.show-idea-details-view .star-selected {
+    color: #B8860B; /* gold */
+}
+
+/* Review-Block-Stile */
+.show-idea-details-view .review-block {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 15px;
+}
+.show-idea-details-view .review-stars {
+    color: #B8860B;
+    font-size: 2em;
+}
+.show-idea-details-view .review-date,
+.show-idea-details-view .review-user {
+    font-size: 0.9em;
+    color: gray;
+}
+.show-idea-details-view .review-user {
+    margin-bottom: 5px;
+}
+.show-idea-details-view .review-comment {
+    display: block;
+    margin-top: 6px;
+}
+
+/* Link zu allen Bewertungen */
+.show-idea-details-view .all-reviews-link {
+    margin-top: 10px;
+    display: block;
+}
