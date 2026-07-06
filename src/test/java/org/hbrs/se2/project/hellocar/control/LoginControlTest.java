@@ -1,13 +1,23 @@
 package org.hbrs.se2.project.hellocar.control;
 
+
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.server.VaadinSession;
+import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
+import org.hbrs.se2.project.hellocar.control.exception.PasswordInvalidException;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
+import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
+import org.hbrs.se2.project.hellocar.util.CryptoProvider;
 import org.hbrs.se2.project.hellocar.util.TestDatenFabrik;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * JUnit-Testfälle zur Benutzeranmeldung.
@@ -23,80 +33,54 @@ public class LoginControlTest {
     @Autowired
     private LoginControl loginControl;
 
-    // Die TestDatenFabrik wird injiziert, um Testbenutzer zu erstellen.
-    // Die Kopplung zur RegistrationControl wird damit entfernt.
     @Autowired
     private TestDatenFabrik testDatenFabrik;
 
-    /**
-     * Testfall 1: Positivtest - Erfolgreicher Login mit gültigen Anmeldedaten.
-     */
-    @Test
-    void testLoginErfolgreich() {
-        // Vorbereitung: Einen Benutzer über die Fabrik erstellen.
-        Benutzer benutzer = testDatenFabrik.erstelleUndSpeichereBenutzer("LoginErfolgreich");
+    @Autowired
+    private BenutzerRepository benutzerRepository;
 
-        // Eigentlicher Test: Login mit den Daten des erstellten Benutzers versuchen.
-        assertDoesNotThrow(() -> {
-            // TODO Test Anpassen!
-            //boolean result = loginControl.authenticate(benutzer.getUsername(), benutzer.getPasswort());
-            //assertTrue(result, "Login sollte mit korrekten Daten erfolgreich sein.");
-        }, "Ein erfolgreicher Login sollte keine DatabaseUserException werfen.");
+    private Benutzer fabriksUser;
+
+    @BeforeEach
+    void setup() {
+        // Erzeuge einen persistierten Benutzer über die Fabrik.
+        fabriksUser = testDatenFabrik.erstelleUndSpeichereBenutzer("loginOK");
+
+        // Fabrik speichert ein Klartext-Passwort; für LoginControl muss es gehasht vorliegen.
+        fabriksUser.setPasswort(CryptoProvider.CreatePassword("SicheresPasswort123"));
+        benutzerRepository.saveAndFlush(fabriksUser);
     }
 
-    /**
-     * Testfall 2: Negativtest - Login schlägt fehl bei falschem Passwort.
-     */
     @Test
-    void testLoginSchlaegtFehlBeiFalschemPasswort() {
-        // Vorbereitung: Einen Benutzer über die Fabrik erstellen.
-        Benutzer benutzer = testDatenFabrik.erstelleUndSpeichereBenutzer("FalschesPasswort");
-
-        // Eigentlicher Test: Login mit falschem Passwort versuchen.
-        assertDoesNotThrow(() -> {
-            // TODO Test Anpassen!
-            //boolean result = loginControl.authenticate(benutzer.getUsername(), "absolutFalschesPasswort");
-            //assertFalse(result, "Login sollte bei falschem Passwort fehlschlagen.");
-        }, "Ein fehlschlagender Login sollte keine DatabaseUserException werfen.");
+    void authenticate_success_withTestDatenFabrik() throws PasswordInvalidException, DatabaseUserException {
+        var dto = loginControl.authenticate(fabriksUser.getUsername(), "SicheresPasswort123");
+        assertNotNull(dto);
+        assertEquals(fabriksUser.getUsername(), dto.getUsername());
+        assertEquals(fabriksUser.getUserId(), dto.getUserId());
     }
 
-    /**
-     * Testfall 3: Negativtest - Login schlägt fehl bei unbekanntem Benutzernamen.
-     */
     @Test
-    void testLoginSchlaegtFehlBeiUnbekanntemBenutzernamen() {
-        // Es wird kein Benutzer registriert, um einen unbekannten Benutzernamen zu simulieren.
-        assertDoesNotThrow(() -> {
-            // TODO Test Anpassen!
-            //boolean result = loginControl.authenticate("unbekannter_user_12345", "AnyPassword");
-            //assertFalse(result, "Login sollte fehlschlagen bei unbekanntem Benutzernamen.");
-        }, "Ein unbekannter Benutzername sollte keine DatabaseUserException werfen.");
+    void authenticate_wrongPassword_throwsPasswordInvalidException() {
+        assertThrows(PasswordInvalidException.class, () ->
+                loginControl.authenticate(fabriksUser.getUsername(), "falschesPasswort"));
     }
 
-    /**
-     * Testfall 4: Negativtest - Login schlägt fehl bei leerem Benutzernamen.
-     */
     @Test
-    void testLoginSchlaegtFehlBeiLeeremBenutzernamen() {
-        assertDoesNotThrow(() -> {
-            // TODO Test Anpassen!
-            //boolean result = loginControl.authenticate("", "SecurePassword123");
-            //assertFalse(result, "Login sollte fehlschlagen bei leerem Benutzernamen.");
-        }, "Ein leerer Benutzername sollte keine DatabaseUserException werfen.");
+    void authenticate_unknownUser_throwsDatabaseUserException() {
+        assertThrows(DatabaseUserException.class, () ->
+                loginControl.authenticate("nicht_existierender_user_123", "any"));
     }
 
-    /**
-     * Testfall 5: Negativtest - Login schlägt fehl bei leerem Passwort.
-     */
     @Test
-    void testLoginSchlaegtFehlBeiLeeremPasswort() {
-        // Vorbereitung: Einen Benutzer über die Fabrik erstellen.
-        Benutzer benutzer = testDatenFabrik.erstelleUndSpeichereBenutzer("LeeresPasswort");
+    void checkResetCredentials_success_returnsTrue() throws DatabaseUserException {
+        Benutzer resetUser = testDatenFabrik.erstelleUndSpeichereBenutzer("reset");
+        boolean result = loginControl.checkResetCredentials(resetUser.getUsername(), resetUser.getEmail());
+        assertTrue(result);
+    }
 
-        assertDoesNotThrow(() -> {
-            // TODO Test Anpassen!
-            //boolean result = loginControl.authenticate(benutzer.getUsername(), "");
-            //assertFalse(result, "Login sollte fehlschlagen bei leerem Passwort.");
-        }, "Ein leeres Passwort sollte keine DatabaseUserException werfen.");
+    @Test
+    void checkResetCredentials_unknownUser_throwsDatabaseUserException() {
+        assertThrows(DatabaseUserException.class, () ->
+                loginControl.checkResetCredentials("nonexistent_user_x", "noemail@x.de"));
     }
 }

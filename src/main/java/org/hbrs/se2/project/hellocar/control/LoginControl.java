@@ -48,7 +48,10 @@ public class LoginControl {
                     .orElseThrow(DatabaseUserException::new);
 
             // Benutzer verifiziert! Wir merken uns die ID in der Vaadin-Session für den nächsten Schritt
-            UI.getCurrent().getSession().setAttribute("reset_user_id", benutzer.getUserId());
+            UI currentUi = UI.getCurrent();
+            if (currentUi != null && currentUi.getSession() != null) {
+                currentUi.getSession().setAttribute("reset_user_id", benutzer.getUserId());
+            }
             return true;
 
         } catch (DataAccessResourceFailureException e) {
