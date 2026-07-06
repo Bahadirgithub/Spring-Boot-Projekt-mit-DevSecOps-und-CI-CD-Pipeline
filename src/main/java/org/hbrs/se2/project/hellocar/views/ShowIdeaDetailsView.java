@@ -97,47 +97,35 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
 
         // Erste Linie (nach dem Formular)
         Hr line1 = new Hr();
-        line1.getStyle().set("margin-top", "20px");
-        line1.getStyle().set("margin-bottom", "20px");
-        line1.getStyle().set("border", "none");
-        line1.getStyle().set("height", "2px");
-        line1.getStyle().set("background-color", "black");
+        line1.addClassName("divider");
         add(line1);
 
         //Title
         H3 title = new H3("Bewertungen");
-        title.getStyle().set("margin-bottom", "0");
-        title.getStyle().set("margin-top", "0");
+        title.addClassName("section-title");
         add(title);
 
         //Bewertungen
         reviewsContainer.setSpacing(false);
         reviewsContainer.setMargin(false);
-        reviewsContainer.getStyle().set("margin-left", "-17px");
-        reviewsContainer.getStyle().set("margin-right", "-17px");
+        reviewsContainer.addClassName("reviews-container");
         add(reviewsContainer);
 
         if (currentUser != null && authorizationControl.isStudent(currentUser)) {
             // Zweite Linie (nach den Bewertungen)
             Hr line2 = new Hr();
-            line2.getStyle().set("margin-top", "20px");
-            line2.getStyle().set("margin-bottom", "20px");
-            line2.getStyle().set("border", "none");
-            line2.getStyle().set("height", "2px");
-            line2.getStyle().set("background-color", "black");
+            line2.addClassName("divider");
             add(line2);
 
             VerticalLayout reviewFormContainer = new VerticalLayout();
 
             H3 ratingTitle = new H3("Bewertung schreiben");
-            ratingTitle.getStyle().set("margin-bottom", "0");
-            ratingTitle.getStyle().set("margin-top", "0");
+            ratingTitle.addClassName("section-title");
             add(ratingTitle);
 
             reviewFormContainer.setSpacing(false);
             reviewFormContainer.setMargin(false);
-            reviewFormContainer.getStyle().set("margin-left", "-17px");
-            reviewFormContainer.getStyle().set("margin-right", "-17px");
+            reviewFormContainer.addClassName("review-form-container");
 
             final int[] selectedStars = {0};
             HorizontalLayout starRatingLayout = new HorizontalLayout();
@@ -146,7 +134,7 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
             for (int i = 1; i <= 5; i++) {
                 int ratingValue = i;
                 Span star = new Span("★");
-                star.getStyle().set("cursor", "pointer").set("font-size", "2em").set("color", "lightgray");
+                star.addClassName("star");
                 star.addClickListener(e -> {
                     selectedStars[0] = ratingValue;
                     updateStars(starRatingLayout, ratingValue);
@@ -184,7 +172,8 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
     private void updateStars(HorizontalLayout layout, int rating) {
         for (int i = 0; i < 5; i++) {
             Span star = (Span) layout.getComponentAt(i);
-            star.getStyle().set("color", (i < rating) ? "#B8860B" : "lightgray");
+            if (i < rating) star.addClassName("star-selected");
+            else star.removeClassName("star-selected");
         }
     }
 
@@ -255,12 +244,11 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
 
             // Sterne-String erzeugen
             Span starSpan = new Span(createStarRating(b.getBewertung()));
-            starSpan.getStyle().set("color", "#B8860B"); // Goldene Farbe für die Sterne
-            starSpan.getStyle().set("font-size", "2em");
+            starSpan.addClassName("review-stars");
 
             String zeitstempelString = (b.getZeitstempel() != null) ? b.getZeitstempel().format(formatter) : "Datum unbekannt";
             Span dateSpan = new Span("Bewertet am: " + zeitstempelString);
-            dateSpan.getStyle().set("font-size", "0.9em").set("color", "gray");
+            dateSpan.addClassName("review-date");
 
             String username = "Unbekannt";
             var studentOpt = studentRepository.findById(b.getStudentUserId());
@@ -276,13 +264,13 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
                 }
             }
             Span userSpan = new Span("Bewertet von: " + (username != null ? username : "Unbekannt"));
-            userSpan.getStyle().set("font-size", "0.9em").set("color", "gray").set("margin-bottom", "5px");
+            userSpan.addClassName("review-user");
 
             Span commentSpan = new Span("Kommentar: " + b.getKommentar());
+            commentSpan.addClassName("review-comment");
 
             reviewBlock.add(starSpan, dateSpan, userSpan, commentSpan);
-            reviewBlock.getStyle().set("border-bottom", "1px solid #ccc");
-            reviewBlock.getStyle().set("padding-bottom", "15px");
+            reviewBlock.addClassName("review-block");
 
             reviewsContainer.add(reviewBlock);
         }
@@ -290,8 +278,7 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
         if (alleBewertungen.size() > 2) {
             String linkText = "Alle " + alleBewertungen.size() + " Bewertungen ansehen";
             Anchor allReviewsLink = new Anchor("show-all-ratings/" + ideeId, linkText);
-            allReviewsLink.getStyle().set("margin-top", "10px");
-            allReviewsLink.getStyle().set("display", "block");
+            allReviewsLink.addClassName("all-reviews-link");
             reviewsContainer.add(allReviewsLink);
         }
     }
