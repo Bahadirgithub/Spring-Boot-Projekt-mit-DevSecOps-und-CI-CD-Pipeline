@@ -73,6 +73,16 @@ public class ManageIdeaControl {
     }
 
     /**
+     * Holt nur die Gründungsideen des aktuell eingeloggten Gründers.
+     */
+    @Transactional
+    public List<GruendungsideeDTO> readIdeasByGruender(int gruenderUserId) {
+        return repository.findByGruenderUserId(gruenderUserId).stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
+    /**
      * Speichert eine neu erstellte Gründungsidee in der Datenbank.
      */
     @Transactional
