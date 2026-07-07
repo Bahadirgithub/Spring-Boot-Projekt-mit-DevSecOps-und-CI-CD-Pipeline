@@ -4,24 +4,28 @@ import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.BewerbungDTO;
 import org.hbrs.se2.project.hellocar.dtos.GruendungsideeDTO;
 import org.hbrs.se2.project.hellocar.dtos.impl.BewerbungDTOImpl;
+import org.hbrs.se2.project.hellocar.entities.Bewertung;
 import org.hbrs.se2.project.hellocar.entities.Bewerbung;
 import org.hbrs.se2.project.hellocar.entities.Gruendungsidee;
 import org.hbrs.se2.project.hellocar.entities.Student;
+import org.hbrs.se2.project.hellocar.repository.BewertungRepository;
 import org.hbrs.se2.project.hellocar.repository.BewerbungRepository;
 import org.hbrs.se2.project.hellocar.repository.GruendungsideeRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Control-Klasse für die Gründer-Ansicht "Meine Gründungsideen".
- * Hier liegt die Logik zum Laden eigener Ideen, Bewerbungen und Statusänderungen.
+ * Control Klasse für die Ansicht "Meine Gründungsideen". Verwaltung der eigenen Gründungsideen.
+ *
  */
 @Component
 public class MeineGruendungsideenControl {
 
+    // Status, kann der Gründer später in der View auswählen. Noch nicht weiter implementiert - MM
     private static final List<String> ERLAUBTE_STATUS = List.of(
             "Eingegangen",
             "In Prüfung",
@@ -30,23 +34,34 @@ public class MeineGruendungsideenControl {
             "Eingestellt"
     );
 
+    // Wird benutzt, um die eigenen Ideen des Gründers zu laden.
     private final ManageIdeaControl ideaControl;
+
+    // Repository für Bewerbungen.
     private final BewerbungRepository bewerbungRepository;
+
+    // Repository für Bewertungen.
+    private final BewertungRepository bewertungRepository;
+
     private final GruendungsideeRepository gruendungsideeRepository;
+
+    // Laden von Benutzerdaten und Studentendaten.
     private final VerwaltungControl verwaltungControl;
 
     public MeineGruendungsideenControl(ManageIdeaControl ideaControl,
                                        BewerbungRepository bewerbungRepository,
+                                       BewertungRepository bewertungRepository,
                                        GruendungsideeRepository gruendungsideeRepository,
                                        VerwaltungControl verwaltungControl) {
         this.ideaControl = ideaControl;
         this.bewerbungRepository = bewerbungRepository;
+        this.bewertungRepository = bewertungRepository;
         this.gruendungsideeRepository = gruendungsideeRepository;
         this.verwaltungControl = verwaltungControl;
     }
 
     /**
-     * Lädt nur die Gründungsideen des eingeloggten Gründers.
+     * Lädt alle Gründungsideen, die dem eingeloggten Gründer gehören.
      */
     @Transactional
     public List<GruendungsideeDTO> ladeEigeneGruendungsideen(int gruenderUserId) {
@@ -54,8 +69,7 @@ public class MeineGruendungsideenControl {
     }
 
     /**
-     * Lädt die Bewerbungen für genau eine eigene Gründungsidee.
-     * Ein Gründer darf nur Bewerbungen für seine eigenen Ideen sehen.
+     * Prüfung ob Idee dem Grüpnder gehört, dann laden der Bewerbungen zu der Idee.
      */
     @Transactional
     public List<BewerbungDTO> ladeBewerbungenFuerEigeneIdee(int gruenderUserId, int ideeId) {
@@ -63,14 +77,27 @@ public class MeineGruendungsideenControl {
             return List.of();
         }
 
-        return bewerbungRepository.findByIdeeId(ideeId).stream()
-                .map(this::mapToDTO)
+        return bewerbungRepository.findByIdeeId(ideeId).stream().map(this::mapToDTO).toList();
+    }
+
+    /**
+     * Gleiche Logik, lädt die Bewertungen zu einer Idee.
+     */
+    @Transactional
+    public List<Bewertung> ladeBewertungenFuerEigeneIdee(int gruenderUserId, int ideeId) {
+        if (!gehoertIdeeZuGruender(gruenderUserId, ideeId)) {
+            return List.of();
+        }
+
+        // Neueste Bewertungen sollen oben stehen.
+        return bewertungRepository.findByIdeeId(ideeId).stream().sorted(Comparator.comparing(Bewertung::getZeitstempel,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                ).reversed())
                 .toList();
     }
 
     /**
-     * Ändert den Status einer Bewerbung.
-     * Sicherheitsprüfung: Die Bewerbung muss zu einer Idee des Gründers gehören.
+     * Statusänderung - Noch keine weitere Implementation, Chat etc. Ablehnung kommt eventuell noch
      */
     @Transactional
     public boolean aendereStatusFuerBewerbung(int gruenderUserId, int bewerbungId, String neuerStatus) {
@@ -83,6 +110,7 @@ public class MeineGruendungsideenControl {
             return false;
         }
 
+        // Sicherheit: Gründer darf nicht fremde Bewerbungen ändern.
         if (!gehoertIdeeZuGruender(gruenderUserId, bewerbung.getIdeeId())) {
             return false;
         }
@@ -92,22 +120,18 @@ public class MeineGruendungsideenControl {
         return true;
     }
 
-    /**
-     * Statuswerte für die Auswahl im Frontend.
-     */
     public List<String> ladeErlaubteStatus() {
         return ERLAUBTE_STATUS;
     }
 
-    /**
-     * Lädt die Benutzer-Stammdaten eines Studenten.
-     */
+    // Lädt die Benutzerdaten eines Studenten.
     public BenutzerDTO ladeStudentBenutzer(int studentUserId) {
         return verwaltungControl.ladeBenutzer(studentUserId);
     }
 
     /**
-     * Lädt das Studentenprofil inklusive Skills.
+     * Lädt das Studentenprofil.
+     * Hier sind dann z.B. Uni, Semester, Abschluss und Skills drin.
      */
     @Transactional
     public Student ladeStudentProfil(int studentUserId) {
@@ -115,10 +139,14 @@ public class MeineGruendungsideenControl {
     }
 
     /**
-     * Prüft, ob ein Studentenskill zu den gesuchten Skills der Idee passt.
+     * Prüft, ob ein Skill vom Studenten auch in der Idee gesucht wird. - Und dann Matching in der View :)
      */
     public boolean istSkillPassendZurIdee(String studentSkillName, GruendungsideeDTO idee) {
-        if (studentSkillName == null || studentSkillName.isBlank() || idee == null || idee.getGesuchteSkills() == null) {
+        if (studentSkillName == null || studentSkillName.isBlank()) {
+            return false;
+        }
+
+        if (idee == null || idee.getGesuchteSkills() == null) {
             return false;
         }
 
@@ -131,32 +159,43 @@ public class MeineGruendungsideenControl {
     }
 
     /**
-     * Prüft, ob eine Idee dem Gründer gehört.
+     * Kleine Hilfsmethode.
+     * Prüft, ob eine Idee wirklich dem Gründer gehört.
      */
     private boolean gehoertIdeeZuGruender(int gruenderUserId, int ideeId) {
         Gruendungsidee idee = gruendungsideeRepository.findById(ideeId).orElse(null);
-        return idee != null && idee.getGruenderUserId() == gruenderUserId;
+
+        if (idee == null) {
+            return false;
+        }
+
+        return idee.getGruenderUserId() == gruenderUserId;
     }
 
     /**
-     * Mapping von Entity auf DTO für die View.
-     */
+     * Wandelt eine Bewerbung-Entity in ein DTO um.
+     *  Weil die View nicht direkt mit der Entity arbeiten soll!
+     *  */
     private BewerbungDTO mapToDTO(Bewerbung entity) {
         BewerbungDTOImpl dto = new BewerbungDTOImpl();
+
         dto.setBewerbungId(entity.getBewerbungId());
         dto.setStudentUserId(entity.getStudentUserId());
         dto.setIdeeId(entity.getIdeeId());
         dto.setBewerbungsdatum(entity.getBewerbungsdatum());
         dto.setStatus(entity.getStatus());
+
+        // Dateiinformationen für Anschreiben und Lebenslauf.
         dto.setAnschreibenDateiname(entity.getAnschreibenDateiname());
         dto.setAnschreibenDateipfad(entity.getAnschreibenDateipfad());
         dto.setLebenslaufDateiname(entity.getLebenslaufDateiname());
         dto.setLebenslaufDateipfad(entity.getLebenslaufDateipfad());
+
         return dto;
     }
 
     /**
-     * Einfache Normalisierung für Skill-Vergleich.
+     * Leichte Normalisierung des Skills, lower + leerzeichen, aber eigentlich nicht notwendig.
      */
     private String normalisiereSkill(String skill) {
         return skill.trim().toLowerCase(Locale.ROOT);
