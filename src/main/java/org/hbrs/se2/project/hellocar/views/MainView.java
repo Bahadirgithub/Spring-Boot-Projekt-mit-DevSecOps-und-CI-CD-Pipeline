@@ -7,6 +7,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
+import org.hbrs.se2.project.hellocar.control.ChatControl;
+import org.hbrs.se2.project.hellocar.control.LoginControl;
 import org.hbrs.se2.project.hellocar.util.Globals;
 
 /**
@@ -19,9 +21,11 @@ import org.hbrs.se2.project.hellocar.util.Globals;
 public class MainView extends VerticalLayout implements BeforeEnterObserver {
 
 
-    private ChatView chatView;
-    public MainView() {
+
+    public MainView()
+    {
         // Diese View ist leer. Alle Aktion passiert in der beforeEnter-Methode.
+
     }
 
     /**
@@ -33,7 +37,6 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
         
         // 1. Prüfen: Ist ein Benutzer-Objekt in der aktuellen Session gespeichert?
         Object currentUser = UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
-        add(this.createChatbotAvatar());
 
         if (currentUser != null) {
             // Benutzer IST eingeloggt -> Weiterleitung in den internen Bereich
@@ -44,17 +47,5 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
         }
     }
 
-    private Component createChatbotAvatar(){
-        Avatar chatbotAvatar = new Avatar();
-        chatbotAvatar.setId("chatbot-avatar");
-        chatbotAvatar.setImage("images/logo.png");
 
-        chatbotAvatar.getStyle().set("position", "absolute");
-        chatbotAvatar.getStyle().set("bottom", "20px");
-        chatbotAvatar.getStyle().set("right", "30px");
-
-        chatbotAvatar.getElement().addEventListener("click", event -> {chatView.open();});
-
-        return chatbotAvatar;
-    }
 }
