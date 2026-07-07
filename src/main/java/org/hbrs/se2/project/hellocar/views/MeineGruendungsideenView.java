@@ -2,6 +2,7 @@ package org.hbrs.se2.project.hellocar.views;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -20,6 +21,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
+import org.hbrs.se2.project.hellocar.control.ChatControl;
+import org.hbrs.se2.project.hellocar.control.LoginControl;
 import org.hbrs.se2.project.hellocar.control.MeineGruendungsideenControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.BewerbungDTO;
@@ -55,13 +58,16 @@ public class MeineGruendungsideenView extends Div {
 
     private BenutzerDTO currentUser;
 
+    private ChatView chatView;
+
     public MeineGruendungsideenView(AuthorizationControl authorizationControl,
-                                    MeineGruendungsideenControl meineGruendungsideenControl) {
+                                    MeineGruendungsideenControl meineGruendungsideenControl , ChatControl chatControl, LoginControl loginControl) {
         this.authorizationControl = authorizationControl;
         this.meineGruendungsideenControl = meineGruendungsideenControl;
+        this.chatView = new ChatView(chatControl,loginControl);
 
         addClassName("show-cars-view");
-
+        add(this.chatView);
         currentUser = (BenutzerDTO) UI.getCurrent().getSession().getAttribute(Globals.CURRENT_USER);
 
         // Falls jemand die Route direkt aufruft und nicht eingeloggt ist.
@@ -79,6 +85,7 @@ public class MeineGruendungsideenView extends Div {
         add(new H3("Meine Gründungsideen"));
         add(createGridTable());
         add(createDetailLayout());
+        add(this.createChatbotAvatar());
     }
 
     private Component createGridTable() {
@@ -535,4 +542,34 @@ public class MeineGruendungsideenView extends Div {
 
         return text;
     }
+
+  /*  private Component createChatbotAvatar(){
+        Avatar chatbotAvatar = new Avatar();
+        chatbotAvatar.setId("chatbot-avatar");
+        chatbotAvatar.setImage("images/logo.png");
+
+        chatbotAvatar.getStyle().set("position", "absolute");
+        chatbotAvatar.getStyle().set("bottom", "20px");
+        chatbotAvatar.getStyle().set("right", "30px");
+
+        chatbotAvatar.getElement().addEventListener("click", event -> {chatView.open();});
+
+        return chatbotAvatar;
+    }*/
+
+    private Component createChatbotAvatar(){
+        Avatar chatbotAvatar = new Avatar();
+        chatbotAvatar.setId("chatbot-avatar");
+        chatbotAvatar.setImage("images/logo.png");
+
+        // 1. WICHTIG: fixed statt absolute nutzen, damit der Button am Bildschirm "klebt"
+        chatbotAvatar.getStyle().set("position", "absolute");
+        chatbotAvatar.getStyle().set("bottom", "20px");
+        chatbotAvatar.getStyle().set("right", "30px");
+
+        chatbotAvatar.getElement().addEventListener("click", event -> { chatView.open(); });
+
+        return chatbotAvatar;
+    }
+
 }
