@@ -543,31 +543,28 @@ public class MeineGruendungsideenView extends Div {
         return text;
     }
 
-  /*  private Component createChatbotAvatar(){
-        Avatar chatbotAvatar = new Avatar();
+    private Component createChatbotAvatar() {
+        Avatar chatbotAvatar = new Avatar("Startito");
         chatbotAvatar.setId("chatbot-avatar");
         chatbotAvatar.setImage("images/logo.png");
 
-        chatbotAvatar.getStyle().set("position", "absolute");
-        chatbotAvatar.getStyle().set("bottom", "20px");
-        chatbotAvatar.getStyle().set("right", "30px");
+        /*
+         * FIX: Der Avatar soll immer unten rechts am Bildschirm sichtbar sein.
+         * Vorher stand hier "absolute", dadurch ggf. nicht sichtbar.
+         */
+        chatbotAvatar.getStyle().set("position", "fixed");
+        chatbotAvatar.getStyle().set("bottom", "24px");
+        chatbotAvatar.getStyle().set("right", "32px");
+        chatbotAvatar.getStyle().set("z-index", "9999");
+        chatbotAvatar.getStyle().set("cursor", "pointer");
+        chatbotAvatar.getStyle().set("width", "58px");
+        chatbotAvatar.getStyle().set("height", "58px");
+        chatbotAvatar.getStyle().set("border", "2px solid #0b5ed7");
+        chatbotAvatar.getStyle().set("background", "white");
+        chatbotAvatar.getStyle().set("box-shadow", "0 4px 12px rgba(0,0,0,0.25)");
 
-        chatbotAvatar.getElement().addEventListener("click", event -> {chatView.open();});
-
-        return chatbotAvatar;
-    }*/
-
-    private Component createChatbotAvatar(){
-        Avatar chatbotAvatar = new Avatar();
-        chatbotAvatar.setId("chatbot-avatar");
-        chatbotAvatar.setImage("images/logo.png");
-
-        // 1. WICHTIG: fixed statt absolute nutzen, damit der Button am Bildschirm "klebt"
-        chatbotAvatar.getStyle().set("position", "absolute");
-        chatbotAvatar.getStyle().set("bottom", "20px");
-        chatbotAvatar.getStyle().set("right", "30px");
-
-        chatbotAvatar.getElement().addEventListener("click", event -> { chatView.open(); });
+        chatbotAvatar.getElement().setAttribute("title", "Chatbot öffnen");
+        chatbotAvatar.getElement().addEventListener("click", event -> chatView.open());
 
         return chatbotAvatar;
     }

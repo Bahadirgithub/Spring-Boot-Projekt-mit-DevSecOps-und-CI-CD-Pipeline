@@ -1,5 +1,5 @@
 package org.hbrs.se2.project.hellocar.control;
-// TODO services einbinden
+
 import com.vaadin.flow.component.UI;
 import jakarta.transaction.Transactional;
 import org.hbrs.se2.project.hellocar.services.ai.AIService;
@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 @Component
 public class ChatControl {
+
+    private static final String CHATBOT_FEHLER_TEXT =
+            "Der Chatbot ist gerade leider nicht verfügbar. Bitte versuche es später nochmal.";
 
     @Autowired
     private PromptControl promptControl;
@@ -21,21 +23,30 @@ public class ChatControl {
     @Autowired
     private AIService aiService;
 
-    public boolean sendAndGetMessage(String userMessage){
+    public boolean sendAndGetMessage(String userMessage) {
 
-        if(userMessage.isEmpty()){
+        if (userMessage == null || userMessage.isBlank()) {
             return false;
         }
 
         List<Map<String, String>> chatHistory = getCurrentChatHistory();
 
+        // Tokens Sparen, an History
         while (chatHistory.size() > 21) {
             chatHistory.remove(1);
         }
 
-        chatHistory.add(Map.of("role","user", "content", userMessage));
+        chatHistory.add(Map.of("role", "user", "content", userMessage));
 
-        String response = this.aiService.sendMessageAndGetResponse(chatHistory);
+        String response;
+
+        try {
+            response = this.aiService.sendMessageAndGetResponse(chatHistory);
+        } catch (Exception e) {
+            // FIXX! Die Anwendung soll nicht abstürzen, nur weil KI nicht erreichbar.
+            System.out.println("Chatbot konnte keine Antwort liefern: " + e.getMessage());
+            response = CHATBOT_FEHLER_TEXT;
+        }
 
         chatHistory.add(Map.of("role", "assistant", "content", response));
 
@@ -45,19 +56,28 @@ public class ChatControl {
     }
 
     @Transactional
-    public List<Map<String, String>> getCurrentChatHistory(){
+    public List<Map<String, String>> getCurrentChatHistory() {
 
-        List<Map<String, String>> chatHistory = (List<Map<String, String>>) UI.getCurrent().getSession().getAttribute(Globals.CHAT_HISTORY);
+        List<Map<String, String>> chatHistory =
+                (List<Map<String, String>>) UI.getCurrent().getSession().getAttribute(Globals.CHAT_HISTORY);
 
-        if (chatHistory == null){
+        if (chatHistory == null) {
             chatHistory = new ArrayList<>();
-            String prompt = this.promptControl.getSystemPrompt();
+
+            String prompt;
+
+            try {
+                prompt = this.promptControl.getSystemPrompt();
+            } catch (Exception e) {
+                // Fallback, falls beim Promptbau z.B. die DB gerade nicht erreichbar ist.
+                System.out.println("System-Prompt konnte nicht geladen werden: " + e.getMessage());
+                prompt = "Du bist ein hilfreicher Assistent für Gründungsideen und Bewerbungen.";
+            }
 
             chatHistory.add(Map.of("role", "system", "content", prompt));
 
-            chatHistory.add(Map.of("role", "assistant", "content", "Hi, mein Name ist Startito. " +
-                    "Ich bin ein virtueller Assistent, der dich rund um das Thema Gründungsideen beraten kann! "+
-                    "Sag mir Bescheid, wenn du etwas wissen willst :)"));
+            chatHistory.add(Map.of("role", "assistant", "content",
+                    "Hi, mein Name ist Startito. Ich bin dein Chatbot für Gründungsideen und Bewerbungen."));
 
             UI.getCurrent().getSession().setAttribute(Globals.CHAT_HISTORY, chatHistory);
         }
