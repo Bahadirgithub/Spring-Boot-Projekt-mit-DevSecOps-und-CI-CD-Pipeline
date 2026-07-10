@@ -113,6 +113,10 @@ public class RegistrationControl {
            throw new InvalidEmailException("Email ist ungültig.");
         }
 
+        if (geburtstag == null) {
+            throw new BirthdayMissingException("Bitte geben Sie Ihr Geburtsdatum an.");
+        }
+
         if(!ValidateUserControl.isAdult(geburtstag)) {
             throw new InvalidBirthdayException("Ungültiges Geburtsdatum.");
         }

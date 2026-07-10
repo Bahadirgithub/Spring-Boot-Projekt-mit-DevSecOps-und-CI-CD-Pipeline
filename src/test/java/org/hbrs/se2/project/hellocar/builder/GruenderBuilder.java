@@ -23,6 +23,7 @@ import org.hbrs.se2.project.hellocar.entities.Gruender;
  * BEISPIEL 2: Einen Gründer mit spezifischen Eigenschaften erstellen
  * {@code
  * TestGruender testGruender = GruenderBuilder.aGruender()
+ *     .withGruenderId("g_my_test_id")
  *     .withUnternehmensname("Next Unicorn GmbH")
  *     .withStandort("Sankt Augustin")
  *     .build();
@@ -52,6 +53,7 @@ public class GruenderBuilder {
     private BenutzerBuilder benutzerBuilder = BenutzerBuilder.aBenutzer();
 
     // Nur die Felder, die spezifisch für die Gründer-Rolle sind.
+    private String gruenderId = "g_test_456";
     private String unternehmensname = "Test-Startup GmbH";
     private String standort = "Bonn";
 
@@ -63,6 +65,16 @@ public class GruenderBuilder {
      */
     public static GruenderBuilder aGruender() {
         return new GruenderBuilder();
+    }
+
+    /**
+     * Überschreibt die system-interne, fachliche Gründer-ID.
+     * @param gruenderId Die gewünschte ID für den Testfall.
+     * @return Der Builder selbst, um weitere Aufrufe zu verketten.
+     */
+    public GruenderBuilder withGruenderId(String gruenderId) {
+        this.gruenderId = gruenderId;
+        return this;
     }
 
     /**
@@ -113,6 +125,7 @@ public class GruenderBuilder {
         Gruender gruender = new Gruender();
 
         // 3. Befülle das Gründer-Objekt mit den spezifischen Werten dieses Builders.
+        gruender.setGruenderId(this.gruenderId);
         gruender.setUnternehmensname(this.unternehmensname);
         gruender.setStandort(this.standort);
 

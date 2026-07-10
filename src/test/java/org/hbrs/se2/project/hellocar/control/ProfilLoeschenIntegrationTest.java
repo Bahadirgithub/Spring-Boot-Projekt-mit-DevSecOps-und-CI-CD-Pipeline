@@ -1,64 +1,63 @@
 package org.hbrs.se2.project.hellocar.control;
 
+import org.hbrs.se2.project.hellocar.builder.GruenderBuilder;
+import org.hbrs.se2.project.hellocar.builder.StudentBuilder;
 import org.hbrs.se2.project.hellocar.dtos.impl.BenutzerDTOImpl;
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
+import org.hbrs.se2.project.hellocar.entities.Gruender;
+import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.GruenderRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
-import org.hbrs.se2.project.hellocar.util.TestDatenFabrik;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integrationstest für Task #27 — "Profil löschen" (DSGVO-konform).
- *
  * Testziel: Prüfen ob loeschen() alle personenbezogenen Daten eines Benutzers
  * vollständig aus der PostgreSQL-Datenbank entfernt (Benutzer + Rolle).
- *
  * Schicht: Integrationstest — testet VerwaltungControl mit echter DB.
- * @Rollback stellt sicher, dass nach jedem Test keine Testdaten übrig bleiben.
+ *  @ Transactional stellt sicher, dass nach jedem Test keine Testdaten übrig bleiben.
  */
 @SpringBootTest
 @Transactional
-@Rollback
+@DisplayName("Integrationstests für die Profil-Lösch-Funktion (VerwaltungControl)")
 public class ProfilLoeschenIntegrationTest {
 
-    // VerwaltungControl enthält die loeschen()-Methode — das ist was wir testen
+    // VerwaltungControl enthält die loeschen()-Methode — das ist, was wir testen
     @Autowired
     private VerwaltungControl verwaltungControl;
 
-    // TestDatenFabrik erstellt und speichert Testdaten in der echten DB
-    @Autowired
-    private TestDatenFabrik testDatenFabrik;
-
-    // Repositories um nach der Löschung zu prüfen ob wirklich nichts mehr da ist
+    // Repositories um Testdaten zu speichern und den DB-Zustand zu prüfen
     @Autowired
     private BenutzerRepository benutzerRepository;
-
     @Autowired
     private StudentRepository studentRepository;
-
     @Autowired
     private GruenderRepository gruenderRepository;
 
 
     /**
-     * TEST 1 — Vollständige Löschung eines Studenten-Profils.
-     *
+     * TEST 1 — vollständige Löschung eines Studenten-Profils.
      * Szenario: Ein Benutzer mit Student-Rolle löscht sein Profil.
      * Erwartet: Benutzer UND Student-Eintrag sind danach nicht mehr in der DB.
      */
     @Test
+    @DisplayName("Ein Studenten-Profil wird vollständig gelöscht.")
     void testLoeschen_StudentProfil_BenutzerUndStudentAusDBEntfernt() {
 
-        // ── Arrange: Student über TestDatenFabrik anlegen ──
-        Benutzer benutzer = testDatenFabrik.erstelleUndSpeichereBenutzer("LoeschTest_Student");
-        testDatenFabrik.erstelleUndSpeichereStudent(benutzer);
+        // ── Arrange: Student über Builder erstellen und explizit speichern ──
+        StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent().build();
+        Benutzer benutzer = benutzerRepository.save(testStudent.getBenutzer());
+        Student student = testStudent.getStudent();
+        student.setUserId(benutzer.getUserId()); // Verknüpfung setzen
+        studentRepository.save(student);
+
         int userId = benutzer.getUserId();
 
         // Vorher-Prüfung: Beide Einträge müssen in der DB existieren
@@ -90,17 +89,21 @@ public class ProfilLoeschenIntegrationTest {
 
 
     /**
-     * TEST 2 — Vollständige Löschung eines Gründer-Profils.
-     *
+     * TEST 2 — vollständige Löschung eines Gründer-Profils.
      * Szenario: Ein Benutzer mit Gründer-Rolle löscht sein Profil.
      * Erwartet: Benutzer UND Gründer-Eintrag sind danach nicht mehr in der DB.
      */
     @Test
+    @DisplayName("Ein Gründer-Profil wird vollständig gelöscht.")
     void testLoeschen_GruenderProfil_BenutzerUndGruenderAusDBEntfernt() {
 
-        // ── Arrange: Gründer über TestDatenFabrik anlegen ──
-        Benutzer benutzer = testDatenFabrik.erstelleUndSpeichereBenutzer("LoeschTest_Gruender");
-        testDatenFabrik.erstelleUndSpeichereGruender(benutzer);
+        // ── Arrange: Gründer über Builder erstellen und explizit speichern ──
+        GruenderBuilder.TestGruender testGruender = GruenderBuilder.aGruender().build();
+        Benutzer benutzer = benutzerRepository.save(testGruender.getBenutzer());
+        Gruender gruender = testGruender.getGruender();
+        gruender.setUserId(benutzer.getUserId()); // Verknüpfung setzen
+        gruenderRepository.save(gruender);
+
         int userId = benutzer.getUserId();
 
         // Vorher-Prüfung
@@ -131,11 +134,11 @@ public class ProfilLoeschenIntegrationTest {
 
     /**
      * TEST 3 — Löschung eines nicht existierenden Benutzers.
-     *
      * Szenario: loeschen() wird mit einem userId aufgerufen der nicht in der DB ist.
      * Erwartet: Methode gibt false zurück — kein Absturz, kein Fehler.
      */
     @Test
+    @DisplayName("Löschversuch eines nicht-existierenden Benutzers gibt false zurück.")
     void testLoeschen_NichtExistierenderBenutzer_GibtFalseZurueck() {
 
         // Eine userId die garantiert nicht in der DB existiert
@@ -150,11 +153,11 @@ public class ProfilLoeschenIntegrationTest {
 
     /**
      * TEST 4 — Robustheitstest: loeschen() mit null aufgerufen.
-     *
      * Szenario: Die View übergibt versehentlich null als currentUser.
      * Erwartet: Kein NullPointerException — Methode gibt sicher false zurück.
      */
     @Test
+    @DisplayName("Löschversuch mit 'null' als Benutzer gibt false zurück.")
     void testLoeschen_NullAlsBenutzer_GibtFalseZurueckOhneAbsturz() {
         assertDoesNotThrow(
                 () -> {
