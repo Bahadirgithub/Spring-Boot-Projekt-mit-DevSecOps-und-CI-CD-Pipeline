@@ -7,25 +7,20 @@ import java.time.LocalDate;
  * Test-Builder für die {@link Benutzer}-Entität.
  * Dieses Pattern ermöglicht die einfache und flexible Erstellung von Test-Objekten für Unit- und Integrationstests.
  * Der Builder erzeugt ein reines Java-Objekt (POJO), das NICHT automatisch in der Datenbank gespeichert wird.
- *
  * -----------------------------------------------------------------------------------------------------------------
  * ANLEITUNG FÜR TEAMKOLLEGEN:
  * -----------------------------------------------------------------------------------------------------------------
- *
  * WANN IST DIESER BUILDER ZU VERWENDEN?
  * Immer dann, wenn ihr ein {@link Benutzer}-Objekt für einen Test benötigt, insbesondere wenn ihr
  * nur bestimmte Eigenschaften für euren Testfall anpassen müsst.
- *
  * BEISPIEL 1: Einen Standard-Benutzer erstellen
  * Ein Benutzer mit validen, aber unspezifischen Daten.
- *
  * {@code
  * Benutzer standardBenutzer = BenutzerBuilder.aBenutzer().build();
  * }
  *
  * BEISPIEL 2: Einen Benutzer mit spezifischen Eigenschaften erstellen
  * Nützlich, um gezielte Szenarien zu testen (z.B. Login mit einem bestimmten Usernamen).
- *
  * {@code
  * Benutzer testBenutzer = BenutzerBuilder.aBenutzer()
  *     .withUsername("testuser123")
@@ -33,12 +28,10 @@ import java.time.LocalDate;
  *     .build();
  * }
  *
- * BEISPIEL 3: Einen Benutzer für einen Negativtest erstellen
- * Perfekt, um ungültige Zustände zu testen, ohne die Datenbank zu belasten.
- *
+ * BEISPIEL 3: Einen Benutzer für einen Mocking-Test mit einer festen ID erstellen
  * {@code
- * Benutzer benutzerOhnePasswort = BenutzerBuilder.aBenutzer()
- *     .withPasswort(null)
+ * Benutzer mockBenutzer = BenutzerBuilder.aBenutzer()
+ *     .withUserId(123)
  *     .build();
  * }
  *
@@ -46,13 +39,13 @@ import java.time.LocalDate;
  * - {@link BenutzerBuilder} (dieser hier): Erstellt ein Java-Objekt im Speicher. Flexibel und schnell. Ideal für Unit-Tests.
  * - {@code TestDatenFabrik}: Erstellt und speichert eine Entität direkt in der Datenbank. Ideal für Integrationstests,
  *   bei denen ein in der DB existierendes Objekt benötigt wird.
- *
  * Beide ergänzen sich und sollten je nach Testanforderung gewählt werden.
  * -----------------------------------------------------------------------------------------------------------------
  */
 public class BenutzerBuilder {
 
     // Standardwerte für einen "perfekten" Benutzer, um Tests kurz und lesbar zu halten.
+    private Integer userId = null; // Standardmäßig keine ID, da sie von der DB kommt.
     private String vorname = "Max";
     private String nachname = "Mustermann";
     private String username = "standard_Max1";
@@ -69,6 +62,17 @@ public class BenutzerBuilder {
      */
     public static BenutzerBuilder aBenutzer() {
         return new BenutzerBuilder();
+    }
+
+    /**
+     * Setzt die User-ID. WICHTIG: Nur für Test-Szenarien verwenden,
+     * in denen eine ID für Mocking-Zwecke benötigt wird.
+     * @param userId Die zu setzende User-ID.
+     * @return Der Builder selbst, um weitere Aufrufe zu verketten.
+     */
+    public BenutzerBuilder withUserId(Integer userId) {
+        this.userId = userId;
+        return this;
     }
 
     /**
@@ -149,6 +153,10 @@ public class BenutzerBuilder {
      */
     public Benutzer build() {
         Benutzer benutzer = new Benutzer();
+        // Setze die ID nur, wenn sie explizit im Test angegeben wurde.
+        if (this.userId != null) {
+            benutzer.setUserId(this.userId);
+        }
         benutzer.setVorname(this.vorname);
         benutzer.setNachname(this.nachname);
         benutzer.setUsername(this.username);
@@ -156,7 +164,6 @@ public class BenutzerBuilder {
         benutzer.setEmail(this.email);
         benutzer.setGeburtstag(this.geburtstag);
         benutzer.setTelefonnummer(this.telefonnummer);
-        // Die ID wird hier bewusst nicht gesetzt, da sie normalerweise von der Datenbank generiert wird.
         return benutzer;
     }
 }

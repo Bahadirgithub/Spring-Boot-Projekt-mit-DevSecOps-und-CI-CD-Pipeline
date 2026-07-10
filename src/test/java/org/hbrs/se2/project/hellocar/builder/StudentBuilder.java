@@ -1,29 +1,26 @@
 package org.hbrs.se2.project.hellocar.builder;
 
 import org.hbrs.se2.project.hellocar.entities.Benutzer;
-import org.hbrs.se2.project.hellocar.entities.Student;
 import org.hbrs.se2.project.hellocar.entities.Skill;
-
-import java.util.Collections;
+import org.hbrs.se2.project.hellocar.entities.Student;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Test-Builder für die Erstellung eines vollständigen Studenten (Benutzer + Student-Rolle).
  * Dieses Pattern ermöglicht die einfache und flexible Erstellung von Test-Objekten für Unit-Tests.
  * Der Builder erzeugt reine Java-Objekte (POJOs), die NICHT automatisch in der Datenbank gespeichert werden.
+ * Dieser Builder ist darauf ausgelegt, die 'TestDataFabrik' schrittweise zu ersetzen, indem er eine
+ * flexible, lesbare und wartbare Alternative zur Testdatenerzeugung bietet.
  * -----------------------------------------------------------------------------------------------------------------
  * ANLEITUNG FÜR TEAMKOLLEGEN:
  * -----------------------------------------------------------------------------------------------------------------
- * WANN IST DIESER BUILDER ZU VERWENDEN?
- * Immer dann, wenn ihr ein Studenten-Szenario für einen Unit-Test benötigt, bei dem keine
- * echte Datenbank-Interaktion erforderlich ist.
- * BEISPIEL 1: Einen Standard-Studenten (inkl. Standard-Benutzer) erstellen
+ * BEISPIEL 1: Einen Standard-Studenten erstellen
  * {@code
  * TestStudent standard = StudentBuilder.aStudent().build();
- * // Zugriff auf die Objekte:
- * // Benutzer benutzer = standard.getBenutzer();
- * // Student student = standard.getStudent();
  * }
  *
  * BEISPIEL 2: Einen Studenten mit spezifischen Eigenschaften erstellen
@@ -31,17 +28,21 @@ import java.util.Arrays;
  * TestStudent testStudent = StudentBuilder.aStudent()
  *     .withUniversitaet("RWTH Aachen")
  *     .withSemester(3)
+ *     .withSkills("Python", "Machine Learning")
+ *     .addSkill("TensorFlow")
  *     .build();
  * }
  *
- * BEISPIEL 3: Einen Studenten mit einem spezifischen Benutzer-Setup erstellen
+ * BEISPIEL 3: Einen Studenten ohne Skills erstellen
  * {@code
- * // Zuerst den Benutzer-Teil konfigurieren
+ * TestStudent beginner = StudentBuilder.aStudent().withoutSkills().build();
+ * }
+ *
+ * BEISPIEL 4: Einen Studenten mit einem spezifischen Benutzer-Setup erstellen
+ * {@code
  * BenutzerBuilder bb = BenutzerBuilder.aBenutzer().withUsername("student_jane");
- * // Dann den Studenten-Builder damit füttern
  * TestStudent custom = StudentBuilder.aStudent().withBenutzer(bb).build();
  * }
- * Ki-erstellte Doku
  * -----------------------------------------------------------------------------------------------------------------
  */
 public class StudentBuilder {
@@ -49,18 +50,29 @@ public class StudentBuilder {
     // Komposition: Wir verwenden den existierenden BenutzerBuilder wieder.
     private BenutzerBuilder benutzerBuilder = BenutzerBuilder.aBenutzer();
 
-    // Nur die Felder, die spezifisch für die Student-Rolle sind.
+    // Felder, die spezifisch für die Student-Rolle sind, mit sinnvollen Standardwerten.
+    private String studentId = "s_test_123";
     private String universitaet = "H-BRS";
     private int semester = 5;
-    private String skills = "Java, Spring, JPA";
     private String abschluss = "Bachelor";
+    private Set<String> skills = new HashSet<>(Arrays.asList("Java", "Spring", "JPA"));
 
     /**
-     * Statische Factory-Methode für bessere Lesbarkeit im Testcode.
+     * Statische Factory-Methode für bessere Lesbarkeit im Testcode ("fluent interface").
      * @return Eine neue Instanz des StudentBuilders.
      */
     public static StudentBuilder aStudent() {
         return new StudentBuilder();
+    }
+
+    /**
+     * Überschreibt die system-interne, fachliche Studenten-ID.
+     * @param studentId Die gewünschte ID für den Testfall.
+     * @return Der Builder selbst, um weitere Aufrufe zu verketten.
+     */
+    public StudentBuilder withStudentId(String studentId) {
+        this.studentId = studentId;
+        return this;
     }
 
     /**
@@ -84,22 +96,41 @@ public class StudentBuilder {
     }
 
     /**
-     * Überschreibt die Standard-Skills.
-     * @param skills Die gewünschten Skills.
-     * @return Der Builder selbst, um weitere Aufrufe zu verketten.
-     */
-    public StudentBuilder withSkills(String skills) {
-        this.skills = skills;
-        return this;
-    }
-
-    /**
      * Überschreibt den Standard-Abschluss.
      * @param abschluss Der gewünschte Abschluss.
      * @return Der Builder selbst, um weitere Aufrufe zu verketten.
      */
     public StudentBuilder withAbschluss(String abschluss) {
         this.abschluss = abschluss;
+        return this;
+    }
+
+    /**
+     * Ersetzt die Standard-Skills vollständig durch die übergebenen Werte.
+     * @param skills Eine variable Anzahl an Skill-Namen.
+     * @return Der Builder selbst, um weitere Aufrufe zu verketten.
+     */
+    public StudentBuilder withSkills(String... skills) {
+        this.skills = new HashSet<>(Arrays.asList(skills));
+        return this;
+    }
+
+    /**
+     * Fügt einen einzelnen Skill zur bestehenden Liste hinzu.
+     * @param skill Der hinzuzufügende Skill.
+     * @return Der Builder selbst, um weitere Aufrufe zu verketten.
+     */
+    public StudentBuilder addSkill(String skill) {
+        this.skills.add(skill);
+        return this;
+    }
+
+    /**
+     * Entfernt alle Skills, um einen Studenten ohne Vorkenntnisse zu erstellen.
+     * @return Der Builder selbst, um weitere Aufrufe zu verketten.
+     */
+    public StudentBuilder withoutSkills() {
+        this.skills.clear();
         return this;
     }
 
@@ -113,25 +144,21 @@ public class StudentBuilder {
         return this;
     }
 
-    private java.util.Set<Skill> baueSkillEntities(String skillsText) {
-        java.util.Set<Skill> skillSet = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
-
-        if (skillsText == null || skillsText.isBlank()) {
-            return skillSet;
-        }
-
-        for (String skillName : skillsText.split(",")) {
-            String name = skillName.trim();
-
-            if (!name.isEmpty()) {
-                Skill skill = new Skill();
-                skill.setName(name);
-                skillSet.add(skill);
-            }
-        }
-
-        return skillSet;
+    /**
+     * Interne Hilfsmethode, die aus den Skill-Namen (Strings) die Skill-Entitäten baut.
+     * @return Ein Set von {@link Skill}-Entitäten.
+     */
+    private Set<Skill> baueSkillEntities() {
+        // Stream über die Namen, erstelle für jeden eine neue Skill-Entität und sammle sie in einem Set.
+        return this.skills.stream()
+                .map(skillName -> {
+                    Skill skill = new Skill();
+                    skill.setName(skillName.trim());
+                    return skill;
+                })
+                .collect(Collectors.toSet());
     }
+
     /**
      * Baut die {@link Student}- und {@link Benutzer}-Objekte aus den konfigurierten Werten.
      * @return Ein {@link TestStudent}-Objekt, das den ungespeicherten Benutzer und Studenten enthält.
@@ -144,10 +171,16 @@ public class StudentBuilder {
         Student student = new Student();
 
         // 3. Befülle das Student-Objekt mit den spezifischen Werten dieses Builders.
+        student.setStudentId(this.studentId);
         student.setUniversitaet(this.universitaet);
         student.setSemester(this.semester);
-        student.setSkillEntities(baueSkillEntities(this.skills));
         student.setAbschluss(this.abschluss);
+        student.setSkillEntities(baueSkillEntities());
+
+        // WICHTIG: Die user_id wird hier bewusst NICHT gesetzt.
+        // In einem echten Szenario würde der Benutzer zuerst gespeichert, wodurch die DB eine ID generiert.
+        // Diese ID würde dann dem Studentenobjekt zugewiesen. Für reine Unit-Tests ist dies oft nicht nötig.
+        // student.setUserId(benutzer.getId());
 
         // 4. Gib die beiden erstellten Objekte in einem sauberen Container zurück.
         return new TestStudent(benutzer, student);
