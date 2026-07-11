@@ -49,7 +49,7 @@ public class ProfilLoeschenIntegrationTest {
      */
     @Test
     @DisplayName("Ein Studenten-Profil wird vollständig gelöscht.")
-    void testLoeschen_StudentProfil_BenutzerUndStudentAusDBEntfernt() {
+    void testLoeschenStudentProfilBenutzerUndStudentAusDBEntfernt() {
 
         // ── Arrange: Student über Builder erstellen und explizit speichern ──
         StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent().build();
@@ -95,7 +95,7 @@ public class ProfilLoeschenIntegrationTest {
      */
     @Test
     @DisplayName("Ein Gründer-Profil wird vollständig gelöscht.")
-    void testLoeschen_GruenderProfil_BenutzerUndGruenderAusDBEntfernt() {
+    void testLoeschenGruenderProfilBenutzerUndGruenderAusDBEntfernt() {
 
         // ── Arrange: Gründer über Builder erstellen und explizit speichern ──
         GruenderBuilder.TestGruender testGruender = GruenderBuilder.aGruender().build();
@@ -139,7 +139,7 @@ public class ProfilLoeschenIntegrationTest {
      */
     @Test
     @DisplayName("Löschversuch eines nicht-existierenden Benutzers gibt false zurück.")
-    void testLoeschen_NichtExistierenderBenutzer_GibtFalseZurueck() {
+    void testLoeschenNichtExistierenderBenutzerGibtFalseZurueck() {
 
         // Eine userId die garantiert nicht in der DB existiert
         BenutzerDTOImpl dto = new BenutzerDTOImpl();
@@ -158,7 +158,7 @@ public class ProfilLoeschenIntegrationTest {
      */
     @Test
     @DisplayName("Löschversuch mit 'null' als Benutzer gibt false zurück.")
-    void testLoeschen_NullAlsBenutzer_GibtFalseZurueckOhneAbsturz() {
+    void testLoeschenNullAlsBenutzerGibtFalseZurueckOhneAbsturz() {
         assertDoesNotThrow(
                 () -> {
                     boolean result = verwaltungControl.loeschen(null);

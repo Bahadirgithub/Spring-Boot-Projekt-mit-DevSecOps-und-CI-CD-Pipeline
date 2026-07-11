@@ -54,7 +54,7 @@ class BewerbungControlTest {
     }
 
     @Test
-    void testBewerben_success() throws BewerbungBereitsVorhandenException {
+    void testBewerbungSuccess() throws BewerbungBereitsVorhandenException {
         when(bewerbungRepository.findByStudentUserIdAndIdeeId(100, 200)).thenReturn(Optional.empty());
 
         control.bewerben(100, 200, "a.pdf", "path/a.pdf", "cv.pdf", "path/cv.pdf");
@@ -72,7 +72,7 @@ class BewerbungControlTest {
     }
 
     @Test
-    void testBewerben_alreadyExists() {
+    void testBewerbungAlreadyExists() {
         when(bewerbungRepository.findByStudentUserIdAndIdeeId(100, 200)).thenReturn(Optional.of(sampleBewerbung));
 
         assertThrows(BewerbungBereitsVorhandenException.class, () ->
@@ -119,7 +119,7 @@ class BewerbungControlTest {
     }
 
     @Test
-    void testLadeIdeeBeschreibungByIdeeId_found() throws BewerbungNichtGefundenException {
+    void testLadeIdeeBeschreibungByIdeeIdFound() throws BewerbungNichtGefundenException {
         when(gruendungsideeRepository.findById(200)).thenReturn(Optional.of(sampleIdee));
 
         String beschreibung = control.ladeIdeeBeschreibungByIdeeId(200);
@@ -127,7 +127,7 @@ class BewerbungControlTest {
     }
 
     @Test
-    void testLadeIdeeBeschreibungByIdeeId_notFound() {
+    void testLadeIdeeBeschreibungByIdeeIdNotFound() {
         when(gruendungsideeRepository.findById(999)).thenReturn(Optional.empty());
 
         assertThrows(BewerbungNichtGefundenException.class, () -> control.ladeIdeeBeschreibungByIdeeId(999));

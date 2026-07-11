@@ -38,7 +38,7 @@ public class PasswordResetControlTest {
     }
 
     @Test
-    void testUpdatePassword_Erfolgreich() throws DatabaseUserException {
+    void testUpdatePasswordErfolgreich() throws DatabaseUserException {
         // GIVEN: Ein Benutzer existiert
         int userId = 42;
         simulatedUserId = userId;
@@ -54,7 +54,7 @@ public class PasswordResetControlTest {
     }
 
     @Test
-    void testUpdatePassword_KeinAktiverProzess_WirftException() {
+    void testUpdatePasswordKeinAktiverProzessWirftException() {
         // GIVEN: Keine UserId in der Session
         simulatedUserId = null;
 
@@ -66,17 +66,17 @@ public class PasswordResetControlTest {
     }
 
     @Test
-    void testValidatePasswords_Valid() {
+    void testValidatePasswordsValid() {
         assertDoesNotThrow(() -> testControl.validatePasswords("LangGenug123", "LangGenug123"));
     }
 
     @Test
-    void testValidatePasswords_ZuKurz_WirftException() {
+    void testValidatePasswordsZuKurzWirftException() {
         assertThrows(IllegalArgumentException.class, () -> testControl.validatePasswords("kurz", "kurz"));
     }
 
     @Test
-    void testValidatePasswords_NichtIdentisch_WirftException() {
+    void testValidatePasswordsNichtIdentischWirftException() {
         assertThrows(IllegalArgumentException.class, () -> testControl.validatePasswords("Passwort123", "Passwort456"));
     }
 }

@@ -59,7 +59,7 @@ public class ProfilLoeschenSessionTest {
      * mit dem Zustand NACH der Löschung.
      */
     @Test
-    void testVorLoeschung_BenutzerGiltAlsEingeloggt() {
+    void testVorLoeschungBenutzerGiltAlsEingeloggt() {
         assertTrue(authorizationControl.isLoggedIn(eingeloggterBenutzer),
                 "Ein angemeldeter Benutzer muss als eingeloggt gelten.");
     }
@@ -72,7 +72,7 @@ public class ProfilLoeschenSessionTest {
      * currentUser = null. isLoggedIn(null) muss false zurückgeben.
      */
     @Test
-    void testNachLoeschung_BenutzerGiltNichtMehrAlsEingeloggt() {
+    void testNachLoeschungBenutzerGiltNichtMehrAlsEingeloggt() {
         // null simuliert die gecleared Session nach der Profilöschung
         BenutzerDTO geloeschterBenutzer = null;
 
@@ -88,7 +88,7 @@ public class ProfilLoeschenSessionTest {
      * Nach Profilöschung darf diese Seite nicht mehr erreichbar sein.
      */
     @Test
-    void testNachLoeschung_KeinZugriffAufIdeenUebersicht() {
+    void testNachLoeschungKeinZugriffAufIdeenUebersicht() {
         BenutzerDTO geloeschterBenutzer = null;
 
         assertFalse(
@@ -105,7 +105,7 @@ public class ProfilLoeschenSessionTest {
      * Nach Profilöschung darf diese Seite erst recht nicht erreichbar sein.
      */
     @Test
-    void testNachLoeschung_KeinZugriffAufIdeenErstellen() {
+    void testNachLoeschungKeinZugriffAufIdeenErstellen() {
         BenutzerDTO geloeschterBenutzer = null;
 
         assertFalse(
@@ -122,7 +122,7 @@ public class ProfilLoeschenSessionTest {
      * darf dabei nicht einmal aufgerufen werden.
      */
     @Test
-    void testNachLoeschung_NichtMehrAlsStudentErkannt() {
+    void testNachLoeschungNichtMehrAlsStudentErkannt() {
         BenutzerDTO geloeschterBenutzer = null;
 
         assertFalse(authorizationControl.isStudent(geloeschterBenutzer),
@@ -140,7 +140,7 @@ public class ProfilLoeschenSessionTest {
      * darf dabei nicht einmal aufgerufen werden.
      */
     @Test
-    void testNachLoeschung_NichtMehrAlsGruenderErkannt() {
+    void testNachLoeschungNichtMehrAlsGruenderErkannt() {
         BenutzerDTO geloeschterBenutzer = null;
 
         assertFalse(authorizationControl.isGruender(geloeschterBenutzer),

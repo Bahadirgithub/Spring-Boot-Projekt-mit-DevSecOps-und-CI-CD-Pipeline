@@ -78,7 +78,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Ein Student wird erfolgreich registriert.")
-        void testRegistriereStudent_Success() {
+        void testRegistriereStudentSuccess() {
             StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent()
                     .withBenutzer(BenutzerBuilder.aBenutzer().withUsername("neuer_student_1"))
                     .build();
@@ -107,7 +107,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Ein Gründer wird erfolgreich registriert.")
-        void testRegistriereGruender_Success() {
+        void testRegistriereGruenderSuccess() {
             GruenderBuilder.TestGruender testGruender = GruenderBuilder.aGruender()
                     .withBenutzer(BenutzerBuilder.aBenutzer().withUsername("neuer_gruender_1"))
                     .build();
@@ -144,7 +144,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Registrierung schlägt fehl, wenn Username bereits existiert.")
-        void testRegistriereStudent_Failure_UsernameAlreadyExists() {
+        void testRegistriereStudentFailureUsernameAlreadyExists() {
             StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent()
                     .withBenutzer(BenutzerBuilder.aBenutzer().withUsername(kollisionsBenutzer.getUsername()))
                     .build();
@@ -169,7 +169,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Registrierung schlägt fehl, wenn Username leer ist.")
-        void testRegistriereStudent_Failure_UsernameEmpty() {
+        void testRegistriereStudentFailureUsernameEmpty() {
             StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent()
                     .withBenutzer(BenutzerBuilder.aBenutzer().withUsername(""))
                     .build();
@@ -194,7 +194,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Registrierung schlägt fehl, wenn Passwort unsicher ist.")
-        void testRegistriereStudent_Failure_InvalidPassword() {
+        void testRegistriereStudentFailureInvalidPassword() {
             StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent()
                     .withBenutzer(BenutzerBuilder.aBenutzer().withPasswort("schwach"))
                     .build();
@@ -219,7 +219,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Registrierung schlägt fehl, wenn E-Mail ungültig ist.")
-        void testRegistriereStudent_Failure_InvalidEmail() {
+        void testRegistriereStudentFailureInvalidEmail() {
             StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent()
                     .withBenutzer(BenutzerBuilder.aBenutzer().withEmail("keine-gueltige-email"))
                     .build();
@@ -244,7 +244,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Registrierung schlägt fehl, wenn Vorname leer ist.")
-        void testRegistriereStudent_Failure_FirstNameEmpty() {
+        void testRegistriereStudentFailureFirstNameEmpty() {
             StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent()
                     .withBenutzer(BenutzerBuilder.aBenutzer().withVorname(""))
                     .build();
@@ -269,7 +269,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Registrierung schlägt fehl, wenn Nachname leer ist.")
-        void testRegistriereStudent_Failure_LastNameEmpty() {
+        void testRegistriereStudentFailureLastNameEmpty() {
             StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent()
                     .withBenutzer(BenutzerBuilder.aBenutzer().withNachname(""))
                     .build();
@@ -294,7 +294,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Registrierung schlägt fehl, wenn Geburtsdatum fehlt (null).")
-        void testRegistriereStudent_Failure_BirthdayMissing() {
+        void testRegistriereStudentFailureBirthdayMissing() {
             StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent()
                     .withBenutzer(BenutzerBuilder.aBenutzer().withGeburtstag(null))
                     .build();
@@ -327,7 +327,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Studenten-Registrierung schlägt fehl, wenn Universität leer ist.")
-        void testRegistriereStudent_Failure_UniversityEmpty() {
+        void testRegistriereStudentFailureUniversityEmpty() {
             StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent()
                     .withUniversitaet("")
                     .build();
@@ -352,7 +352,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Studenten-Registrierung schlägt fehl, wenn Semester ungültig ist.")
-        void testRegistriereStudent_Failure_InvalidSemester() {
+        void testRegistriereStudentFailureInvalidSemester() {
             StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent()
                     .withSemester(0)
                     .build();
@@ -377,7 +377,7 @@ public class RegistrationControlTest {
          */
         @Test
         @DisplayName("Gründer-Registrierung schlägt fehl, wenn Unternehmensname leer ist.")
-        void testRegistriereGruender_Failure_StartupNameEmpty() {
+        void testRegistriereGruenderFailureStartupNameEmpty() {
             GruenderBuilder.TestGruender testGruender = GruenderBuilder.aGruender()
                     .withUnternehmensname("")
                     .build();

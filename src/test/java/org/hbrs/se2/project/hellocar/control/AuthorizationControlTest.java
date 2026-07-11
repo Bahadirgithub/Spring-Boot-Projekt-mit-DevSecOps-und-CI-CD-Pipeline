@@ -52,13 +52,13 @@ public class AuthorizationControlTest {
     // -------------------------------------------------------
 
     @Test
-    void testIsLoggedIn_WithValidUser_ReturnsTrue() {
+    void testIsLoggedInWithValidUserReturnsTrue() {
         // Wenn ein gültiger Benutzer übergeben wird, muss true zurückgegeben werden
         assertTrue(authorizationControl.isLoggedIn(mockBenutzer));
     }
 
     @Test
-    void testIsLoggedIn_WithNull_ReturnsFalse() {
+    void testIsLoggedInWithNullReturnsFalse() {
         // Wenn kein Benutzer übergeben wird (null), muss false zurückgegeben werden
         assertFalse(authorizationControl.isLoggedIn(null));
     }
@@ -68,7 +68,7 @@ public class AuthorizationControlTest {
     // -------------------------------------------------------
 
     @Test
-    void testIsStudent_WithValidStudent_ReturnsTrue() {
+    void testIsStudentWithValidStudentReturnsTrue() {
         // Simuliere die JPA-Abfrage: Der Benutzer existiert in der Student-Tabelle
         when(mockBenutzer.getUserId()).thenReturn(1);
         when(studentRepository.existsById(1)).thenReturn(true);
@@ -77,7 +77,7 @@ public class AuthorizationControlTest {
     }
 
     @Test
-    void testIsStudent_WithNonStudent_ReturnsFalse() {
+    void testIsStudentWithNonStudentReturnsFalse() {
         // Simuliere die JPA-Abfrage: Der Benutzer existiert NICHT in der Student-Tabelle
         when(mockBenutzer.getUserId()).thenReturn(2);
         when(studentRepository.existsById(2)).thenReturn(false);
@@ -86,7 +86,7 @@ public class AuthorizationControlTest {
     }
 
     @Test
-    void testIsStudent_WithNull_ReturnsFalse() {
+    void testIsStudentWithNullReturnsFalse() {
         // Null-Check: Darf nicht zu einer NullPointerException führen
         assertFalse(authorizationControl.isStudent(null));
     }
@@ -96,7 +96,7 @@ public class AuthorizationControlTest {
     // -------------------------------------------------------
 
     @Test
-    void testIsGruender_WithValidGruender_ReturnsTrue() {
+    void testIsGruenderWithValidGruenderReturnsTrue() {
         // Simuliere die JPA-Abfrage: Der Benutzer existiert in der Gruender-Tabelle
         when(mockBenutzer.getUserId()).thenReturn(1);
         when(gruenderRepository.existsById(1)).thenReturn(true);
@@ -105,7 +105,7 @@ public class AuthorizationControlTest {
     }
 
     @Test
-    void testIsGruender_WithNonGruender_ReturnsFalse() {
+    void testIsGruenderWithNonGruenderReturnsFalse() {
         // Simuliere die JPA-Abfrage: Der Benutzer existiert NICHT in der Gruender-Tabelle
         when(mockBenutzer.getUserId()).thenReturn(2);
         when(gruenderRepository.existsById(2)).thenReturn(false);
@@ -114,7 +114,7 @@ public class AuthorizationControlTest {
     }
 
     @Test
-    void testIsGruender_WithNull_ReturnsFalse() {
+    void testIsGruenderWithNullReturnsFalse() {
         // Null-Check für Gründer-Validierung
         assertFalse(authorizationControl.isGruender(null));
     }
@@ -124,13 +124,13 @@ public class AuthorizationControlTest {
     // -------------------------------------------------------
 
     @Test
-    void testCanAccessFeature_ShowCars_AsLoggedInUser() {
+    void testCanAccessFeatureShowCarsAsLoggedInUser() {
         // Jeder eingeloggte Benutzer darf die "Show Cars" (bzw. bald "Show Ideas") Ansicht sehen
         assertTrue(authorizationControl.canAccessFeature(mockBenutzer, Globals.Pages.SHOW_IDEAS));
     }
 
     @Test
-    void testCanAccessFeature_EnterCar_AsGruender() {
+    void testCanAccessFeatureEnterCarAsGruender() {
         // Nur Gründer dürfen die "Enter Car" (bzw. "Enter Idea") Ansicht sehen
         when(mockBenutzer.getUserId()).thenReturn(1);
         when(gruenderRepository.existsById(1)).thenReturn(true);
@@ -139,7 +139,7 @@ public class AuthorizationControlTest {
     }
 
     @Test
-    void testCanAccessFeature_EnterCar_AsStudent() {
+    void testCanAccessFeatureEnterCarAsStudent() {
         // Studenten (Nicht-Gründer) dürfen die "Enter Car" Ansicht nicht sehen
         when(mockBenutzer.getUserId()).thenReturn(2);
         when(gruenderRepository.existsById(2)).thenReturn(false);
@@ -148,7 +148,7 @@ public class AuthorizationControlTest {
     }
 
     @Test
-    void testCanAccessFeature_UnknownFeature_ReturnsFalse() {
+    void testCanAccessFeatureUnknownFeatureReturnsFalse() {
         // Ein unbekanntes Feature sollte standardmäßig den Zugriff verweigern
         assertFalse(authorizationControl.canAccessFeature(mockBenutzer, "UNKNOWN_FEATURE"));
     }
