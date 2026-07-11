@@ -28,7 +28,7 @@ public class ValidateUserControl {
     // Aufteilungen der Zeichen durchprobiert (catastrophic backtracking).
     // Das schützt vor exponentieller Laufzeit / StackOverflowError bei langen Eingaben,
     // ohne die akzeptierte Sprache zu verändern.
-    private static final String emailRegex = "^(?=.{1,64}@)[A-Za-z0-9_-]++(\\.[A-Za-z0-9_-]++)*@" + "[^-][A-Za-z0-9-]++(\\.[A-Za-z0-9-]++)*(\\.[A-Za-z]{2,}+)$";
+    private static final String emailRegex = "^[A-Za-z0-9_-]++(?:\\.[A-Za-z0-9_-]++)*@[A-Za-z0-9][A-Za-z0-9-]*+(?:\\.[A-Za-z0-9][A-Za-z0-9-]*+)*\\.(?:[A-Za-z]{2,}+)$";
 
     // Tests geben true zurück, wenn Daten valide sind , ansonsten false.
     public static boolean validateUserName(String username, BenutzerRepository benutzerRepository) {
