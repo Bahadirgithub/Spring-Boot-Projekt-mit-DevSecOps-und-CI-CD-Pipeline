@@ -120,7 +120,7 @@ public class ShowIdeasView extends Div  {
                 .setHeader("Anforderungen");
 
         Grid.Column<GruendungsideeDTO> skillsColumn = grid
-                .addColumn(idee -> formatSkillsPreview(idee.getGesuchteSkills()))
+                .addColumn(idee -> ManageIdeaControl.formatSkillsPreview(idee.getGesuchteSkills()))
                 .setHeader("Gesuchte Skills");
 
         Grid.Column<GruendungsideeDTO> bedingungenColumn = grid
@@ -203,30 +203,6 @@ public class ShowIdeasView extends Div  {
         });
 
         return grid;
-    }
-
-    private String formatSkillsPreview(List<String> skills) {
-        if (skills == null || skills.isEmpty()) {
-            return "-";
-        }
-
-        List<String> sortierteSkills = skills.stream()
-                .filter(skill -> skill != null && !skill.isBlank())
-                .map(String::trim)
-                .distinct()
-                .sorted()
-                .toList();
-
-        if (sortierteSkills.isEmpty()) {
-            return "-";
-        }
-
-        int maxAnzeigen = 3;
-        int anzahl = Math.min(maxAnzeigen, sortierteSkills.size());
-        String preview = String.join(", ", sortierteSkills.subList(0, anzahl));
-        int rest = sortierteSkills.size() - anzahl;
-
-        return rest > 0 ? preview + " +" + rest : preview;
     }
 
     private Component createTitle() {

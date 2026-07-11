@@ -24,6 +24,7 @@ import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
 import org.hbrs.se2.project.hellocar.control.BewertungControl;
 import org.hbrs.se2.project.hellocar.control.ChatControl;
 import org.hbrs.se2.project.hellocar.control.LoginControl;
+import org.hbrs.se2.project.hellocar.control.ManageIdeaControl;
 import org.hbrs.se2.project.hellocar.control.MeineGruendungsideenControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.BewerbungDTO;
@@ -111,7 +112,7 @@ public class MeineGruendungsideenView extends Div {
         grid.addColumn(GruendungsideeDTO::getAnforderungen)
                 .setHeader("Anforderungen");
 
-        grid.addColumn(idee -> formatSkillsPreview(idee.getGesuchteSkills()))
+        grid.addColumn(idee -> ManageIdeaControl.formatSkillsPreview(idee.getGesuchteSkills()))
                 .setHeader("Gesuchte Skills");
 
         grid.addColumn(GruendungsideeDTO::getArbeitsbedingungen)
@@ -481,35 +482,6 @@ public class MeineGruendungsideenView extends Div {
         anchor.getElement().setAttribute("download", true);
 
         return anchor;
-    }
-
-    private String formatSkillsPreview(List<String> skills) {
-        if (skills == null || skills.isEmpty()) {
-            return "-";
-        }
-
-        List<String> sortierteSkills = skills.stream()
-                .filter(skill -> skill != null && !skill.isBlank())
-                .map(String::trim)
-                .distinct()
-                .sorted()
-                .toList();
-
-        if (sortierteSkills.isEmpty()) {
-            return "-";
-        }
-
-        int maxAnzeigen = 3;
-        int anzahl = Math.min(maxAnzeigen, sortierteSkills.size());
-
-        String preview = String.join(", ", sortierteSkills.subList(0, anzahl));
-        int rest = sortierteSkills.size() - anzahl;
-
-        if (rest > 0) {
-            return preview + " +" + rest;
-        }
-
-        return preview;
     }
 
     private String sichererText(String text) {
