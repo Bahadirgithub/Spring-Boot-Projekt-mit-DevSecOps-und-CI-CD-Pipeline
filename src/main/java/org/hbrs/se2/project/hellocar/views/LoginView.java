@@ -29,41 +29,26 @@ import org.springframework.dao.DataAccessResourceFailureException;
  */
 @Route("login")
 @PageTitle("Login | StartMeUp")
-public class LoginView extends VerticalLayout implements BeforeEnterObserver, LocaleChangeObserver {
+public class LoginView extends AbstractAuthView implements BeforeEnterObserver, LocaleChangeObserver {
 
     private final LoginControl loginControl;
 
     private LoginForm loginForm;
 
     public LoginView(LoginControl loginControl) {
+        super();
         this.loginControl = loginControl;
         CreateLayout();
     }
 
     private void CreateLayout() {
-        // Layout-Konfiguration
-        setSizeFull();
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setAlignItems(Alignment.CENTER);
-
-        Image logo = new Image("images/logo.png", "Logo");
-        logo.setWidth("80px");
-
-        H1 brandText = new H1("St@rtMeUp");
-        brandText.getStyle().set("margin", "0 0 -5px 0");
-
-        Span subtitleText = new Span("powered by AhSoGehts");
-        subtitleText.getStyle().set("font-size", "14px");
-        subtitleText.getStyle().set("color", "gray");
-        subtitleText.getStyle().set("margin", "0 0 10px 0");
-
         // LoginForm-Komponente mit deutschen Texten erstellen
         LoginForm loginForm = this.createLoginForm();
 
         // Link zur Registrierungs-Seite
         RouterLink registerLink = new RouterLink("Noch kein Konto? Jetzt registrieren", RegistrationView.class);
 
-        add(logo, brandText, subtitleText, loginForm, registerLink);
+        add(loginForm, registerLink);
 
         // Listener für den Klick auf "Anmelden"
         loginForm.addLoginListener(e -> {

@@ -18,29 +18,15 @@ import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
 
 @Route("reset-password")
 @PageTitle("Passwort zurücksetzen | StartMeUp")
-public class PasswordResetView extends VerticalLayout implements BeforeEnterObserver {
+public class PasswordResetView extends AbstractAuthView implements BeforeEnterObserver {
 
     private final LoginControl loginControl;
     private final PasswordResetControl passwordResetControl;
 
     public PasswordResetView(LoginControl loginControl, PasswordResetControl passwordResetControl) {
+        super();
         this.loginControl = loginControl;
         this.passwordResetControl = passwordResetControl;
-
-        setSizeFull();
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setAlignItems(Alignment.CENTER);
-
-        Image logo = new Image("images/logo.png", "Logo");
-        logo.setWidth("80px");
-
-        H1 brandText = new H1("St@rtMeUp");
-        brandText.getStyle().set("margin", "0 0 2px 0");
-
-        Span subtitleText = new Span("powered by AhSoGehts");
-        subtitleText.getStyle().set("font-size", "14px");
-        subtitleText.getStyle().set("color", "gray");
-        subtitleText.getStyle().set("margin", "0 0 30px 0");
 
         // Abstände anpassen
         setSpacing(false);
@@ -102,7 +88,7 @@ public class PasswordResetView extends VerticalLayout implements BeforeEnterObse
 
         // Erst Felder in den Container, dann alles zentriert anzeigen
         formContainer.add( passwordField, confirmPasswordField, saveButton);
-        add(logo, brandText, subtitleText, title, instructionText, formContainer);
+        add(title, instructionText, formContainer);
     }
 
     /**
