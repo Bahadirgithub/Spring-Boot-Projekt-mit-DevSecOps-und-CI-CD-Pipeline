@@ -87,6 +87,11 @@ public class ManageIdeaControl {
      */
     @Transactional
     public void createIdea(GruendungsideeDTOImpl dto) {
+        //Exception werfen wenn die Beschreibung leer ist
+        if (dto.getBeschreibung() == null || dto.getBeschreibung().isBlank()) {
+            throw new IllegalArgumentException("Beschreibung darf nicht leer sein.");
+        }
+
         // 1. Eine neue leere Entity für die Datenbank erstellen
         Gruendungsidee entity = new Gruendungsidee();
 

@@ -74,6 +74,19 @@ class ManageIdeaControlTest {
         verify(repository, times(1)).save(any(Gruendungsidee.class));
     }
 
+    /**
+     * Prüft, dass eine Gründungsidee ohne Beschreibung nicht gespeichert wird.
+     */
+    @Test
+    void gruendungsideeOhneBeschreibungWirdNichtGespeichert() {
+        GruendungsideeDTOImpl dto = new GruendungsideeDTOImpl();
+        dto.setGruenderUserId(10);
+        dto.setBeschreibung("   ");
+
+        assertThrows(IllegalArgumentException.class, () -> control.createIdea(dto));
+        verify(repository, never()).save(any(Gruendungsidee.class));
+    }
+
     // -------------------------
     // TEST 3: getUnternehmensnameByUserId()
     // -------------------------
