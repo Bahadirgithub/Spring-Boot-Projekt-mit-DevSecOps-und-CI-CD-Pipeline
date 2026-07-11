@@ -52,7 +52,8 @@ public class ProfilLoeschenIntegrationTest {
     void testLoeschenStudentProfilBenutzerUndStudentAusDBEntfernt() {
 
         // ── Arrange: Student über Builder erstellen und explizit speichern ──
-        StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent().build();
+        // WICHTIG: withoutSkills() verwenden, weil transient Skills beim Speichern fehlschlägt
+        StudentBuilder.TestStudent testStudent = StudentBuilder.aStudent().withoutSkills().build();
         Benutzer benutzer = benutzerRepository.save(testStudent.getBenutzer());
         Student student = testStudent.getStudent();
         student.setUserId(benutzer.getUserId()); // Verknüpfung setzen
