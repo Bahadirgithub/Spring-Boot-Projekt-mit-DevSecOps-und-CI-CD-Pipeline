@@ -20,7 +20,7 @@
     <java.version>17</java.version>
     <vaadin.version>24.1.4</vaadin.version>
     <hilla.version>2.1.4</hilla.version>
-    <selenium.version>4.10.0</selenium.version>
+    <selenium.version>4.46.0</selenium.version>
 
   </properties>
 
@@ -85,6 +85,7 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- Test-Abhaengigkeiten -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
@@ -103,6 +104,13 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>5.9.3</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>${selenium.version}</version>
       <scope>test</scope>
     </dependency>
 
