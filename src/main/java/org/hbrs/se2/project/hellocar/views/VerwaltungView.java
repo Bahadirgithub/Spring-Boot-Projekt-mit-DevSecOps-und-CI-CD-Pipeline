@@ -190,9 +190,7 @@ public class VerwaltungView extends VerticalLayout {
                             emailField.getValue(),
                             telefonnummerField.getValue() != null ? String.valueOf(telefonnummerField.getValue()) : "",
                             universitaetField.getValue(),
-                            semesterField.getValue() == null || semesterField.getValue().isBlank()
-                                    ? null
-                                    : semesterField.getValue().matches("\\d+") ? Integer.parseInt(semesterField.getValue()) : null,
+                            ValidateUserControl.parseSemester(semesterField.getValue()),
                             abschlussField.getValue(),
                             new java.util.ArrayList<>(skillsField.getValue())                    );
 

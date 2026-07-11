@@ -23,17 +23,11 @@ import org.hbrs.se2.project.hellocar.control.BewerbungControl;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
 import org.hbrs.se2.project.hellocar.dtos.GruendungsideeDTO;
 import org.hbrs.se2.project.hellocar.entities.Bewertung;
-import org.hbrs.se2.project.hellocar.entities.Student;
-import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
-import org.hbrs.se2.project.hellocar.repository.BewertungRepository;
-import org.hbrs.se2.project.hellocar.repository.StudentRepository;
 import org.hbrs.se2.project.hellocar.util.Globals;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * View zur Anzeige der Details einer Gründungsidee.
@@ -44,9 +38,6 @@ import java.util.stream.Collectors;
 public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParameter<Long> {
 
     private final ManageIdeaControl ideaService;
-    private final BewertungRepository bewertungRepository;
-    private final StudentRepository studentRepository;
-    private final BenutzerRepository benutzerRepository;
     private final BewertungControl bewertungControl;
     private final AuthorizationControl authorizationControl;
     private final BewerbungControl bewerbungControl;
@@ -63,14 +54,10 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
 
     private VerticalLayout reviewsContainer = new VerticalLayout();
 
-    public ShowIdeaDetailsView(ManageIdeaControl ideaService, BewertungRepository bewertungRepository,
-                               StudentRepository studentRepository, BenutzerRepository benutzerRepository,
+    public ShowIdeaDetailsView(ManageIdeaControl ideaService,
                                BewertungControl bewertungControl, AuthorizationControl authorizationControl,
                                BewerbungControl bewerbungControl) {
         this.ideaService = ideaService;
-        this.bewertungRepository = bewertungRepository;
-        this.studentRepository = studentRepository;
-        this.benutzerRepository = benutzerRepository;
         this.bewertungControl = bewertungControl;
         this.authorizationControl = authorizationControl;
         this.bewerbungControl = bewerbungControl;
@@ -208,30 +195,13 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
         }
     }
 
-    //Hilfsmethode für Sternerating
-    private String createStarRating(int rating) {
-        StringBuilder stars = new StringBuilder();
-        int maxStars = 5;
-
-        // Ausgefüllte Sterne (★)
-        for (int i = 0; i < rating; i++) {
-            stars.append("★");
-        }
-        // Nicht ausgefüllte Sterne (☆)
-        for (int i = rating; i < maxStars; i++) {
-            stars.append("☆");
-        }
-        return stars.toString();
-    }
-
     private void loadReviews(int ideeId) {
         reviewsContainer.removeAll();
-        List<Bewertung> alleBewertungen = bewertungRepository.findByIdeeId(ideeId);
+        List<Bewertung> alleBewertungen = bewertungControl.ladeBewertungenFuerIdeeSortiert(ideeId);
 
         List<Bewertung> letzteZwei = alleBewertungen.stream()
-                .sorted(Comparator.comparing(Bewertung::getZeitstempel).reversed())
                 .limit(2)
-                .collect(Collectors.toList());
+                .toList();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
@@ -243,27 +213,15 @@ public class ShowIdeaDetailsView extends VerticalLayout implements HasUrlParamet
             reviewBlock.setSpacing(false);
 
             // Sterne-String erzeugen
-            Span starSpan = new Span(createStarRating(b.getBewertung()));
+            Span starSpan = new Span(BewertungControl.createStarRating(b.getBewertung()));
             starSpan.addClassName("review-stars");
 
             String zeitstempelString = (b.getZeitstempel() != null) ? b.getZeitstempel().format(formatter) : "Datum unbekannt";
             Span dateSpan = new Span("Bewertet am: " + zeitstempelString);
             dateSpan.addClassName("review-date");
 
-            String username = "Unbekannt";
-            var studentOpt = studentRepository.findById(b.getStudentUserId());
-            if (studentOpt.isPresent()) {
-                Student student = studentOpt.get();
-                Integer userId = student.getUserId();
-                // Hier wird der Benutzername aus der verknüpften Benutzer-Entität geholt
-                if (userId != null) {
-                    var userOpt = benutzerRepository.findById(userId);
-                    if (userOpt.isPresent()) {
-                        username = userOpt.get().getUsername();
-                    }
-                }
-            }
-            Span userSpan = new Span("Bewertet von: " + (username != null ? username : "Unbekannt"));
+            String username = bewertungControl.ermittleBenutzernameFuerBewertung(b);
+            Span userSpan = new Span("Bewertet von: " + username);
             userSpan.addClassName("review-user");
 
             Span commentSpan = new Span("Kommentar: " + b.getKommentar());

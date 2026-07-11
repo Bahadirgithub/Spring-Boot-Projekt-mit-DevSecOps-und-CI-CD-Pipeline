@@ -91,7 +91,7 @@ public class RegistrationView extends VerticalLayout {
                 try {
 
                     //PasswordMissMatch testen, es wird hier getestet, weil wir nur hier das Wiederholungsfeld haben
-                    if(!passwordField.getValue().equals(repeatPasswordField.getValue())){
+                    if (!ValidateUserControl.validatePasswordMatch(passwordField.getValue(), repeatPasswordField.getValue())) {
                         throw new PasswordMissmatchException("Passwörter ungleich");
                     }
 
@@ -99,18 +99,11 @@ public class RegistrationView extends VerticalLayout {
                     String type = typeSelect.getValue();
 
                     if ("Student".equals(type)) {
-                        // Semester sicher parsen
-                        int semester = 0;
-                        if (!semesterField.getValue().isEmpty()) {
-                            try {
-                                semester = Integer.parseInt(semesterField.getValue());
-                            }
-                            catch (NumberFormatException ex) {
-                                semesterField.setErrorMessage("Bitte ein gültiges Semester (Zahl) eingeben.");
-                                semesterField.setInvalid(true);
-                                return;
-                            }
-                        }
+                        // Semester parsen; ungültige/leere Eingabe wird zu 0 und von registriereStudent
+                        // als IllegalArgumentException abgelehnt (siehe catch weiter unten).
+                        Integer semesterEingabe = ValidateUserControl.parseSemester(semesterField.getValue());
+                        int semester = semesterEingabe == null ? 0 : semesterEingabe;
+
                         // Aufruf der Control-Methode - hier könnten exceptions geworfen werden
                         registrationControl.registriereStudent(
                                 firstNameField.getValue(), lastNameField.getValue(),

@@ -2,6 +2,7 @@ package org.hbrs.se2.project.hellocar.control;
 
 import org.hbrs.se2.project.hellocar.control.exception.BewerbungBereitsVorhandenException;
 import org.hbrs.se2.project.hellocar.control.exception.BewerbungNichtGefundenException;
+import org.hbrs.se2.project.hellocar.dtos.BewerbungDTO;
 import org.hbrs.se2.project.hellocar.entities.Bewerbung;
 import org.hbrs.se2.project.hellocar.entities.Gruendungsidee;
 import org.hbrs.se2.project.hellocar.repository.BewerbungRepository;
@@ -14,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -131,5 +134,107 @@ class BewerbungControlTest {
         when(gruendungsideeRepository.findById(999)).thenReturn(Optional.empty());
 
         assertThrows(BewerbungNichtGefundenException.class, () -> control.ladeIdeeBeschreibungByIdeeId(999));
+    }
+
+    @Test
+    void testLadeBewerbungenFuerEigeneIdeeErfolg() {
+        when(gruendungsideeRepository.findById(200)).thenReturn(Optional.of(sampleIdee));
+        when(bewerbungRepository.findByIdeeId(200)).thenReturn(List.of(sampleBewerbung));
+
+        List<BewerbungDTO> result = control.ladeBewerbungenFuerEigeneIdee(50, 200);
+
+        assertEquals(1, result.size());
+        assertEquals(1, result.get(0).getBewerbungId());
+        assertEquals("Eingegangen", result.get(0).getStatus());
+    }
+
+    @Test
+    void testLadeBewerbungenFuerEigeneIdeeFremderGruender() {
+        when(gruendungsideeRepository.findById(200)).thenReturn(Optional.of(sampleIdee));
+
+        List<BewerbungDTO> result = control.ladeBewerbungenFuerEigeneIdee(999, 200);
+
+        assertTrue(result.isEmpty());
+        verify(bewerbungRepository, never()).findByIdeeId(anyInt());
+    }
+
+    @Test
+    void testLadeBewerbungenFuerEigeneIdeeIdeeNichtGefunden() {
+        when(gruendungsideeRepository.findById(999)).thenReturn(Optional.empty());
+
+        List<BewerbungDTO> result = control.ladeBewerbungenFuerEigeneIdee(50, 999);
+
+        assertTrue(result.isEmpty());
+        verify(bewerbungRepository, never()).findByIdeeId(anyInt());
+    }
+
+    @Test
+    void testBewerbenMitDateienAlreadyExists() {
+        when(bewerbungRepository.findByStudentUserIdAndIdeeId(100, 200)).thenReturn(Optional.of(sampleBewerbung));
+
+        assertThrows(BewerbungBereitsVorhandenException.class, () ->
+                control.bewerbenMitDateien(100, 200,
+                        "anschreiben.pdf", new ByteArrayInputStream(new byte[]{1, 2, 3}),
+                        "lebenslauf.pdf", new ByteArrayInputStream(new byte[]{1, 2, 3}))
+        );
+
+        verify(bewerbungRepository, never()).save(any());
+    }
+
+    @Test
+    void testBewerbenMitDateienAnschreibenFehlt() {
+        when(bewerbungRepository.findByStudentUserIdAndIdeeId(100, 200)).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                control.bewerbenMitDateien(100, 200,
+                        null, null,
+                        "lebenslauf.pdf", new ByteArrayInputStream(new byte[]{1, 2, 3}))
+        );
+
+        assertTrue(ex.getMessage().contains("Anschreiben"));
+        verify(bewerbungRepository, never()).save(any());
+    }
+
+    @Test
+    void testBewerbenMitDateienAnschreibenKeinPdf() {
+        when(bewerbungRepository.findByStudentUserIdAndIdeeId(100, 200)).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                control.bewerbenMitDateien(100, 200,
+                        "anschreiben.docx", new ByteArrayInputStream(new byte[]{1, 2, 3}),
+                        "lebenslauf.pdf", new ByteArrayInputStream(new byte[]{1, 2, 3}))
+        );
+
+        assertTrue(ex.getMessage().contains("Anschreiben"));
+        verify(bewerbungRepository, never()).save(any());
+    }
+
+    @Test
+    void testBewerbenMitDateienLebenslaufFehlt() {
+        when(bewerbungRepository.findByStudentUserIdAndIdeeId(100, 200)).thenReturn(Optional.empty());
+        InputStream fehlenderStream = null;
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                control.bewerbenMitDateien(100, 200,
+                        "anschreiben.pdf", new ByteArrayInputStream(new byte[]{1, 2, 3}),
+                        "lebenslauf.pdf", fehlenderStream)
+        );
+
+        assertTrue(ex.getMessage().contains("Lebenslauf"));
+        verify(bewerbungRepository, never()).save(any());
+    }
+
+    @Test
+    void testBewerbenMitDateienLebenslaufKeinPdf() {
+        when(bewerbungRepository.findByStudentUserIdAndIdeeId(100, 200)).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                control.bewerbenMitDateien(100, 200,
+                        "anschreiben.pdf", new ByteArrayInputStream(new byte[]{1, 2, 3}),
+                        "lebenslauf.txt", new ByteArrayInputStream(new byte[]{1, 2, 3}))
+        );
+
+        assertTrue(ex.getMessage().contains("Lebenslauf"));
+        verify(bewerbungRepository, never()).save(any());
     }
 }

@@ -121,6 +121,34 @@ public class ManageIdeaControl {
         return new HashSet<>(skillRepository.findByNameIn(namen));
     }
 
+    /**
+     * Kurzvorschau der gesuchten Skills für die Tabellenanzeige: sortiert, auf maximal 3 Einträge
+     * gekürzt, restliche Anzahl als "+N" angehängt.
+     */
+    public static String formatSkillsPreview(List<String> skills) {
+        if (skills == null || skills.isEmpty()) {
+            return "-";
+        }
+
+        List<String> sortierteSkills = skills.stream()
+                .filter(skill -> skill != null && !skill.isBlank())
+                .map(String::trim)
+                .distinct()
+                .sorted()
+                .toList();
+
+        if (sortierteSkills.isEmpty()) {
+            return "-";
+        }
+
+        int maxAnzeigen = 3;
+        int anzahl = Math.min(maxAnzeigen, sortierteSkills.size());
+        String preview = String.join(", ", sortierteSkills.subList(0, anzahl));
+        int rest = sortierteSkills.size() - anzahl;
+
+        return rest > 0 ? preview + " +" + rest : preview;
+    }
+
     //Hilfsmethode um Unternehmensname zu bekommen
     public String getUnternehmensnameByUserId(int userId) {
         // Wir suchen im Gründer-Repository nach der ID des eingeloggten Nutzers

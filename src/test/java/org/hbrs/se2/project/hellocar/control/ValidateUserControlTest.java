@@ -21,14 +21,14 @@ class ValidateUserControlTest {
 
     // validateUserName -----------------------------------------------------
     @Test
-    void validateUserName_returnsFalseWhenUsernameExists() {
+    void validateUserNameReturnsFalseWhenUsernameExists() {
         when(benutzerRepository.existsByUsername("exists")).thenReturn(true);
         boolean ok = ValidateUserControl.validateUserName("exists", benutzerRepository);
         assertFalse(ok);
     }
 
     @Test
-    void validateUserName_returnsTrueWhenUsernameNotExists() {
+    void validateUserNameReturnsTrueWhenUsernameNotExists() {
         when(benutzerRepository.existsByUsername("newuser")).thenReturn(false);
         boolean ok = ValidateUserControl.validateUserName("newuser", benutzerRepository);
         assertTrue(ok);
@@ -36,43 +36,43 @@ class ValidateUserControlTest {
 
     // validateUserNameNotEmpty ---------------------------------------------
     @Test
-    void validateUserNameNotEmpty_returnsFalseForBlank() {
+    void validateUserNameNotEmptyReturnsFalseForBlank() {
         assertFalse(ValidateUserControl.validateUserNameNotEmpty("   "));
     }
 
     @Test
-    void validateUserNameNotEmpty_returnsTrueForNonBlank() {
+    void validateUserNameNotEmptyReturnsTrueForNonBlank() {
         assertTrue(ValidateUserControl.validateUserNameNotEmpty("alice"));
     }
 
     // validateEmail -------------------------------------------------------
     @Test
-    void validateEmail_validExamplesReturnTrue() {
+    void validateEmailValidExamplesReturnTrue() {
         assertTrue(ValidateUserControl.validateEmail("user@example.com"));
         assertTrue(ValidateUserControl.validateEmail("firstname.lastname@sub.domain.de"));
     }
 
     @Test
-    void validateEmail_invalidExamplesReturnFalse() {
+    void validateEmailInvalidExamplesReturnFalse() {
         assertFalse(ValidateUserControl.validateEmail("no-at-symbol"));
         assertFalse(ValidateUserControl.validateEmail("bad@domain"));
         assertFalse(ValidateUserControl.validateEmail("toolonglocalparttoolonglocalparttoolonglocalparttoolong@d.de"));
     }
 
     @Test
-    void validateEmail_nullThrowsNullPointer() {
+    void validateEmailNullThrowsNullPointer() {
         assertThrows(NullPointerException.class, () -> ValidateUserControl.validateEmail(null));
     }
 
     // validatePassword ----------------------------------------------------
     @Test
-    void validatePassword_nullOrBlankReturnsFalse() {
+    void validatePasswordNullOrBlankReturnsFalse() {
         assertFalse(ValidateUserControl.validatePassword(null));
         assertFalse(ValidateUserControl.validatePassword("    "));
     }
 
     @Test
-    void validatePassword_validatesPattern() {
+    void validatePasswordValidatesPattern() {
         // meets: uppercase, lowercase, digit, special char from allowed set, length >=8, no spaces
         assertTrue(ValidateUserControl.validatePassword("Abcdef1!"));
         // fails because no special char
@@ -83,14 +83,14 @@ class ValidateUserControlTest {
 
     // validDatePicker / isAdult -------------------------------------------
     @Test
-    void validDatePicker_setsMaxToNowMinus18Years() {
+    void validDatePickerSetsMaxToNowMinus18Years() {
         DatePicker dp = ValidateUserControl.validDatePicker();
         LocalDate expectedMax = LocalDate.now().minusYears(18);
         assertEquals(expectedMax, dp.getMax());
     }
 
     @Test
-    void isAdult_nullOrUnder18ReturnsFalse_andExact18ReturnsTrue() {
+    void isAdultNullOrUnder18ReturnsFalseAndExact18ReturnsTrue() {
         assertFalse(ValidateUserControl.isAdult(null));
         LocalDate under18 = LocalDate.now().minusYears(17);
         assertFalse(ValidateUserControl.isAdult(under18));
@@ -102,7 +102,7 @@ class ValidateUserControlTest {
 
     // validFieldNotEmpty --------------------------------------------------
     @Test
-    void validFieldNotEmpty_behaviour() {
+    void validFieldNotEmptyBehaviour() {
         assertFalse(ValidateUserControl.validFieldNotEmpty("   "));
         assertTrue(ValidateUserControl.validFieldNotEmpty("not empty"));
     }

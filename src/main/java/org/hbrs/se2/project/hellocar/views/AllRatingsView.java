@@ -15,19 +15,13 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.dependency.CssImport;
+import org.hbrs.se2.project.hellocar.control.BewertungControl;
 import org.hbrs.se2.project.hellocar.control.ManageIdeaControl;
 import org.hbrs.se2.project.hellocar.dtos.GruendungsideeDTO;
 import org.hbrs.se2.project.hellocar.entities.Bewertung;
-import org.hbrs.se2.project.hellocar.entities.Student;
-import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
-import org.hbrs.se2.project.hellocar.repository.BewertungRepository;
-import org.hbrs.se2.project.hellocar.repository.StudentRepository;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Route(value = "show-all-ratings", layout = AppView.class)
 @PageTitle("Gründungsidee Alle Bewertungen")
@@ -35,16 +29,12 @@ import java.util.stream.Collectors;
 public class AllRatingsView extends VerticalLayout implements HasUrlParameter<Long> {
 
     private final ManageIdeaControl ideaService;
-    private final BewertungRepository bewertungRepository;
-    private final StudentRepository studentRepository;
-    private final BenutzerRepository benutzerRepository;
+    private final BewertungControl bewertungControl;
     private final VerticalLayout listContainer = new VerticalLayout();
 
-    public AllRatingsView(ManageIdeaControl ideaService, BewertungRepository bewertungRepository, StudentRepository studentRepository, BenutzerRepository benutzerRepository) {
+    public AllRatingsView(ManageIdeaControl ideaService, BewertungControl bewertungControl) {
         this.ideaService = ideaService;
-        this.bewertungRepository = bewertungRepository;
-        this.studentRepository = studentRepository;
-        this.benutzerRepository = benutzerRepository;
+        this.bewertungControl = bewertungControl;
         addClassName("show-all-ratings-view");
         setAlignItems(Alignment.CENTER);
         add(listContainer);
@@ -58,8 +48,7 @@ public class AllRatingsView extends VerticalLayout implements HasUrlParameter<Lo
             listContainer.add(new H2("Gründungsidee - " + idee.getUnternehmensname()));
             listContainer.add(new H2("Alle Bewertungen"));
 
-            List<Bewertung> bewertungen = bewertungRepository.findByIdeeId(ideaId.intValue());
-            bewertungen.sort(Comparator.comparing(Bewertung::getZeitstempel).reversed());
+            List<Bewertung> bewertungen = bewertungControl.ladeBewertungenFuerIdeeSortiert(ideaId.intValue());
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
@@ -75,7 +64,7 @@ public class AllRatingsView extends VerticalLayout implements HasUrlParameter<Lo
                 header.setAlignItems(Alignment.CENTER);
                 header.setSpacing(true);
 
-                Span stars = new Span(createStarRating(b.getBewertung()));
+                Span stars = new Span(BewertungControl.createStarRating(b.getBewertung()));
                 stars.getStyle().set("color", "#B8860B");
                 stars.getStyle().set("font-size", "2em");
 
@@ -86,20 +75,8 @@ public class AllRatingsView extends VerticalLayout implements HasUrlParameter<Lo
                 dateSpan.getStyle().set("color", "gray");
                 dateSpan.getStyle().set("margin-bottom", "5px");
 
-                String username = "Unbekannt";
-                var studentOpt = studentRepository.findById(b.getStudentUserId());
-                if (studentOpt.isPresent()) {
-                    Student student = studentOpt.get();
-                    Integer userId = student.getUserId();
-                    // Hier wird der Benutzername aus der verknüpften Benutzer-Entität geholt
-                    if (userId != null) {
-                        var userOpt = benutzerRepository.findById(userId);
-                        if (userOpt.isPresent()) {
-                            username = userOpt.get().getUsername();
-                        }
-                    }
-                }
-                Span userSpan = new Span("Bewertet von: " + (username != null ? username : "Unbekannt"));
+                String username = bewertungControl.ermittleBenutzernameFuerBewertung(b);
+                Span userSpan = new Span("Bewertet von: " + username);
                 userSpan.getStyle().set("font-size", "0.9em").set("color", "gray").set("margin-bottom", "5px");
 
                 Anchor reportLink = new Anchor("#", "Kommentar melden");
@@ -121,11 +98,5 @@ public class AllRatingsView extends VerticalLayout implements HasUrlParameter<Lo
                 listContainer.add(block);
             }
         }
-    }
-
-    private String createStarRating(int rating) {
-        StringBuilder stars = new StringBuilder();
-        for (int i = 0; i < 5; i++) stars.append(i < rating ? "★" : "☆");
-        return stars.toString();
     }
 }

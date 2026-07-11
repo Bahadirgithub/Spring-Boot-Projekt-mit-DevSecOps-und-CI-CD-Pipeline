@@ -57,7 +57,7 @@ public class LoginControlTest {
 
     @Test
     @DisplayName("Authentifizierung mit korrekten Daten ist erfolgreich.")
-    void authenticate_success() throws PasswordInvalidException, DatabaseUserException {
+    void authenticateSuccess() throws PasswordInvalidException, DatabaseUserException {
         // Führe die Authentifizierung mit dem korrekten Klartext-Passwort durch
         var dto = loginControl.authenticate(standardBenutzer.getUsername(), KLARTEXT_PASSWORT);
 
@@ -69,7 +69,7 @@ public class LoginControlTest {
 
     @Test
     @DisplayName("Authentifizierung mit falschem Passwort wirft PasswordInvalidException.")
-    void authenticate_wrongPassword_throwsPasswordInvalidException() {
+    void authenticateWrongPasswordThrowsPasswordInvalidException() {
         // Erwarte eine Exception, wenn ein falsches Passwort verwendet wird
         assertThrows(PasswordInvalidException.class, () ->
                 loginControl.authenticate(standardBenutzer.getUsername(), "falschesPasswort"));
@@ -77,7 +77,7 @@ public class LoginControlTest {
 
     @Test
     @DisplayName("Authentifizierung mit unbekanntem Benutzer wirft DatabaseUserException.")
-    void authenticate_unknownUser_throwsDatabaseUserException() {
+    void authenticateUnknownUserThrowsDatabaseUserException() {
         // Erwarte eine Exception, wenn der Benutzername nicht existiert
         assertThrows(DatabaseUserException.class, () ->
                 loginControl.authenticate("nicht_existierender_user_123", "any"));
@@ -85,7 +85,7 @@ public class LoginControlTest {
 
     @Test
     @DisplayName("Passwort-Reset-Prüfung mit korrekten Daten gibt true zurück.")
-    void checkResetCredentials_success_returnsTrue() throws DatabaseUserException {
+    void checkResetCredentialsSuccessReturnsTrue() throws DatabaseUserException {
         // Vorbereitung: Erstelle einen spezifischen Benutzer für diesen Testfall
         Benutzer resetUser = BenutzerBuilder.aBenutzer()
                 .withUsername("reset_user")
@@ -102,7 +102,7 @@ public class LoginControlTest {
 
     @Test
     @DisplayName("Passwort-Reset-Prüfung mit unbekanntem Benutzer wirft DatabaseUserException.")
-    void checkResetCredentials_unknownUser_throwsDatabaseUserException() {
+    void checkResetCredentialsUnknownUserThrowsDatabaseUserException() {
         // Erwarte eine Exception, wenn der Benutzer für den Reset nicht existiert
         assertThrows(DatabaseUserException.class, () ->
                 loginControl.checkResetCredentials("nonexistent_user_x", "noemail@x.de"));
