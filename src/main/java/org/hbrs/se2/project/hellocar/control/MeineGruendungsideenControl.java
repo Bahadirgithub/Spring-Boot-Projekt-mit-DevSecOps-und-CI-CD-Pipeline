@@ -37,6 +37,8 @@ public class MeineGruendungsideenControl {
     // Wird benutzt, um die eigenen Ideen des Gründers zu laden.
     private final ManageIdeaControl ideaControl;
 
+    private final BewerbungControl bewerbungControl;
+
     // Repository für Bewerbungen.
     private final BewerbungRepository bewerbungRepository;
 
@@ -52,12 +54,14 @@ public class MeineGruendungsideenControl {
                                        BewerbungRepository bewerbungRepository,
                                        BewertungRepository bewertungRepository,
                                        GruendungsideeRepository gruendungsideeRepository,
-                                       VerwaltungControl verwaltungControl) {
+                                       VerwaltungControl verwaltungControl,
+                                       BewerbungControl bewerbungControl) {
         this.ideaControl = ideaControl;
         this.bewerbungRepository = bewerbungRepository;
         this.bewertungRepository = bewertungRepository;
         this.gruendungsideeRepository = gruendungsideeRepository;
         this.verwaltungControl = verwaltungControl;
+        this.bewerbungControl = bewerbungControl;
     }
 
     /**
@@ -77,7 +81,9 @@ public class MeineGruendungsideenControl {
             return List.of();
         }
 
-        return bewerbungRepository.findByIdeeId(ideeId).stream().map(this::mapToDTO).toList();
+        return bewerbungRepository.findByIdeeId(ideeId).stream()
+                .map(bewerbungControl::mapToDTO) // <- Aufruf der public Methode
+                .toList();
     }
 
     /**
@@ -170,28 +176,6 @@ public class MeineGruendungsideenControl {
         }
 
         return idee.getGruenderUserId() == gruenderUserId;
-    }
-
-    /**
-     * Wandelt eine Bewerbung-Entity in ein DTO um.
-     *  Weil die View nicht direkt mit der Entity arbeiten soll!
-     *  */
-    private BewerbungDTO mapToDTO(Bewerbung entity) {
-        BewerbungDTOImpl dto = new BewerbungDTOImpl();
-
-        dto.setBewerbungId(entity.getBewerbungId());
-        dto.setStudentUserId(entity.getStudentUserId());
-        dto.setIdeeId(entity.getIdeeId());
-        dto.setBewerbungsdatum(entity.getBewerbungsdatum());
-        dto.setStatus(entity.getStatus());
-
-        // Dateiinformationen für Anschreiben und Lebenslauf.
-        dto.setAnschreibenDateiname(entity.getAnschreibenDateiname());
-        dto.setAnschreibenDateipfad(entity.getAnschreibenDateipfad());
-        dto.setLebenslaufDateiname(entity.getLebenslaufDateiname());
-        dto.setLebenslaufDateipfad(entity.getLebenslaufDateipfad());
-
-        return dto;
     }
 
     /**

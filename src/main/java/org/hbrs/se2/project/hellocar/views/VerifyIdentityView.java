@@ -12,23 +12,10 @@ import org.hbrs.se2.project.hellocar.control.exception.DatabaseUserException;
 
 @Route("verify-identity")
 @PageTitle("Identität verifizieren | StartMeUp")
-public class VerifyIdentityView extends VerticalLayout {
+public class VerifyIdentityView extends AbstractAuthView {
 
     public VerifyIdentityView(LoginControl loginControl) {
-        setSizeFull();
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setAlignItems(Alignment.CENTER);
-
-        Image logo = new Image("images/logo.png", "Logo");
-        logo.setWidth("80px");
-
-        H1 brandText = new H1("St@rtMeUp");
-        brandText.getStyle().set("margin", "0 0 2px 0");
-
-        Span subtitleText = new Span("powered by AhSoGehts");
-        subtitleText.getStyle().set("font-size", "14px");
-        subtitleText.getStyle().set("color", "gray");
-        subtitleText.getStyle().set("margin", "0 0 30px 0");
+        super();
 
         // Seitentitel
         H2 title = new H2("Identität verifizieren");
@@ -78,7 +65,7 @@ public class VerifyIdentityView extends VerticalLayout {
 
         // Komponenten in den Container packen
         formContainer.add(usernameField, emailField, nextButton);
-        add(logo, brandText, subtitleText, title, instructionText, formContainer);
+        add(title, instructionText, formContainer);
 
         // Alles zentrieren
         setAlignItems(Alignment.CENTER);
