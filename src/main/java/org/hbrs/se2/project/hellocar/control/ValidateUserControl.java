@@ -23,10 +23,11 @@ public class ValidateUserControl {
     // min 18
     // Passwort muss min 8 Zeichen, min 1 Großbuchstabe, min 1 Zahl, min 1 Kleinbuchstabe, 1 Zeichen
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+/=.?,;!*_'~])(?=\\S+$).{8,}");
-    // E-Mail-Validierung mit Pattern ohne catastrophic backtracking.
-    // Verzicht auf lookahead/lookbehind, die zu exponentieller Laufzeit führen.
-    // Stattdessen: Einfache, greedy Quantoren ohne Verschachtelung.
-    private static final String emailRegex = "^[A-Za-z0-9._%-]{1,64}@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+    // E-Mail-Validierung: Einfache, sichere Regex ohne catastrophic backtracking.
+    // Pattern: localpart@domain mit mindestens einem Punkt in der Domain.
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+            "^[A-Za-z0-9.\\-_]{1,64}@[A-Za-z0-9][A-Za-z0-9.]*[A-Za-z0-9]\\.[A-Za-z]{2,}$"
+    );
 
     // Tests geben true zurück, wenn Daten valide sind , ansonsten false.
     public static boolean validateUserName(String username, BenutzerRepository benutzerRepository) {
@@ -40,7 +41,7 @@ public class ValidateUserControl {
     }
 
     public static boolean validateEmail(@NonNull String email) throws NullPointerException {
-        return email.matches(emailRegex);
+        return EMAIL_PATTERN.matcher(email).matches();
     }
 
     public static boolean validatePassword(String passwort) {
