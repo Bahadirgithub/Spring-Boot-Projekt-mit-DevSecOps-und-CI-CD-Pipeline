@@ -4,7 +4,10 @@ import org.hbrs.se2.project.hellocar.control.exception.BewertungInvalidException
 import org.hbrs.se2.project.hellocar.control.exception.BewertungNotLoggedInException;
 import org.hbrs.se2.project.hellocar.control.exception.BewertungNurStudentException;
 import org.hbrs.se2.project.hellocar.dtos.BenutzerDTO;
+import org.hbrs.se2.project.hellocar.entities.Benutzer;
 import org.hbrs.se2.project.hellocar.entities.Bewertung;
+import org.hbrs.se2.project.hellocar.entities.Student;
+import org.hbrs.se2.project.hellocar.repository.BenutzerRepository;
 import org.hbrs.se2.project.hellocar.repository.BewertungRepository;
 import org.hbrs.se2.project.hellocar.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 
 @Component
 public class BewertungControl {
@@ -20,6 +25,9 @@ public class BewertungControl {
 
     @Autowired
     private StudentRepository studentRepository;
+
+    @Autowired
+    private BenutzerRepository benutzerRepository;
 
     @Transactional
     public Bewertung bewertungErstellen(BenutzerDTO user, int ideeId, int sterne, String kommentar) {
@@ -55,5 +63,40 @@ public class BewertungControl {
         b.setZeitstempel(LocalDateTime.now());
 
         return bewertungRepository.save(b);
+    }
+
+    /**
+     * Lädt alle Bewertungen zu einer Idee, neueste zuerst.
+     */
+    @Transactional
+    public List<Bewertung> ladeBewertungenFuerIdeeSortiert(int ideeId) {
+        return bewertungRepository.findByIdeeId(ideeId).stream()
+                .sorted(Comparator.comparing(Bewertung::getZeitstempel,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                ).reversed())
+                .toList();
+    }
+
+    /**
+     * Löst den Benutzernamen des Studenten auf, der eine Bewertung abgegeben hat.
+     */
+    @Transactional
+    public String ermittleBenutzernameFuerBewertung(Bewertung bewertung) {
+        return studentRepository.findById(bewertung.getStudentUserId())
+                .map(Student::getUserId)
+                .flatMap(benutzerRepository::findById)
+                .map(Benutzer::getUsername)
+                .orElse("Unbekannt");
+    }
+
+    /**
+     * Erzeugt die Sternchen-Darstellung (★/☆) für eine Bewertung.
+     */
+    public static String createStarRating(int rating) {
+        StringBuilder stars = new StringBuilder();
+        for (int i = 0; i < 5; i++) {
+            stars.append(i < rating ? "★" : "☆");
+        }
+        return stars.toString();
     }
 }
