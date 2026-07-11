@@ -14,6 +14,8 @@ import java.util.Map;
 @Component
 public class ChatControl {
 
+    private static final String CONTENT_KEY = "content";
+
     private static final String CHATBOT_FEHLER_TEXT =
             "Der Chatbot ist gerade leider nicht verfügbar. Bitte versuche es später nochmal.";
 
@@ -36,7 +38,7 @@ public class ChatControl {
             chatHistory.remove(1);
         }
 
-        chatHistory.add(Map.of("role", "user", "content", userMessage));
+        chatHistory.add(Map.of("role", "user", CONTENT_KEY, userMessage));
 
         String response;
 
@@ -48,7 +50,7 @@ public class ChatControl {
             response = CHATBOT_FEHLER_TEXT;
         }
 
-        chatHistory.add(Map.of("role", "assistant", "content", response));
+        chatHistory.add(Map.of("role", "assistant", CONTENT_KEY, response));
 
         UI.getCurrent().getSession().setAttribute(Globals.CHAT_HISTORY, chatHistory);
 
@@ -74,9 +76,9 @@ public class ChatControl {
                 prompt = "Du bist ein hilfreicher Assistent für Gründungsideen und Bewerbungen.";
             }
 
-            chatHistory.add(Map.of("role", "system", "content", prompt));
+            chatHistory.add(Map.of("role", "system", CONTENT_KEY, prompt));
 
-            chatHistory.add(Map.of("role", "assistant", "content",
+            chatHistory.add(Map.of("role", "assistant", CONTENT_KEY,
                     "Hi, mein Name ist Startito. Ich bin dein Chatbot für Gründungsideen und Bewerbungen."));
 
             UI.getCurrent().getSession().setAttribute(Globals.CHAT_HISTORY, chatHistory);
