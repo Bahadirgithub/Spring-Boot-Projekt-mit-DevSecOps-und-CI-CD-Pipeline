@@ -23,12 +23,10 @@ public class ValidateUserControl {
     // min 18
     // Passwort muss min 8 Zeichen, min 1 Großbuchstabe, min 1 Zahl, min 1 Kleinbuchstabe, 1 Zeichen
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+/=.?,;!*_'~])(?=\\S+$).{8,}");
-    // Possessive Quantifiere (++ / {2,}+) auf den inneren Zeichenklassen verhindern,
-    // dass die Gruppen-Wiederholung ((...)*) bei einem Nicht-Treffer alle möglichen
-    // Aufteilungen der Zeichen durchprobiert (catastrophic backtracking).
-    // Das schützt vor exponentieller Laufzeit / StackOverflowError bei langen Eingaben,
-    // ohne die akzeptierte Sprache zu verändern.
-    private static final String emailRegex = "^[A-Za-z0-9_-]++(?:\\.[A-Za-z0-9_-]++)*@[A-Za-z0-9][A-Za-z0-9-]*+(?:\\.[A-Za-z0-9][A-Za-z0-9-]*+)*\\.(?:[A-Za-z]{2,}+)$";
+    // E-Mail-Validierung mit Pattern ohne catastrophic backtracking.
+    // Verzicht auf lookahead/lookbehind, die zu exponentieller Laufzeit führen.
+    // Stattdessen: Einfache, greedy Quantoren ohne Verschachtelung.
+    private static final String emailRegex = "^[A-Za-z0-9._%-]{1,64}@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
 
     // Tests geben true zurück, wenn Daten valide sind , ansonsten false.
     public static boolean validateUserName(String username, BenutzerRepository benutzerRepository) {
