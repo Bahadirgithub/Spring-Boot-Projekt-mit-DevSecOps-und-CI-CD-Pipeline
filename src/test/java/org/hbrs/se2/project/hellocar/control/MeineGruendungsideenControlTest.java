@@ -80,7 +80,7 @@ class MeineGruendungsideenControlTest {
     }
 
     @Test
-    void testLadeBewerbungenFuerEigeneIdee_Erfolg() {
+    void testLadeBewerbungenFuerEigeneIdeeErfolg() {
         int gruenderId = 42;
         int ideeId = 100;
 
@@ -97,7 +97,7 @@ class MeineGruendungsideenControlTest {
     }
 
     @Test
-    void testLadeBewerbungenFuerFremdeIdee_Sicherheitsblock() {
+    void testLadeBewerbungenFuerFremdeIdeeSicherheitsblock() {
         int gruenderId = 42;
         int fremdeIdeeId = 200;
 
@@ -114,7 +114,7 @@ class MeineGruendungsideenControlTest {
     }
 
     @Test
-    void testIstSkillPassendZurIdee_MatchingLogik() {
+    void testIstSkillPassendZurIdeeMatchingLogik() {
         GruendungsideeDTO mockIdeeDTO = mock(GruendungsideeDTO.class);
         when(mockIdeeDTO.getGesuchteSkills()).thenReturn(List.of("Java", "Vaadin"));
 
