@@ -21,6 +21,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import org.hbrs.se2.project.hellocar.control.AuthorizationControl;
+import org.hbrs.se2.project.hellocar.control.BewertungControl;
 import org.hbrs.se2.project.hellocar.control.ChatControl;
 import org.hbrs.se2.project.hellocar.control.LoginControl;
 import org.hbrs.se2.project.hellocar.control.MeineGruendungsideenControl;
@@ -411,7 +412,7 @@ public class MeineGruendungsideenView extends Div {
         block.getStyle().set("background", "white");
         block.setWidthFull();
 
-        Span sterne = new Span(createStarRating(bewertung.getBewertung()));
+        Span sterne = new Span(BewertungControl.createStarRating(bewertung.getBewertung()));
         sterne.getStyle().set("color", "#B8860B");
         sterne.getStyle().set("font-size", "1.7em");
         sterne.getStyle().set("line-height", "1.1");
@@ -450,30 +451,6 @@ public class MeineGruendungsideenView extends Div {
         span.getStyle().set("color", "gray");
 
         return span;
-    }
-
-    private String createStarRating(int rating) {
-        StringBuilder stars = new StringBuilder();
-        int maxStars = 5;
-
-        // Zur Sicherheit begrenzen, falls aus der DB mal ein falscher Wert kommt.
-        if (rating < 0) {
-            rating = 0;
-        }
-
-        if (rating > maxStars) {
-            rating = maxStars;
-        }
-
-        for (int i = 0; i < rating; i++) {
-            stars.append("★");
-        }
-
-        for (int i = rating; i < maxStars; i++) {
-            stars.append("☆");
-        }
-
-        return stars.toString();
     }
 
     private Component createDownloadLink(String text, String dateiname, String dateipfad) {
