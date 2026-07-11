@@ -90,7 +90,7 @@ public class EnterIdeasView extends Div { // 3. Form (Spezialisierung / Vererbun
                   Notification.show("Gründungsidee erfolgreich gespeichert.");
                   UI.getCurrent().navigate(ShowIdeasView.class);
 
-                } catch (com.vaadin.flow.data.binder.ValidationException validationException) {
+                } catch (com.vaadin.flow.data.binder.ValidationException | IllegalArgumentException validationException) {
                   // Falls der Nutzer unvollständige Daten eingegeben hat
                   Notification.show("Fehler: Bitte überprüfen Sie Ihre Eingaben.");
                 }
