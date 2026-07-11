@@ -100,7 +100,7 @@ public class VerwaltungControlTest {
      * - Es wird sichergestellt, dass das gruenderRepository unberührt bleibt.
      */
     @Test
-    void testLoeschen_StudentUndBenutzer_Success() {
+    void testLoeschenStudentUndBenutzerSuccess() {
         // Arrange
         int expectedId = 1;
         when(mockBenutzerDTO.getUserId()).thenReturn(expectedId);
@@ -125,7 +125,7 @@ public class VerwaltungControlTest {
      * - Es wird sichergestellt, dass das studentRepository unberührt bleibt.
      */
     @Test
-    void testLoeschen_GruenderUndBenutzer_Success() {
+    void testLoeschenGruenderUndBenutzerSuccess() {
         // Arrange
         int id = 1;
         when(mockBenutzerDTO.getUserId()).thenReturn(id);
@@ -148,7 +148,7 @@ public class VerwaltungControlTest {
      * - Die Methode soll {@code false} zurückgeben und keine Löschoperationen ausführen.
      */
     @Test
-    void testLoeschen_BenutzerNichtGefunden_ReturnsFalse() {
+    void testLoeschenBenutzerNichtGefundenReturnsFalse() {
         // Arrange
         int id = 1;
         when(mockBenutzerDTO.getUserId()).thenReturn(id);
@@ -170,7 +170,7 @@ public class VerwaltungControlTest {
      *   Interaktion mit den Repositories stattfindet.
      */
     @Test
-    void testLoeschen_CurrentUserIsNull_ReturnsFalse() {
+    void testLoeschenCurrentUserIsNullReturnsFalse() {
         // Act
         boolean result = verwaltungControl.loeschen(null);
 
@@ -191,7 +191,7 @@ public class VerwaltungControlTest {
      * - Es wird geprüft, ob ein valides DTO mit den korrekten Daten zurückgegeben wird.
      */
     @Test
-    void testLadeBenutzer_BenutzerGefunden_ReturnsDTO() {
+    void testLadeBenutzerBenutzerGefundenReturnsDTO() {
         // Arrange
         when(benutzerRepository.findById(1)).thenReturn(Optional.of(testBenutzer));
 
@@ -211,7 +211,7 @@ public class VerwaltungControlTest {
      * - Es wird erwartet, dass die Methode {@code null} zurückgibt.
      */
     @Test
-    void testLadeBenutzer_BenutzerNichtGefunden_ReturnsNull() {
+    void testLadeBenutzerBenutzerNichtGefundenReturnsNull() {
         // Arrange
         when(benutzerRepository.findById(anyInt())).thenReturn(Optional.empty());
 
@@ -229,7 +229,7 @@ public class VerwaltungControlTest {
      * - Es wird geprüft, ob die Methode eine Liste von Strings mit den korrekten Namen zurückgibt.
      */
     @Test
-    void testLadeAlleSkillNamen_returnsNames() {
+    void testLadeAlleSkillNamenReturnsNames() {
         // Arrange
         Skill s1 = new Skill(); s1.setName("A");
         Skill s2 = new Skill(); s2.setName("B");
@@ -252,7 +252,7 @@ public class VerwaltungControlTest {
      * - Es wird geprüft, ob der zurückgegebene Student korrekt ist und seine Skills geladen wurden.
      */
     @Test
-    void testLadeStudent_found_returnsStudentWithSkills() {
+    void testLadeStudentFoundReturnsStudentWithSkills() {
         // Arrange
         Student testStudent = StudentBuilder.aStudent()
                 .withSkills("Java")
@@ -276,7 +276,7 @@ public class VerwaltungControlTest {
      * Testet den Fall, dass kein Student für eine gegebene ID gefunden wird.
      */
     @Test
-    void testLadeStudent_notFound_returnsNull() {
+    void testLadeStudentNotFoundReturnsNull() {
         // Arrange
         when(studentRepository.findById(99)).thenReturn(Optional.empty());
         // Act & Assert
@@ -287,7 +287,7 @@ public class VerwaltungControlTest {
      * Testet das erfolgreiche Laden eines Gründers.
      */
     @Test
-    void testLadeGruender_found_returnsGruender() {
+    void testLadeGruenderFoundReturnsGruender() {
         // Arrange
         Gruender testGruender = GruenderBuilder.aGruender().build().getGruender();
         testGruender.setUserId(5);
@@ -302,7 +302,7 @@ public class VerwaltungControlTest {
      * Testet den Fall, dass kein Gründer für eine gegebene ID gefunden wird.
      */
     @Test
-    void testLadeGruender_notFound_returnsNull() {
+    void testLadeGruenderNotFoundReturnsNull() {
         // Arrange
         when(gruenderRepository.findById(42)).thenReturn(Optional.empty());
         // Act & Assert
@@ -317,7 +317,7 @@ public class VerwaltungControlTest {
      * Testet, ob der Vorname eines Benutzers korrekt geändert wird, wenn ein gültiger String übergeben wird.
      */
     @Test
-    void testVornameAendern_nonEmpty_setsVorname() {
+    void testVornameAendernNonEmptySetsVorname() {
         // Arrange
         Benutzer benutzer = BenutzerBuilder.aBenutzer().build();
         // Act
@@ -330,7 +330,7 @@ public class VerwaltungControlTest {
      * Testet, ob der Vorname eines Benutzers unverändert bleibt, wenn ein leerer String übergeben wird.
      */
     @Test
-    void testVornameAendern_empty_noChange() {
+    void testVornameAendernEmptyNoChange() {
         // Arrange
         Benutzer benutzer = BenutzerBuilder.aBenutzer().withVorname("Old").build();
         // Act
@@ -343,7 +343,7 @@ public class VerwaltungControlTest {
      * Testet, ob die E-Mail-Änderung bei einer ungültigen E-Mail fehlschlägt.
      */
     @Test
-    void testEmailAendern_invalid_returnsFalse() {
+    void testEmailAendernInvalidReturnsFalse() {
         // Arrange: Erstelle einen Benutzer, der initial keine E-Mail hat.
         Benutzer benutzer = BenutzerBuilder.aBenutzer().withEmail(null).build();
 
@@ -359,7 +359,7 @@ public class VerwaltungControlTest {
      * Testet, ob die E-Mail eines Benutzers bei einer gültigen Eingabe korrekt gesetzt wird.
      */
     @Test
-    void testEmailAendern_valid_setsEmail() {
+    void testEmailAendernValidSetsEmail() {
         // Arrange
         Benutzer benutzer = BenutzerBuilder.aBenutzer().build();
         // Act
@@ -372,7 +372,7 @@ public class VerwaltungControlTest {
      * Testet, ob die Passwort-Änderung bei einem zu kurzen Passwort fehlschlägt.
      */
     @Test
-    void testPasswortAendern_invalid_returnsFalse() {
+    void testPasswortAendernInvalidReturnsFalse() {
         // Arrange
         Benutzer benutzer = BenutzerBuilder.aBenutzer().build();
         // Act & Assert
@@ -383,7 +383,7 @@ public class VerwaltungControlTest {
      * Testet, ob das Passwort eines Benutzers bei einer gültigen Eingabe korrekt gesetzt wird.
      */
     @Test
-    void testPasswortAendern_valid_setsPassword() {
+    void testPasswortAendernValidSetsPassword() {
         // Arrange
         Benutzer benutzer = BenutzerBuilder.aBenutzer().build();
         String good = "Abcdef1!"; // Entspricht den Validierungsregeln
@@ -398,7 +398,7 @@ public class VerwaltungControlTest {
      * eine {@link InvalidBirthdayException} geworfen wird.
      */
     @Test
-    void testGeburtstagAendern_under18_throws() {
+    void testGeburtstagAendernUnder18Throws() {
         // Arrange
         Benutzer benutzer = BenutzerBuilder.aBenutzer().build();
         LocalDate under18 = LocalDate.now().minusYears(17);
@@ -410,7 +410,7 @@ public class VerwaltungControlTest {
      * Testet, ob das Geburtsdatum bei einer gültigen Eingabe (Alter >= 18) korrekt gesetzt wird.
      */
     @Test
-    void testGeburtstagAendern_valid_setsDate() throws InvalidBirthdayException {
+    void testGeburtstagAendernValidSetsDate() throws InvalidBirthdayException {
         // Arrange
         Benutzer benutzer = BenutzerBuilder.aBenutzer().build();
         LocalDate adult = LocalDate.now().minusYears(25);
@@ -425,7 +425,7 @@ public class VerwaltungControlTest {
      * Es sollte keine Änderung und kein Fehler auftreten.
      */
     @Test
-    void testSkillsAendern_null_returnsTrue() {
+    void testSkillsAendernNullReturnsTrue() {
         // Arrange
         Student student = StudentBuilder.aStudent().build().getStudent();
         // Act & Assert
@@ -441,7 +441,7 @@ public class VerwaltungControlTest {
      * - Es wird geprüft, ob der Student danach genau diesen einen Skill besitzt.
      */
     @Test
-    void testSkillsAendern_resolvesAndSetsSkills() {
+    void testSkillsAendernResolvesAndSetsSkills() {
         // Arrange
         Student student = StudentBuilder.aStudent().withoutSkills().build().getStudent();
         Skill javaSkill = new Skill();
@@ -468,7 +468,7 @@ public class VerwaltungControlTest {
      * angewendet und die Ergebnisse wieder zum Speichern an die Repositories übergeben werden.
      */
     @Test
-    void testUpdateStudent_savesChanges() throws InvalidEmailException, InvalidBirthdayException, DatabaseUserException {
+    void testUpdateStudentSavesChanges() throws InvalidEmailException, InvalidBirthdayException, DatabaseUserException {
         // Arrange: Testdaten und Mocking-Verhalten definieren
         final int userId = 1;
         BenutzerDTO currentUser = mock(BenutzerDTO.class);
@@ -509,7 +509,7 @@ public class VerwaltungControlTest {
      * angewendet und die Ergebnisse wieder zum Speichern an die Repositories übergeben werden.
      */
     @Test
-    void testUpdateGruender_savesChanges() throws InvalidEmailException, InvalidBirthdayException {
+    void testUpdateGruenderSavesChanges() throws InvalidEmailException, InvalidBirthdayException {
         // Arrange: Testdaten und Mocking-Verhalten definieren
         final int userId = 2;
         BenutzerDTO currentUser = mock(BenutzerDTO.class);
@@ -552,7 +552,7 @@ public class VerwaltungControlTest {
      * - Es wird erwartet, dass die Methode eine {@link DatabaseUserException} wirft.
      */
     @Test
-    void testUpdateStudent_userNotFound_throwsDatabaseUserException() {
+    void testUpdateStudentUserNotFoundThrowsDatabaseUserException() {
         // 1. Arrange: Mocking-Verhalten für den "Nicht gefunden"-Fall definieren
         final int userId = 99; // Eine nicht existierende ID
         BenutzerDTO currentUser = mock(BenutzerDTO.class);
@@ -581,7 +581,7 @@ public class VerwaltungControlTest {
      * - Es wird erwartet, dass die Methode {@code false} zurückgibt und keine Daten speichert.
      */
     @Test
-    void testUpdateGruender_gruenderNotFound_returnsFalse() throws Exception {
+    void testUpdateGruenderGruenderNotFoundReturnsFalse() throws Exception {
         // 1. Arrange: Mocking-Verhalten für den "Nicht gefunden"-Fall definieren
         final int userId = 99;
         BenutzerDTO currentUser = mock(BenutzerDTO.class);
@@ -618,7 +618,7 @@ public class VerwaltungControlTest {
      *   Benutzer-Objekt die neue Telefonnummer enthält.
      */
     @Test
-    void testUpdateStudent_updatesTelefonnummerCorrectly() throws Exception {
+    void testUpdateStudentUpdatesTelefonnummerCorrectly() throws Exception {
         // 1. Arrange
         final int userId = 1;
         final String alteNummer = "00000";

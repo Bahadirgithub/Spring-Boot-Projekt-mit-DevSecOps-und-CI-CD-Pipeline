@@ -78,7 +78,7 @@ class ManageIdeaControlTest {
     // TEST 3: getUnternehmensnameByUserId()
     // -------------------------
     @Test
-    void testGetUnternehmensnameByUserId_found() {
+    void testGetUnternehmensnameByUserIdFound() {
         when(gruenderRepository.findById(10)).thenReturn(Optional.of(gruender));
 
         String result = control.getUnternehmensnameByUserId(10);
@@ -87,7 +87,7 @@ class ManageIdeaControlTest {
     }
 
     @Test
-    void testGetUnternehmensnameByUserId_notFound() {
+    void testGetUnternehmensnameByUserIdNotFound() {
         when(gruenderRepository.findById(99)).thenReturn(Optional.empty());
 
         String result = control.getUnternehmensnameByUserId(99);
