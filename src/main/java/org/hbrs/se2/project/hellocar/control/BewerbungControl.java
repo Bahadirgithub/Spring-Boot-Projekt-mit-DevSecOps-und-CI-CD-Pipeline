@@ -39,7 +39,7 @@ public class BewerbungControl {
         this.gruendungsideeRepository = gruendungsideeRepository;
     }
 
-    private BewerbungDTO mapToDTO(Bewerbung entity) {
+    public BewerbungDTO mapToDTO(Bewerbung entity) {
         BewerbungDTOImpl dto = new BewerbungDTOImpl();
         dto.setBewerbungId(entity.getBewerbungId());
         dto.setStudentUserId(entity.getStudentUserId());
