@@ -71,6 +71,19 @@ public class ValidateUserControl {
         return !input.isBlank();
     }
 
+    // Prüft, ob Passwort und Passwort-Wiederholung übereinstimmen
+    public static boolean validatePasswordMatch(String passwort, String passwortWiederholung) {
+        return passwort != null && passwort.equals(passwortWiederholung);
+    }
+
+    // Parst die Semester-Eingabe eines Textfelds. Liefert null bei leerer oder nicht-numerischer Eingabe.
+    public static Integer parseSemester(String eingabe) {
+        if (eingabe == null || eingabe.isBlank() || !eingabe.matches("\\d+")) {
+            return null;
+        }
+        return Integer.parseInt(eingabe);
+    }
+
 
 
 }

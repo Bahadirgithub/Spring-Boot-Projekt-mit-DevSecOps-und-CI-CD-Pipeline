@@ -91,7 +91,7 @@ public class RegistrationView extends VerticalLayout {
                 try {
 
                     //PasswordMissMatch testen, es wird hier getestet, weil wir nur hier das Wiederholungsfeld haben
-                    if(!passwordField.getValue().equals(repeatPasswordField.getValue())){
+                    if (!ValidateUserControl.validatePasswordMatch(passwordField.getValue(), repeatPasswordField.getValue())) {
                         throw new PasswordMissmatchException("Passwörter ungleich");
                     }
 
