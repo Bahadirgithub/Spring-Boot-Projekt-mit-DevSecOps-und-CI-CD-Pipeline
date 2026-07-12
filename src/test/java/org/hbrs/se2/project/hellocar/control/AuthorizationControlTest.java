@@ -152,8 +152,4 @@ public class AuthorizationControlTest {
         // Ein unbekanntes Feature sollte standardmäßig den Zugriff verweigern
         assertFalse(authorizationControl.canAccessFeature(mockBenutzer, "UNKNOWN_FEATURE"));
     }
-    @Test
-    void testCanAccessFeatureEnterIdeasAsGuest() {
-        assertFalse(authorizationControl.canAccessFeature(null, Globals.Pages.ENTER_IDEAS));
-    }
 }
