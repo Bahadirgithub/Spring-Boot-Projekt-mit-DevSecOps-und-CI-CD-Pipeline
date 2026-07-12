@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Seite-1" id="VixfZa8ggLkNwSh4UhvZ">
-    <mxGraphModel dx="2054" dy="1235" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="2038" dy="1219" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -63,15 +63,6 @@
         </mxCell>
         <mxCell id="G0OC0Ibm2lAN7INlKd8j-17" parent="46uGRBPA8wgLNxuLv7jw-14" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&amp;lt;&amp;lt;import&amp;gt;&amp;gt;" vertex="1">
           <mxGeometry height="30" width="60" y="75" as="geometry" />
-        </mxCell>
-        <mxCell id="bs_skills_group" connectable="0" parent="46uGRBPA8wgLNxuLv7jw-14" style="group" value="" vertex="1">
-          <mxGeometry height="60" width="80" x="200" y="210" as="geometry" />
-        </mxCell>
-        <mxCell id="bs_skills_box" parent="bs_skills_group" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
-          <mxGeometry height="60" width="80" as="geometry" />
-        </mxCell>
-        <mxCell id="bs_skills_label" parent="bs_skills_group" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Skills" vertex="1">
-          <mxGeometry height="13.846153846153847" width="19.2" x="30.4" y="23.08" as="geometry" />
         </mxCell>
         <mxCell id="46uGRBPA8wgLNxuLv7jw-15" connectable="0" parent="1" style="group;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" value="" vertex="1">
           <mxGeometry height="280" width="710" x="80" y="70" as="geometry" />
@@ -197,7 +188,7 @@
         <mxCell id="G0OC0Ibm2lAN7INlKd8j-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
           <mxGeometry height="620" width="130" x="650" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="G0OC0Ibm2lAN7INlKd8j-8" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Gurdrail" vertex="1">
+        <mxCell id="G0OC0Ibm2lAN7INlKd8j-8" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Guardrail" vertex="1">
           <mxGeometry height="30" width="140" x="640" y="70" as="geometry" />
         </mxCell>
         <mxCell id="G0OC0Ibm2lAN7INlKd8j-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="KIGurd" vertex="1">
@@ -220,13 +211,6 @@
             </Array>
             <mxPoint x="825" y="360" as="sourcePoint" />
             <mxPoint x="825" y="180" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="bs_edge_control_skills" edge="1" parent="1" source="0QRcFA7RtxZSGpfsUJ1F-8" style="endArrow=open;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;dashed=1;endFill=0;" target="bs_skills_box" value="">
-          <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <Array as="points">
-              <mxPoint x="220" y="600" />
-            </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="bs_edge_entity_jpa" edge="1" parent="1" source="57gUXQwgkpZRWUqV5SyJ-2" style="endArrow=open;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;dashed=1;endFill=0;" target="bs_jpa_box" value="">
