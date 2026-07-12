@@ -1,0 +1,120 @@
+<mxfile host="Electron" agent="Claude">
+  <diagram name="Kontext-Sicht" id="diagram_kontext_startmeup">
+    <mxGraphModel dx="2038" dy="1219" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="area_sepp" parent="1" style="swimlane;fontStyle=1;horizontal=1;startSize=34;fillColor=none;strokeColor=#000000;rounded=0;html=1;collapsible=0;whiteSpace=wrap;container=1;recursiveResize=0;connectable=0;strokeWidth=2;" value="&lt;b&gt;SEPP&lt;/b&gt;" vertex="1">
+          <mxGeometry height="360" width="560" x="620" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="box_gitlab" parent="area_sepp" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontStyle=1;fontSize=14;" value="GitLab" vertex="1">
+          <mxGeometry height="80" width="180" x="40" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="box_sonarqube" parent="area_sepp" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontStyle=1;fontSize=14;" value="SonarQube" vertex="1">
+          <mxGeometry height="80" width="180" x="330" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="box_jenkins" parent="area_sepp" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;fontStyle=1;fontSize=14;" value="Jenkins" vertex="1">
+          <mxGeometry height="80" width="180" x="174" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_gitlab_jenkins" edge="1" parent="area_sepp" source="box_gitlab" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;endArrow=classic;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="box_jenkins">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_gitlab_jenkins" connectable="0" parent="edge_gitlab_jenkins" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Webhook / trigger Build" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_jenkins_sonarqube" edge="1" parent="area_sepp" source="box_jenkins" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;endArrow=classic;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="box_sonarqube">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_jenkins_sonarqube" connectable="0" parent="edge_jenkins_sonarqube" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Codeanalyse" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="box_startmeup" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#000000;fontStyle=1;fontSize=16;" value="St@rtMeUp" vertex="1">
+          <mxGeometry height="100" width="220" x="800" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="box_db" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#000000;fontStyle=1;fontSize=14;" value="PostgreSQL DB" vertex="1">
+          <mxGeometry height="90" width="180" x="820" y="854" as="geometry" />
+        </mxCell>
+        <mxCell id="box_kiconnect" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#000000;fontStyle=1;fontSize=14;" value="KI:connect" vertex="1">
+          <mxGeometry height="90" width="200" x="1180" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_student" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;" value="Student" vertex="1">
+          <mxGeometry height="80" width="40" x="436" y="438" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_gruender" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;" value="Gründer" vertex="1">
+          <mxGeometry height="80" width="40" x="459" y="678" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_student_system" edge="1" parent="1" source="actor_student" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;endArrow=classic;endFill=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;exitPerimeter=0;" target="box_startmeup">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="599" y="449" />
+              <mxPoint x="599" y="530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_student_system" connectable="0" parent="edge_student_system" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Bewerbungen, Skills, Chat-Anfragen" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_gruender_system" edge="1" parent="1" source="actor_gruender" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;endArrow=classic;endFill=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" target="box_startmeup">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="544" y="610" />
+              <mxPoint x="544" y="612" />
+              <mxPoint x="650" y="612" />
+              <mxPoint x="650" y="614" />
+              <mxPoint x="737" y="614" />
+              <mxPoint x="737" y="575" />
+            </Array>
+            <mxPoint x="188" y="745" as="sourcePoint" />
+            <mxPoint x="820" y="616" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_gruender_system" connectable="0" parent="edge_gruender_system" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Gründungsideen einstellen, Bewerbungen sichten" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_system_gitlab" edge="1" parent="1" source="box_startmeup" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;endArrow=classic;endFill=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="box_gitlab">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="910" y="400" />
+              <mxPoint x="700" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_system_gitlab" connectable="0" parent="edge_system_gitlab" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Commits / Code" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-57" y="-58" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_system_db" edge="1" parent="1" source="box_startmeup" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;startArrow=none;startFill=0;endArrow=classic;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="box_db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl_system_db" connectable="0" parent="edge_system_db" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Lesen / Schreiben Anwendungsdaten (JPA)" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_system_ki" edge="1" parent="1" source="box_startmeup" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;startArrow=none;startFill=0;endArrow=classic;endFill=1;entryX=0.412;entryY=0.004;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryPerimeter=0;" target="box_kiconnect">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1262" y="550" />
+            </Array>
+            <mxPoint x="1041" y="561" as="sourcePoint" />
+            <mxPoint x="1262" y="715" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_system_ki" connectable="0" parent="edge_system_ki" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Chat-Anfrage (Prompt + History) &lt;br&gt;/ KI-Antwort" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="39" y="7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
