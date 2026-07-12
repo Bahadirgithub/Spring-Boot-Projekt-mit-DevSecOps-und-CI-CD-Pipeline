@@ -64,14 +64,25 @@ class ManageIdeaControlTest {
     // TEST 2: createIdea()
     // -------------------------
     @Test
-    void testCreateIdea() {
+    void testCreateIdeaSuccessfullySavesCompleteIdea() {
+
         GruendungsideeDTOImpl dto = new GruendungsideeDTOImpl();
+
         dto.setGruenderUserId(10);
-        dto.setBeschreibung("New Idea");
+        dto.setBeschreibung("Neue Geschäftsidee");
+        dto.setPosition("Software Entwickler");
+        dto.setAnforderungen("Java Kenntnisse");
+        dto.setArbeitsbedingungen("Remote möglich");
 
         control.createIdea(dto);
 
-        verify(repository, times(1)).save(any(Gruendungsidee.class));
+        verify(repository).save(argThat(idee ->
+                idee.getGruenderUserId() == 10 &&
+                        idee.getBeschreibung().equals("Neue Geschäftsidee") &&
+                        idee.getPosition().equals("Software Entwickler") &&
+                        idee.getAnforderungen().equals("Java Kenntnisse") &&
+                        idee.getArbeitsbedingungen().equals("Remote möglich")
+        ));
     }
 
     /**
