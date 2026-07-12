@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net">
   <diagram name="Seite-1" id="VixfZa8ggLkNwSh4UhvZ">
-    <mxGraphModel dx="1202" dy="1905" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1703" dy="2212" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -76,7 +76,7 @@
         <mxCell id="G0OC0Ibm2lAN7INlKd8j-3" parent="46uGRBPA8wgLNxuLv7jw-14" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="KI Layer" vertex="1">
           <mxGeometry height="16.07142857142857" width="140" x="-20" y="203.9242857142857" as="geometry" />
         </mxCell>
-        <mxCell id="FLyE3ke1G0kZqozCK_w4-1" parent="46uGRBPA8wgLNxuLv7jw-14" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;KIChatBot&lt;/div&gt;" vertex="1">
+        <mxCell id="FLyE3ke1G0kZqozCK_w4-1" parent="46uGRBPA8wgLNxuLv7jw-14" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;services.ai&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="120" x="90" y="216.42999999999995" as="geometry" />
         </mxCell>
         <mxCell id="G0OC0Ibm2lAN7INlKd8j-15" parent="46uGRBPA8wgLNxuLv7jw-14" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&amp;lt;&amp;lt;import&amp;gt;&amp;gt;" vertex="1">
