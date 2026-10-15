@@ -14,3 +14,4 @@ Backend & Core: Java, Spring Boot, Maven
 Frontend: Vaadin
 CI/CD Automation: Jenkins for continuous integration and automated pipelines.
 DevSecOps & Code Quality: SonarQube for automated static code analysis, vulnerability detection, and security gating.
+((This project is developed as a group project.))
